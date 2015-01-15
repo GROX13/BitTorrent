@@ -9,6 +9,14 @@
 * @version 0.1
 */
 
+#include <stdio.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#include "bencode.h"
+
 /**
 * Carry length over to a new bencode object.
 * This is done so that we don't exhaust the buffer */
