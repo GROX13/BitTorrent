@@ -5,13 +5,12 @@
 
 #include "setup.h"
 
-void get_filename(int argc,  char * argv[], char* filename){
-    if(arc != 2){
+void get_filename(int argc,  char * argv[], char filename[]){
+    if(argc != 2){
         puts("Number of arguments must be 2");   
         exit(1); 
     }
     
-    //char filename[1024];
     memset(filename,0x00,1024);
     strncpy(filename,argv[1],1024);
 }
