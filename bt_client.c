@@ -7,28 +7,31 @@
 int main(int argc, char *argv[]) {
     bencode_t ben;
 
-    char *str = strdup("4:test");
-
-    const char *ren;
-
-    int len;
-
-    bencode_init(&ben, str, strlen(str));
-    printf("%i\n", ben.len);
-    printf("%i\n", ben.val);
-    puts(ben.start);
-    puts(ben.str);
-    bencode_string_value(&ben, &ren, &len);
-    puts(ren);
 
     char filename[1024];
     get_filename(argc, argv, filename);
-    puts(filename);
+  //  puts(filename);
     
     char * file; 
     long long leng;
     file = read_file(filename, &leng);
       
-    puts(file);
+   //puts(file);
+
+
+    bencode_t ben2;
+
+
+    const char *ren;
+
+    int len, ret;
+
+    bencode_init(&ben, file, strlen(file));
+
+    ret = bencode_dict_get_next(&ben, &ben2, &ren, &len);
+    printf("foo %s %i\n", ren, len);
+   // bencode_string_value(&ben2, &ren, &len);
+    //printf("bla %s %i\n", ren, len);
+   
     return 0;
 }
