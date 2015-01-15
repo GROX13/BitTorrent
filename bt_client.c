@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 
     ret = bencode_dict_get_next(&ben, &ben2, &ren, &len);
     printf("foo %s %i\n", ren, len);
-   // bencode_string_value(&ben2, &ren, &len);
+    bencode_string_value(&ben2, &ren, &len);
     //printf("bla %s %i\n", ren, len);
    
     return 0;
