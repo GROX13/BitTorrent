@@ -1,7 +1,8 @@
 #ifndef BENCODE_H_
 #define BENCODE_H_
 
-typedef struct {
+typedef struct
+{
     const char *str;
     const char *start;
     void *parent;
@@ -16,37 +17,37 @@ typedef struct {
 * @param len Length of buffer
 */
 void bencode_init(
-        bencode_t *be,
-        const char *str,
-        int len
+    bencode_t *be,
+    const char *str,
+    int len
 );
 
 /**
 * @return 1 if the bencode object is an int; otherwise 0.
 */
 int bencode_is_int(
-        const bencode_t *be
+    const bencode_t *be
 );
 
 /**
 * @return 1 if the bencode object is a string; otherwise 0.
 */
 int bencode_is_string(
-        const bencode_t *be
+    const bencode_t *be
 );
 
 /**
 * @return 1 if the bencode object is a list; otherwise 0.
 */
 int bencode_is_list(
-        const bencode_t *be
+    const bencode_t *be
 );
 
 /**
 * @return 1 if the bencode object is a dict; otherwise 0.
 */
 int bencode_is_dict(
-        const bencode_t *be
+    const bencode_t *be
 );
 
 /**
@@ -55,15 +56,15 @@ int bencode_is_dict(
 * @return 1 on success, otherwise 0
 */
 int bencode_int_value(
-        bencode_t *be,
-        long int *val
+    bencode_t *be,
+    long int *val
 );
 
 /**
 * @return 1 if there is another item on this dict; otherwise 0.
 */
 int bencode_dict_has_next(
-        bencode_t *be
+    bencode_t *be
 );
 
 /**
@@ -74,10 +75,10 @@ int bencode_dict_has_next(
 * @return 1 on success; otherwise 0.
 */
 int bencode_dict_get_next(
-        bencode_t *be,
-        bencode_t *be_item,
-        const char **key,
-        int *klen
+    bencode_t *be,
+    bencode_t *be_item,
+    const char **key,
+    int *klen
 );
 
 /**
@@ -89,9 +90,9 @@ int bencode_dict_get_next(
 * @return 1 on success; otherwise 0
 */
 int bencode_string_value(
-        bencode_t *be,
-        const char **str,
-        int *len
+    bencode_t *be,
+    const char **str,
+    int *len
 );
 
 /**
@@ -100,7 +101,7 @@ int bencode_string_value(
 * @return 1 if another item exists on the list; 0 otherwise; -1 on invalid processing
 */
 int bencode_list_has_next(
-        bencode_t *be
+    bencode_t *be
 );
 
 /**
@@ -110,16 +111,16 @@ int bencode_list_has_next(
 * @return return 0 on end; 1 on have next; -1 on error
 */
 int bencode_list_get_next(
-        bencode_t *be,
-        bencode_t *be_item
+    bencode_t *be,
+    bencode_t *be_item
 );
 
 /**
 * Copy bencode object into other bencode object
 */
 void bencode_clone(
-        bencode_t *be,
-        bencode_t *output
+    bencode_t *be,
+    bencode_t *output
 );
 
 /**
@@ -130,9 +131,9 @@ void bencode_clone(
 * @return 1 on success
 */
 int bencode_dict_get_start_and_len(
-        bencode_t *be,
-        const char **start,
-        int *len
+    bencode_t *be,
+    const char **start,
+    int *len
 );
 
 #endif /* BENCODE_H_ */
