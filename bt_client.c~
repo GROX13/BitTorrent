@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
     bencode_string_value(&ben, &ren, &len);
     puts(ren);
 
-    char * filename;
+    char *filename;
     get_filename(argc, argv, filename);
     puts(filename);
     
