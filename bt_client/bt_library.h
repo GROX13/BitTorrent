@@ -15,8 +15,8 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
-#include "bt_lib.h"
-#include "bencode.h"
+#include "bt_library.h"
+#include "bt_bencode.h"
 
 
 /**

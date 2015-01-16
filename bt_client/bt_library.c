@@ -12,8 +12,7 @@
 
 #include <openssl/sha.h> // hashing pieces
 
-#include "bencode.h"
-#include "bt_lib.h"
+#include "bt_library.h"
 #include "setup.h"
 #include "bt_library.h"
 #include "bt_bencode.h"
@@ -167,5 +166,6 @@ unsigned int select_id()
 
 int parse_bt_info(bt_info_t *bt_info, be_node *node)
 {
+
     return 0;
 }

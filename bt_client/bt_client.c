@@ -3,6 +3,7 @@
 #include <sys/stat.h>
 
 #include "setup.h"
+#include "bt_library.h"
 #include "bt_bencode.h"
 
 int main(int argc, char *argv[])
@@ -23,7 +24,8 @@ int main(int argc, char *argv[])
     puts("done");
     be_dump(node);
 
-
+    bt_info_t *bt_info; 
+    parse_bt_info(bt_info, node);
     //
     //    //puts(file);
     //
