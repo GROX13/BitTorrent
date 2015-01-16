@@ -28,5 +28,9 @@
 *.x86_64
 *.hex
 
+# Editor files
+*.h~
+*.c~
+
 # Executable file
 # bt_client
