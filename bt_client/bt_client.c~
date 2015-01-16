@@ -7,7 +7,7 @@
 
 int main(int argc, char *argv[]) {
     be_node *node; // top node in the bencoding
-	connect_to_tracker(argc, argv);
+
 //    bencode_t ben;
 //
 //
@@ -21,7 +21,6 @@ int main(int argc, char *argv[]) {
     node = load_be_node(filename);
     puts("done");
     be_dump(node);
-	
 
 //
 //    //puts(file);
