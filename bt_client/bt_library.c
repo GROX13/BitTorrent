@@ -164,8 +164,56 @@ unsigned int select_id()
     return 0;
 }
 
+void _fill_info(bt_info_t *info_t, be_node *node, ssize_t indent, char *key)
+{
+    size_t i;
+
+    indent = abs((int) indent);
+
+    switch (node->type)
+    {
+    case BE_STR:
+        if (strcmp(key, "announce"))
+            strcpy(info_t->announce, node->val.s);
+
+        if (strcmp(key, "name"))
+            strcpy(info_t->name, node->val.s);
+        break;
+
+    case BE_INT:
+        if (strcmp(key, "length"))
+            info_t->length = node->val.i;
+        //            if (strcmp(key, ""))
+        //                info_t->num_pieces  = node->val.i;
+        if (strcmp(key, "piece length"))
+            info_t->piece_length  = node->val.i;
+
+        break;
+
+    case BE_LIST:
+
+        for (i = 0; node->val.l[i]; ++i)
+            _fill_info(info_t, node->val.l[i], indent + 1, "");
+
+
+        break;
+
+    case BE_DICT:
+        for (i = 0; node->val.d[i].val; ++i)
+        {
+
+
+            _fill_info(info_t, node->val.d[i].val, -(indent + 1), node->val.d[i].key);
+        }
+        break;
+    }
+}
+
 int parse_bt_info(bt_info_t *bt_info, be_node *node)
 {
-
-    return 0;
+    _fill_info(bt_info, node, 0, "");
+    printf("announce ----- > %s \n", bt_info->announce);
+    printf("name ----- > %s \n", bt_info->name);
+    printf("length ----- > %d \n", bt_info->length);
+    return 1;
 }

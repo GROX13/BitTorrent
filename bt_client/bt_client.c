@@ -9,7 +9,7 @@
 int main(int argc, char *argv[])
 {
     be_node *node; // top node in the bencoding
-    connect_to_tracker(argc, argv);
+    // connect_to_tracker(argc, argv);
     //    bencode_t ben;
     //
     //
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     puts("done");
     be_dump(node);
 
-    bt_info_t *bt_info; 
+    bt_info_t *bt_info  = malloc(sizeof(bt_info_t)); 
     parse_bt_info(bt_info, node);
     //
     //    //puts(file);
