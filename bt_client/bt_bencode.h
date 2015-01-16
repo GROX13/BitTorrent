@@ -1,139 +1,68 @@
-#ifndef BENCODE_H_
-#define BENCODE_H_
+/*
+ * C implementation of a bencode decoder.
+ * This is the format defined by BitTorrent:
+ *  http://wiki.theory.org/BitTorrentSpecification#bencoding
+ *
+ * The only external requirements are a few [standard] function calls and
+ * the long long type.  Any sane system should provide all of these things.
+ *
+ * This is released into the public domain.
+ * Written by Mike Frysinger <vapier@gmail.com>.
+ *
+ *
+ * Edited for CS43 @ Swarthmore College by Adam Aviv
+ */
 
-typedef struct
-{
-    const char *str;
-    const char *start;
-    void *parent;
-    int val;
-    int len;
-} bencode_t;
+/* USAGE:
+ *  - pass the string full of the bencoded data to be_decode()
+ *  - parse the resulting tree however you like
+ *  - call be_free() on the tree to release resources
+ */
 
-/**
-* Initialise a bencode object.
-* @param be The bencode object
-* @param str Buffer we expect input from
-* @param len Length of buffer
-*/
-void bencode_init(
-    bencode_t *be,
-    const char *str,
-    int len
-);
+#ifndef _BENCODE_H
+#define _BENCODE_H
 
-/**
-* @return 1 if the bencode object is an int; otherwise 0.
-*/
-int bencode_is_int(
-    const bencode_t *be
-);
 
-/**
-* @return 1 if the bencode object is a string; otherwise 0.
-*/
-int bencode_is_string(
-    const bencode_t *be
-);
+/*enumerate for the different types of ben_node*/
+typedef enum {
+    BE_STR,
+    BE_INT,
+    BE_LIST,
+    BE_DICT,
+} be_type;
 
-/**
-* @return 1 if the bencode object is a list; otherwise 0.
-*/
-int bencode_is_list(
-    const bencode_t *be
-);
+/*predefined for compiler checks*/
+struct be_dict;
+struct be_node;
 
-/**
-* @return 1 if the bencode object is a dict; otherwise 0.
-*/
-int bencode_is_dict(
-    const bencode_t *be
-);
+/*
+ * XXX: the "val" field of be_dict and be_node can be confusing ...
+ */
 
-/**
-* Obtain value from integer bencode object.
-* @param val Long int we are writing the result to
-* @return 1 on success, otherwise 0
-*/
-int bencode_int_value(
-    bencode_t *be,
-    long int *val
-);
+typedef struct be_dict {
+  char *key; //key of a dict
+  struct be_node *val; //val of a dict
+} be_dict;
 
-/**
-* @return 1 if there is another item on this dict; otherwise 0.
-*/
-int bencode_dict_has_next(
-    bencode_t *be
-);
+typedef struct be_node {
+  be_type type; //type of the node, e.g., a string or a list
+  union { //node can store all of these types
+    char *s; // a stirng
+    long long i; // a long long integer
+    struct be_node **l; //a pointer to an array of be_nodes representing a list
+    struct be_dict *d; //a dictionary 
+  } val; //this union is stored in val
+} be_node;
 
-/**
-* Get the next item within this dictionary.
-* @param be_item Next item.
-* @param key Const pointer to key string of next item.
-* @param klen Length of the key of next item.
-* @return 1 on success; otherwise 0.
-*/
-int bencode_dict_get_next(
-    bencode_t *be,
-    bencode_t *be_item,
-    const char **key,
-    int *klen
-);
 
-/**
-* Get the string value from this bencode object.
-* The buffer returned is stored on the stack.
-* @param be The bencode object.
-* @param str Const pointer to the buffer.
-* @param slen Length of the buffer we are outputting.
-* @return 1 on success; otherwise 0
-*/
-int bencode_string_value(
-    bencode_t *be,
-    const char **str,
-    int *len
-);
+long long be_str_len(be_node *node);
 
-/**
-* Tell if there is another item within this list.
-* @param be The bencode object
-* @return 1 if another item exists on the list; 0 otherwise; -1 on invalid processing
-*/
-int bencode_list_has_next(
-    bencode_t *be
-);
+be_node *be_decode(const char *bencode);
+be_node *be_decoden(const char *bencode, long long bencode_len);
+void be_free(be_node *node);
 
-/**
-* Get the next item within this list.
-* @param be The bencode object
-* @param be_item The next bencode object that we are going to initiate.
-* @return return 0 on end; 1 on have next; -1 on error
-*/
-int bencode_list_get_next(
-    bencode_t *be,
-    bencode_t *be_item
-);
+//dump out the be_node encoding starting from the top
+void be_dump(be_node *node);
 
-/**
-* Copy bencode object into other bencode object
-*/
-void bencode_clone(
-    bencode_t *be,
-    bencode_t *output
-);
-
-/**
-* Get the start and end position of this dictionary
-* @param be Bencode object
-* @param start Starting string
-* @param len Length of the dictionary
-* @return 1 on success
-*/
-int bencode_dict_get_start_and_len(
-    bencode_t *be,
-    const char **start,
-    int *len
-);
-
-#endif /* BENCODE_H_ */
+be_node * load_be_node(char * torrent_file);
+#endif
