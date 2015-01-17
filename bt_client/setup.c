@@ -22,13 +22,15 @@
 #include <sys/sendfile.h>
 #include <sys/stat.h>
 #include <netinet/in.h>
+
 #define ECHOMAX 255
+
 void connect_to_tracker(int argc,  char *argv[]){
     char *requestToSend;
     int sock;
-    struct sockaddr_in servAddr; 
-    struct sockaddr_in fromAddr;    
-    int fromSize; 
+    struct sockaddr_in servAddr;
+    struct sockaddr_in fromAddr;
+    int fromSize;
     int respStringLen;
 
     int portNum =80;
@@ -36,26 +38,34 @@ void connect_to_tracker(int argc,  char *argv[]){
 
     char *hash="12345678901234567890";
     char *id="ABCDEFGHIJKLMNOPQRST";
-    char *temp ="udp://tracker.thepiratebay.org??info_hash=12345678901234567890\n&peer_id=ABCDEFGHIJKLMNOPQRST\nport=6888\n&downloaded=0\n&left=0\n&event=started";
+    char *temp;
+    temp = "udp://tracker.thepiratebay.org??info_hash="
+            "12345678901234567890\n&peer_id=ABCDEFGHIJKLMNOPQRST"
+            "\nport=6888\n&downloaded=0\n&left=0\n&event=started";
     requestToSend = malloc(sizeof(temp)+1);
-    sprintf(requestToSend, "%s??info_hash=%s\n&peer_id=%s\nport=%s\n&downloaded=0\n&left=0\n&event=started\0","udp://tracker.thepiratebay.org", hash,id,"6888");
+    // sprintf(requestToSend, "%s??info_hash=%s\n&peer_id=%s\nport=%s"
+    //         "\n&downloaded=0\n&left=0\n&event=started\0","udp://tracker"
+    //         ".thepiratebay.org", hash,id,"6888");
+    sprintf(requestToSend, "%s??info_hash=%s\n&peer_id=%s\nport=%s"
+            "\n&downloaded=0\n&left=0\n&event=started","udp://tracker"
+            ".thepiratebay.org", hash,id,"6888");
     printf("%s to send \n",  requestToSend);
 
-   /* Create a datagram/UDP socket */
+    /* Create a datagram/UDP socket */
     if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0){
         printf("fail create socket");
         exit(1);
     }
-    
+
     struct hostent *hp = gethostbyname("tracker.thepiratebay.org");//
     if(!hp)
     {
-     herror("gethostbyname(): ");
-     exit(1);
+        herror("gethostbyname(): ");
+        exit(1);
     }
     /* Construct the server address structure */
-    hp = gethostbyname("udp://tracker.thepiratebay.org");   
-    
+    hp = gethostbyname("udp://tracker.thepiratebay.org");
+
     memset(&servAddr, 0, sizeof(servAddr));    /* Zero out structure */
     servAddr.sin_family = AF_INET;                 /* Internet addr family */
     memcpy( (char *) &servAddr.sin_addr.s_addr, hp->h_addr, hp->h_length );
@@ -70,8 +80,8 @@ void connect_to_tracker(int argc,  char *argv[]){
 
     /* Recv a response */
     fromSize = sizeof(fromAddr);
-    if ((respStringLen = recvfrom(sock, data_recv, ECHOMAX, 0, 
-         (struct sockaddr *) &fromAddr, &fromSize)) != strlen(requestToSend)){
+    if ((respStringLen = recvfrom(sock, data_recv, ECHOMAX, 0,
+            (struct sockaddr *) &fromAddr, (socklen_t *) &fromSize)) != strlen(requestToSend)){
         printf("fail to recv");
         exit(1);
     }

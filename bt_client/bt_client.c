@@ -17,14 +17,14 @@ int main(int argc, char *argv[])
     get_filename(argc, argv, filename);
     puts(filename);
     //
-    char *file;
-    long long leng;
-    file = read_file(filename, &leng);
+    //    char *file;
+    // long long leng;
+    // file = read_file(filename, &leng);
     node = load_be_node(filename);
     puts("done");
     be_dump(node);
 
-    bt_info_t *bt_info  = malloc(sizeof(bt_info_t)); 
+    bt_info_t *bt_info  = malloc(sizeof(bt_info_t));
     parse_bt_info(bt_info, node);
     //
     //    //puts(file);
