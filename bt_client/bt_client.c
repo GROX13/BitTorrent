@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
 
     bt_info_t *bt_info  = malloc(sizeof(bt_info_t));
     parse_bt_info(bt_info, node);
+    puts("All Done");
     //
     //    //puts(file);
     //
