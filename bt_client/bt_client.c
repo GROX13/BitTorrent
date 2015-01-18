@@ -7,7 +7,7 @@
 #include "bt_library.h"
 #include "bt_bencode.h"
 
-static int create_socket()
+static int create_socket(char * ip_addr, char * port)
 {
     struct addrinfo adr_info, * result, * result_ptr;
     int sock, socket_fd = -1;
@@ -16,7 +16,7 @@ static int create_socket()
     adr_info.ai_socktype = SOCK_STREAM;
     adr_info.ai_flags = AI_PASSIVE;
 
-    sock = getaddrinfo(NULL, "80", &adr_info, &result);
+    sock = getaddrinfo(NULL, port, &adr_info, &result);
     if (sock != 0)
     {
         perror("Error while geting address info");
