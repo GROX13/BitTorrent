@@ -2,7 +2,7 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#include "setup.h"
+#include "bt_setup.h"
 #include "bt_library.h"
 #include "bt_bencode.h"
 

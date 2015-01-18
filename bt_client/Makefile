@@ -2,7 +2,7 @@ CC = gcc
 CPFLAGS = -g -Wall
 LDFLAGS = -lcrypto
 
-SRC = bt_client.c setup.c bt_bencode.c bt_library.c
+SRC = bt_client.c bt_setup.c bt_bencode.c bt_library.c
 OBJ = $(SRC:.c=.o)
 BIN = bt_client.out
 
