@@ -81,11 +81,17 @@ int contact_tracker(bt_args_t * bt_args){
     puts(port);
     memset(announce, '\0', announce_len);
     strncpy(announce, bt_args->bt_info->announce, port_index-1);
-    puts(announce);
+    
+    char* new_announce = malloc(announce_len);
+    memset(new_announce, '\0', announce_len);
+    puts(strstr(announce, ":"));
+    strcpy(new_announce, (char*)strstr(announce, ":") + 3);
+
+    puts(new_announce);
     struct hostent *he;
     struct in_addr **addr_list;
     
-    if((he = gethostbyname(announce)) == NULL){
+    if((he = gethostbyname(new_announce)) == NULL){
         return 1;
     }
     printf("Official name is: %s\n", he->h_name);
