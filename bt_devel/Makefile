@@ -5,7 +5,7 @@ LDFLAGS = -lcrypto
 
 SRC = bencode.c  bt_client.c bt_lib.c bt_setup.c
 OBJ = $(SRC:.c=.o)
-BIN = bt_client
+BIN = bt_client.out
 
 all: $(BIN)
 
