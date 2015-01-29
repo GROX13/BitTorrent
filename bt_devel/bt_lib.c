@@ -112,10 +112,10 @@ int contact_tracker(bt_args_t *bt_args) {
     char data_recv[ECHOMAX];
 
     requestToSend = malloc(100);
-
+    puts(url_encode(bt_args->bt_info->announce));
     sprintf(requestToSend, "%s?info_hash=%s\n&peer_id=%s\n&port=%s"
             "\n&downloaded=0\n&left=0\n&event=started",bt_args->bt_info->announce, 
-            hashed_info,generate_peer_id(),port);
+            url_encode(hashed_info),url_encode(generate_peer_id()),url_encode(port));
     printf("\n%s \nto send \n",  requestToSend);
 
     /* Create a datagram/UDP socket */
@@ -126,7 +126,7 @@ int contact_tracker(bt_args_t *bt_args) {
 
     memset(&servAddr, 0, sizeof(servAddr));    /* Zero out structure */
     servAddr.sin_family = AF_INET;                 /* Internet addr family */
-    memcpy( (char *) &servAddr.sin_addr.s_addr, he->h_addr, he->h_length );
+    servAddr.sin_addr.s_addr = inet_addr(inet_ntoa(*addr_list[0]));
     servAddr.sin_port   = htons(portNum);     /* Server port */
 
     
