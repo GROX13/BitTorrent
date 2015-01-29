@@ -191,6 +191,7 @@ void parse_args(bt_args_t * bt_args, int argc,  char * argv[]){
   return ;
 }
 
+
 static int create_socket(char * ip_addr, char * port)
 {
     struct addrinfo adr_info, * result, * result_ptr;
@@ -231,3 +232,4 @@ static int create_socket(char * ip_addr, char * port)
 
     return socket_fd;
 }
+
