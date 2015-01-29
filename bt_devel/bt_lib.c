@@ -147,19 +147,19 @@ void _fill_info(bt_info_t *info_t, be_node *node, ssize_t indent, char *key) {
 
     switch (node->type) {
         case BE_STR:
-            if (strcmp(key, "announce"))
+            if (!strcmp(key, "announce"))
                 strcpy(info_t->announce, node->val.s);
 
-            if (strcmp(key, "name"))
+            if (!strcmp(key, "name"))
                 strcpy(info_t->name, node->val.s);
             break;
 
         case BE_INT:
-            if (strcmp(key, "length"))
+            if (!strcmp(key, "length"))
                 info_t->length = node->val.i;
             //            if (strcmp(key, ""))
             //                info_t->num_pieces  = node->val.i;
-            if (strcmp(key, "piece length"))
+            if (!strcmp(key, "piece length"))
                 info_t->piece_length = node->val.i;
             break;
 

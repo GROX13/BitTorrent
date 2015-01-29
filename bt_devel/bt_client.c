@@ -18,59 +18,62 @@
 
 int main (int argc, char * argv[]){
 
-  bt_args_t bt_args;
-  be_node * node; // top node in the bencoding
-  int i;
+    bt_args_t bt_args;
+    be_node * node; // top node in the bencoding
+    int i;
 
-  parse_args(&bt_args, argc, argv);
+    parse_args(&bt_args, argc, argv);
 
 
-  if(bt_args.verbose){
-    printf("Args:\n");
-    printf("verbose: %d\n",bt_args.verbose);
-    printf("save_file: %s\n",bt_args.save_file);
-    printf("log_file: %s\n",bt_args.log_file);
-    printf("torrent_file: %s\n", bt_args.torrent_file);
+    if(bt_args.verbose){
+        printf("Args:\n");
+        printf("verbose: %d\n",bt_args.verbose);
+        printf("save_file: %s\n",bt_args.save_file);
+        printf("log_file: %s\n",bt_args.log_file);
+        printf("torrent_file: %s\n", bt_args.torrent_file);
 
-    for(i=0;i<MAX_CONNECTIONS;i++){
-      if(bt_args.peers[i] != NULL)
-        print_peer(bt_args.peers[i]);
+        for(i=0;i<MAX_CONNECTIONS;i++){
+            if(bt_args.peers[i] != NULL)
+                print_peer(bt_args.peers[i]);
+        }
+
+
     }
 
+    //read and parse the torent file
+    node = load_be_node(bt_args.torrent_file);
 
-  }
+    if(bt_args.verbose){
+        be_dump(node);
+    }
 
-  //read and parse the torent file
-  node = load_be_node(bt_args.torrent_file);
-
-  if(bt_args.verbose){
-    be_dump(node);
-  }
-
-  contact_tracker(&bt_args);
-
-
-  //main client loop
-  printf("Starting Main Loop\n");
-  while(1){
-
-    //try to accept incoming connection from new peer
+    bt_info_t * info_t;
+    parse_bt_info(info_t, node);
+    bt_args.bt_info = info_t;
+    contact_tracker(&bt_args);
 
 
-    //poll current peers for incoming traffic
-    //   write pieces to files
-    //   udpdate peers choke or unchoke status
-    //   responses to have/havenots/interested etc.
+    //main client loop
+    printf("Starting Main Loop\n");
+    while(1){
 
-    //for peers that are not choked
-    //   request pieaces from outcoming traffic
+        //try to accept incoming connection from new peer
 
-    //check livelenss of peers and replace dead (or useless) peers
-    //with new potentially useful peers
 
-    //update peers,
+        //poll current peers for incoming traffic
+        //   write pieces to files
+        //   udpdate peers choke or unchoke status
+        //   responses to have/havenots/interested etc.
 
-  }
+        //for peers that are not choked
+        //   request pieaces from outcoming traffic
 
-  return 0;
+        //check livelenss of peers and replace dead (or useless) peers
+        //with new potentially useful peers
+
+        //update peers,
+
+    }
+
+    return 0;
 }
