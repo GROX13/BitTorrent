@@ -35,4 +35,6 @@ void parse_args(bt_args_t * bt_args, int argc,  char ** argv);
 
 int create_socket(char *ip_addr, unsigned short port);
 
+char * generate_peer_id();
+
 #endif

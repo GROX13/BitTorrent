@@ -219,3 +219,7 @@ int create_socket(char *ip_addr, unsigned short port) {
     return socket_desc;
 }
 
+
+char * generate_peer_id() {
+    return "sdfsdqwertyuiopasdfg";
+}
