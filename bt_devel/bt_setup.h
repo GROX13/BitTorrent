@@ -12,29 +12,33 @@
 
 
 /**
- * __parse_peer(peer_t * peer, char peer_st) -> void
- *
- * parse a peer string, peer_st and store the parsed result in peer
- *
- * ERRORS: Will exit on various errors
- **/
-void usage(FILE * file);
+* __parse_peer(peer_t * peer, char peer_st) -> void
+*
+* parse a peer string, peer_st and store the parsed result in peer
+*
+* ERRORS: Will exit on various errors
+**/
+void usage(FILE *file);
 
 
 /**
- * pars_args(bt_args_t * bt_args, int argc, char * argv[]) -> void
- *
- * parse the command line arguments to bt_client using getopt and
- * store the result in bt_args.
- *
- * ERRORS: Will exit on various errors
- *
- **/
+* pars_args(bt_args_t * bt_args, int argc, char * argv[]) -> void
+*
+* parse the command line arguments to bt_client using getopt and
+* store the result in bt_args.
+*
+* ERRORS: Will exit on various errors
+*
+**/
 
-void parse_args(bt_args_t * bt_args, int argc,  char ** argv);
+void parse_args(bt_args_t *bt_args, int argc, char **argv);
 
 int create_socket(char *ip_addr, unsigned short port);
 
-char * generate_peer_id();
+char *generate_peer_id();
+
+char *url_encode(char *str);
+
+char *url_decode(char *str);
 
 #endif

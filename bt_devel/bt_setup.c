@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <arpa/inet.h>
+#include <time.h>
+#include <ctype.h>
 
 
 #include "bt_setup.h"
@@ -220,6 +222,76 @@ int create_socket(char *ip_addr, unsigned short port) {
 }
 
 
-char * generate_peer_id() {
+char *generate_peer_id() {
+    time_t current_time;
+    char *c_time_string;
+
+    /* Obtain current time as seconds elapsed since the Epoch. */
+    current_time = time(NULL);
+
+    if (current_time == ((time_t) -1)) {
+        (void) fprintf(stderr, "Failure to compute the current time.");
+    }
+
+    /* Convert to local time format. */
+    c_time_string = ctime(&current_time);
+
+    if (c_time_string == NULL) {
+        (void) fprintf(stderr, "Failure to convert the current time.");
+
+    }
+
+    /* Print to stdout. */
+    (void) printf("Current time is %s", c_time_string);
     return "sdfsdqwertyuiopasdfg";
+
+}
+
+/* Converts a hex character to its integer value */
+char from_hex(char ch) {
+    return (char) (isdigit(ch) ? ch - '0' : tolower(ch) - 'a' + 10);
+}
+
+/* Converts an integer value to its hex character*/
+char to_hex(char code) {
+    static char hex[] = "0123456789abcdef";
+    return hex[code & 15];
+}
+
+/* Returns a url-encoded version of str */
+/* IMPORTANT: be sure to free() the returned string after use */
+char *url_encode(char *str) {
+    char *pstr = str, *buf = malloc(strlen(str) * 3 + 1), *pbuf = buf;
+    while (*pstr) {
+        if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.' || *pstr == '~')
+            *pbuf++ = *pstr;
+        else if (*pstr == ' ')
+            *pbuf++ = '+';
+        else
+            *pbuf++ = '%', *pbuf++ = to_hex(*pstr >> 4), *pbuf++ = to_hex((char) (*pstr & 15));
+        pstr++;
+    }
+    *pbuf = '\0';
+    return buf;
+}
+
+/* Returns a url-decoded version of str */
+/* IMPORTANT: be sure to free() the returned string after use */
+char *url_decode(char *str) {
+    char *pstr = str, *buf = malloc(strlen(str) + 1), *pbuf = buf;
+    while (*pstr) {
+        if (*pstr == '%') {
+            if (pstr[1] && pstr[2]) {
+                *pbuf++ = from_hex(pstr[1]) << 4 | from_hex(pstr[2]);
+                pstr += 2;
+            }
+        } else if (*pstr == '+') {
+            *pbuf++ = ' ';
+        } else {
+            *pbuf++ = *pstr;
+        }
+        pstr++;
+    }
+    *pbuf = '\0';
+    return buf;
 }

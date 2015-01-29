@@ -52,6 +52,7 @@ int main (int argc, char * argv[]){
     bt_args.bt_info = info_t;
     contact_tracker(&bt_args);
 
+    generate_peer_id();
 
     //main client loop
     printf("Starting Main Loop\n");
