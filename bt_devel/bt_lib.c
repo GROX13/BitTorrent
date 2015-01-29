@@ -16,8 +16,39 @@
 #include "bt_lib.h"
 #include "bt_setup.h"
 
+char *read_file(char *file, long long *len)
+{
+    struct stat st;
+    char *ret = NULL;
+    FILE *fp;
+
+    if (stat(file, &st))
+    {
+        return ret;
+    }
+    *len = st.st_size;
+
+    fp = fopen(file, "r");
+    if (!fp)
+        return ret;
+
+    ret = malloc(*len);
+    if (!ret)
+        return NULL;
+
+    fread(ret, 1, *len, fp);
+
+    fclose(fp);
+
+    return ret;
+}
+
 int contact_tracker(bt_args_t * bt_args){
-	
+    char *file;
+    long long leng;
+    file = read_file(bt_args->torrent_file, &leng);
+    puts(file);
+    printf("");
 }
 
 void calc_id(char *ip, unsigned short port, char *id) {
