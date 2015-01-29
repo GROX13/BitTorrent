@@ -37,7 +37,7 @@ int main (int argc, char * argv[]){
         print_peer(bt_args.peers[i]);
     }
 
-    
+
   }
 
   //read and parse the torent file
@@ -47,28 +47,29 @@ int main (int argc, char * argv[]){
     be_dump(node);
   }
 
-	contact_tracker(&bt_args);	
+  contact_tracker(&bt_args);
+
+
 
   //main client loop
   printf("Starting Main Loop\n");
-		
   while(1){
 
     //try to accept incoming connection from new peer
-       
-    
+
+
     //poll current peers for incoming traffic
     //   write pieces to files
     //   udpdate peers choke or unchoke status
     //   responses to have/havenots/interested etc.
-    
+
     //for peers that are not choked
     //   request pieaces from outcoming traffic
 
     //check livelenss of peers and replace dead (or useless) peers
     //with new potentially useful peers
-    
-    //update peers, 
+
+    //update peers,
 
   }
 
