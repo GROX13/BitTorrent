@@ -5,12 +5,15 @@
 #include <arpa/inet.h>
 #include <time.h>
 #include <ctype.h>
+#include <glob.h>
 
 
 #include "bt_setup.h"
 #include "bt_lib.h"
 #include "bencode.h"
 
+// Symbols of length 20
+#define CONS_RAND "RRRRRRRRRRRRRRRRRRRR"
 
 /**
 * usage(FILE * file) -> void
@@ -221,6 +224,15 @@ int create_socket(char *ip_addr, unsigned short port) {
     return socket_desc;
 }
 
+void _remove_char(char *str, char garbage) {
+
+    char *src, *dst;
+    for (src = dst = str; *src != '\0'; src++) {
+        *dst = *src;
+        if (*dst != garbage) dst++;
+    }
+    *dst = '\0';
+}
 
 char *generate_peer_id() {
     time_t current_time;
@@ -241,9 +253,16 @@ char *generate_peer_id() {
 
     }
 
+    _remove_char(c_time_string, ' ');
+    _remove_char(c_time_string, ':');
+    size_t a = strlen(c_time_string);
     /* Print to stdout. */
     (void) printf("Current time is %s", c_time_string);
-    return "sdfsdqwertyuiopasdfg";
+    char result[21] = CONS_RAND;
+    printf("%s", result);
+    memcpy(result, c_time_string, strlen(c_time_string) - 1);
+    a = strlen(result);
+    return result;
 
 }
 
