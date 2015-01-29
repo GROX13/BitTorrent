@@ -100,8 +100,51 @@ int contact_tracker(bt_args_t *bt_args) {
     for (i = 0; addr_list[i] != NULL; i++) {
         printf("%s ", inet_ntoa(*addr_list[i]));
     }
-    return 0;
 
+    char *requestToSend;
+    int sock;
+    struct sockaddr_in servAddr;
+    struct sockaddr_in fromAddr;
+    int fromSize;
+    int respStringLen;
+
+    int portNum =80;
+    char data_recv[ECHOMAX];
+
+    requestToSend = malloc(100);
+
+    sprintf(requestToSend, "%s?info_hash=%s\n&peer_id=%s\n&port=%s"
+            "\n&downloaded=0\n&left=0\n&event=started",bt_args->bt_info->announce, 
+            hashed_info,generate_peer_id(),port);
+    printf("\n%s \nto send \n",  requestToSend);
+
+    /* Create a datagram/UDP socket */
+    if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0){
+        printf("fail create socket");
+        exit(1);
+    }
+
+    memset(&servAddr, 0, sizeof(servAddr));    /* Zero out structure */
+    servAddr.sin_family = AF_INET;                 /* Internet addr family */
+    memcpy( (char *) &servAddr.sin_addr.s_addr, he->h_addr, he->h_length );
+    servAddr.sin_port   = htons(portNum);     /* Server port */
+
+    
+    //send request to tracker server
+    if (send(sock, requestToSend, strlen(requestToSend), 0) != strlen(requestToSend)){
+        printf("fail send \n");
+        exit(1);
+    }
+
+    /* Recv a response */
+    fromSize = sizeof(fromAddr);
+    if ((respStringLen = recvfrom(sock, data_recv, ECHOMAX, 0,
+            (struct sockaddr *) &fromAddr, (socklen_t *) &fromSize)) != strlen(requestToSend)){
+        printf("fail to recv \n");
+        exit(1);
+    }
+
+    return 0;    
 }
 
 void calc_id(char *ip, unsigned short port, char *id) {
