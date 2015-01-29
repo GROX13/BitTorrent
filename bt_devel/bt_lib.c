@@ -16,6 +16,9 @@
 #include "bt_lib.h"
 #include "bt_setup.h"
 
+int contact_tracker(bt_args_t * bt_args){
+	
+}
 
 void calc_id(char *ip, unsigned short port, char *id) {
     char data[256];

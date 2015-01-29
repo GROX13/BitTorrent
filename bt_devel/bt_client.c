@@ -47,8 +47,11 @@ int main (int argc, char * argv[]){
     be_dump(node);
   }
 
+	contact_tracker(&bt_args);	
+
   //main client loop
   printf("Starting Main Loop\n");
+		
   while(1){
 
     //try to accept incoming connection from new peer
