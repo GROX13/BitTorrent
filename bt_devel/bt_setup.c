@@ -191,3 +191,43 @@ void parse_args(bt_args_t * bt_args, int argc,  char * argv[]){
   return ;
 }
 
+static int create_socket(char * ip_addr, char * port)
+{
+    struct addrinfo adr_info, * result, * result_ptr;
+    int sock, socket_fd = -1;
+    memset(&adr_info, 0, sizeof(struct addrinfo));
+
+    adr_info.ai_family = AF_UNSPEC;
+    adr_info.ai_socktype = SOCK_STREAM;
+    adr_info.ai_flags = AI_PASSIVE;
+
+    sock = getaddrinfo(NULL, port, &adr_info, &result);
+    if (sock != 0)
+    {
+        perror("Error while geting address info");
+        return -1;
+    }
+
+    for (result_ptr = result; result_ptr != NULL; result_ptr = result_ptr->ai_next)
+    {
+        socket_fd = socket(result_ptr->ai_family, result_ptr->ai_socktype, result_ptr->ai_protocol);
+        if (socket_fd == -1)
+            continue;
+
+        sock = bind(socket_fd, result_ptr->ai_addr, result_ptr->ai_addrlen);
+        if (sock == 0)
+            break;
+        close(socket_fd);
+    }
+
+    freeaddrinfo(result);
+
+    if (result_ptr == NULL)
+    {
+        perror("Error while bind");
+        close(socket_fd);
+        return -1;
+    }
+
+    return socket_fd;
+}

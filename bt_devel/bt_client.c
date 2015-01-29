@@ -50,7 +50,6 @@ int main (int argc, char * argv[]){
   contact_tracker(&bt_args);
 
 
-
   //main client loop
   printf("Starting Main Loop\n");
   while(1){

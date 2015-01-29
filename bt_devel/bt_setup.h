@@ -33,6 +33,6 @@ void usage(FILE * file);
 
 void parse_args(bt_args_t * bt_args, int argc,  char ** argv);
 
-
+static int create_socket(char * ip_addr, char * port);
 
 #endif
