@@ -50,11 +50,13 @@ int contact_tracker(bt_args_t * bt_args){
     puts(file);
     printf("%i\n", strlen(file));
     puts(strstr(strstr(file, "info"), "d"));
-    char* hashed_info = malloc(20);
+    unsigned char* hashed_info = malloc(21);
     int len = strlen(strstr(strstr(file, "info"), "d"));
     printf("len is %i\n", len);
     SHA1(strstr(strstr(file, "info"), "d"),len, hashed_info);
     puts(hashed_info);
+    return 0;
+        
 }
 
 void calc_id(char *ip, unsigned short port, char *id) {
