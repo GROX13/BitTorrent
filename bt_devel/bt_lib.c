@@ -15,7 +15,7 @@
 #include "bencode.h"
 #include "bt_lib.h"
 #include "bt_setup.h"
-
+#define ECHOMAX 255
 char *read_file(char *file, long long *len)
 {
     struct stat st;
@@ -43,6 +43,20 @@ char *read_file(char *file, long long *len)
     return ret;
 }
 
+void reverse(char *x, int begin, int end)
+{
+   char c;
+ 
+   if (begin >= end)
+      return;
+ 
+   c          = *(x+begin);
+   *(x+begin) = *(x+end);
+   *(x+end)   = c;
+ 
+   reverse(x, ++begin, --end);
+}
+
 int contact_tracker(bt_args_t * bt_args){
     char *file;
     long long leng;
@@ -56,7 +70,31 @@ int contact_tracker(bt_args_t * bt_args){
     SHA1(strstr(strstr(file, "info"), "d"),len, hashed_info);
     puts(hashed_info);
     puts(bt_args->bt_info->announce);
-        
+   
+    int announce_len = strlen(bt_args->bt_info->announce);
+    char* announce = malloc(announce_len);
+    strcpy(announce, bt_args->bt_info->announce);
+    reverse(announce, 0, announce_len - 1);
+    char port[5];
+    int port_index = strlen(strstr(announce, ":"));
+    strcpy(port, (char *)bt_args->bt_info->announce + port_index);    
+    puts(port);
+    memset(announce, '\0', announce_len);
+    strncpy(announce, bt_args->bt_info->announce, port_index-1);
+    puts(announce);
+    struct hostent *he;
+    struct in_addr **addr_list;
+    
+    if((he = gethostbyname(announce)) == NULL){
+        return 1;
+    }
+    printf("Official name is: %s\n", he->h_name);
+    puts("IP addresses: ");
+    addr_list = (struct in_addr **)he->h_addr_list;
+    int i;
+    for(i = 0; addr_list[i] != NULL; i++) {
+        printf("%s ", inet_ntoa(*addr_list[i]));
+    }
     return 0;
         
 }
