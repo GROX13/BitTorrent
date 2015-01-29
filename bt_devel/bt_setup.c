@@ -195,7 +195,7 @@ void parse_args(bt_args_t *bt_args, int argc, char *argv[]) {
 /**
 *
 * */
-static int create_socket(char *ip_addr, char *port) {
+static int create_socket(char *ip_addr, unsigned short port) {
     int socket_desc;
     struct sockaddr_in server;
 
@@ -207,12 +207,7 @@ static int create_socket(char *ip_addr, char *port) {
 
     server.sin_addr.s_addr = inet_addr(ip_addr);
     server.sin_family = AF_INET;
-
-    // The "atoi" is unsafe to use!
-    // It doesn't detect and inform the program if the input is invalid.
-    uint16_t local_port = (uint16_t) atoi(port);
-    printf("Converted port is: %d\n", local_port);
-    server.sin_port = htons(local_port);
+    server.sin_port = htons(port);
     return 0;
 }
 
