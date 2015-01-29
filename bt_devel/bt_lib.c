@@ -15,15 +15,15 @@
 #include "bencode.h"
 #include "bt_lib.h"
 #include "bt_setup.h"
+
 #define ECHOMAX 255
-char *read_file(char *file, long long *len)
-{
+
+char *read_file(char *file, long long *len) {
     struct stat st;
     char *ret = NULL;
     FILE *fp;
 
-    if (stat(file, &st))
-    {
+    if (stat(file, &st)) {
         return ret;
     }
     *len = st.st_size;
@@ -32,77 +32,76 @@ char *read_file(char *file, long long *len)
     if (!fp)
         return ret;
 
-    ret = malloc(*len);
+    ret = malloc((size_t) *len);
     if (!ret)
         return NULL;
 
-    fread(ret, 1, *len, fp);
+    fread(ret, 1, (size_t) *len, fp);
 
     fclose(fp);
 
     return ret;
 }
 
-void reverse(char *x, int begin, int end)
-{
-   char c;
- 
-   if (begin >= end)
-      return;
- 
-   c          = *(x+begin);
-   *(x+begin) = *(x+end);
-   *(x+end)   = c;
- 
-   reverse(x, ++begin, --end);
+void reverse(char *x, int begin, int end) {
+    char c;
+
+    if (begin >= end)
+        return;
+
+    c = *(x + begin);
+    *(x + begin) = *(x + end);
+    *(x + end) = c;
+
+    reverse(x, ++begin, --end);
 }
 
-int contact_tracker(bt_args_t * bt_args){
+int contact_tracker(bt_args_t *bt_args) {
     char *file;
     long long leng;
     file = read_file(bt_args->torrent_file, &leng);
     puts(file);
-    printf("%i\n", strlen(file));
+    printf("%i\n", (int) strlen(file));
     puts(strstr(strstr(file, "info"), "d"));
-    char* hashed_info = malloc(21);
-    int len = strlen(strstr(strstr(file, "info"), "d"));
+    char *hashed_info = malloc(21);
+    int len = (int) strlen(strstr(strstr(file, "info"), "d"));
     printf("len is %i\n", len);
-    SHA1(strstr(strstr(file, "info"), "d"),len, hashed_info);
+    SHA1((unsigned char const *) strstr(strstr(file, "info"), "d"), (size_t) len, (unsigned char *) hashed_info);
     puts(hashed_info);
     puts(bt_args->bt_info->announce);
-   
-    int announce_len = strlen(bt_args->bt_info->announce);
-    char* announce = malloc(announce_len);
+
+    int announce_len = (int) strlen(bt_args->bt_info->announce);
+    char *announce = malloc((size_t) announce_len);
     strcpy(announce, bt_args->bt_info->announce);
     reverse(announce, 0, announce_len - 1);
     char port[5];
-    int port_index = strlen(strstr(announce, ":"));
-    strcpy(port, (char *)bt_args->bt_info->announce + port_index);    
+    int port_index = (int) strlen(strstr(announce, ":"));
+    strcpy(port, (char *) bt_args->bt_info->announce + port_index);
     puts(port);
-    memset(announce, '\0', announce_len);
-    strncpy(announce, bt_args->bt_info->announce, port_index-1);
-    
-    char* new_announce = malloc(announce_len);
-    memset(new_announce, '\0', announce_len);
+    memset(announce, '\0', (size_t) announce_len);
+    strncpy(announce, bt_args->bt_info->announce, (size_t) (port_index - 1));
+
+    char *new_announce = malloc((size_t) announce_len);
+    memset(new_announce, '\0', (size_t) announce_len);
     puts(strstr(announce, ":"));
-    strcpy(new_announce, (char*)strstr(announce, ":") + 3);
+    strcpy(new_announce, (char *) strstr(announce, ":") + 3);
 
     puts(new_announce);
     struct hostent *he;
     struct in_addr **addr_list;
-    
-    if((he = gethostbyname(new_announce)) == NULL){
+
+    if ((he = gethostbyname(new_announce)) == NULL) {
         return 1;
     }
     printf("Official name is: %s\n", he->h_name);
     puts("IP addresses: ");
-    addr_list = (struct in_addr **)he->h_addr_list;
+    addr_list = (struct in_addr **) he->h_addr_list;
     int i;
-    for(i = 0; addr_list[i] != NULL; i++) {
+    for (i = 0; addr_list[i] != NULL; i++) {
         printf("%s ", inet_ntoa(*addr_list[i]));
     }
     return 0;
-        
+
 }
 
 void calc_id(char *ip, unsigned short port, char *id) {
@@ -113,7 +112,7 @@ void calc_id(char *ip, unsigned short port, char *id) {
     len = snprintf(data, 256, "%s%u", ip, port);
 
     //id is just the SHA1 of the ip and port string
-    SHA1((unsigned char *) data, len, (unsigned char *) id);
+    SHA1((unsigned char *) data, (size_t) len, (unsigned char *) id);
 
     return;
 }
@@ -154,7 +153,7 @@ int init_peer(peer_t *peer, char *id, char *ip, unsigned short port) {
     //copy the address to the right place
     bcopy((char *) (hostinfo->h_addr),
             (char *) &(peer->sockaddr.sin_addr.s_addr),
-            hostinfo->h_length);
+            (size_t) hostinfo->h_length);
 
     //encode the port
     peer->sockaddr.sin_port = htons(port);
@@ -200,11 +199,11 @@ void _fill_info(bt_info_t *info_t, be_node *node, ssize_t indent, char *key) {
 
         case BE_INT:
             if (!strcmp(key, "length"))
-                info_t->length = node->val.i;
+                info_t->length = (int) node->val.i;
             //            if (strcmp(key, ""))
             //                info_t->num_pieces  = node->val.i;
             if (!strcmp(key, "piece length"))
-                info_t->piece_length = node->val.i;
+                info_t->piece_length = (int) node->val.i;
             break;
 
         case BE_LIST:

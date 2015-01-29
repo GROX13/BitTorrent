@@ -167,7 +167,7 @@ void parse_args(bt_args_t *bt_args, int argc, char *argv[]) {
                 __parse_peer(bt_args->peers[n_peers], optarg);
                 break;
             case 'I':
-                bt_args->id = atoi(optarg);
+                bt_args->id = (unsigned int) atoi(optarg);
                 break;
             default:
                 fprintf(stderr, "ERROR: Unknown option '-%c'\n", ch);
@@ -195,7 +195,7 @@ void parse_args(bt_args_t *bt_args, int argc, char *argv[]) {
 /**
 *
 * */
-static int create_socket(char *ip_addr, unsigned short port) {
+int create_socket(char *ip_addr, unsigned short port) {
     int socket_desc;
     struct sockaddr_in server;
 
@@ -208,6 +208,14 @@ static int create_socket(char *ip_addr, unsigned short port) {
     server.sin_addr.s_addr = inet_addr(ip_addr);
     server.sin_family = AF_INET;
     server.sin_port = htons(port);
-    return 0;
+
+    //Connect to remote server
+    if (connect(socket_desc, (struct sockaddr *) &server, sizeof(server)) < 0) {
+        puts("connect error");
+        return 1;
+    }
+    puts("Connected");
+
+    return socket_desc;
 }
 
