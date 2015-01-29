@@ -48,7 +48,13 @@ int contact_tracker(bt_args_t * bt_args){
     long long leng;
     file = read_file(bt_args->torrent_file, &leng);
     puts(file);
-    printf("");
+    printf("%i\n", strlen(file));
+    puts(strstr(strstr(file, "info"), "d"));
+    char* hashed_info = malloc(20);
+    int len = strlen(strstr(strstr(file, "info"), "d"));
+    printf("len is %i\n", len);
+    SHA1(strstr(strstr(file, "info"), "d"),len, hashed_info);
+    puts(hashed_info);
 }
 
 void calc_id(char *ip, unsigned short port, char *id) {
