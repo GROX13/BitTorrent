@@ -60,9 +60,9 @@ void reverse(char *x, int begin, int end) {
 int contact_tracker(bt_args_t *bt_args) {
     printf("Starting contact tracker:\n");
     printf("Announce: %s\n", bt_args->bt_info->announce);
-    printf("Length: %l\n", bt_args->bt_info->length);
+    printf("Length: %d\n", bt_args->bt_info->length);
     printf("Name: %s\n", bt_args->bt_info->name);
-    printf("Number of pieces: %d\n", bt_args->bt_info->num_pieces);
+    printf("Number of pieces: %u\n", bt_args->bt_info->num_pieces);
     printf("Piece length: %d\n", bt_args->bt_info->piece_length);
 
     return 0;
