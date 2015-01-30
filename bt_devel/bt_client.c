@@ -48,11 +48,11 @@ int main(int argc, char *argv[]) {
     }
 
     bt_info_t *info_t = malloc(sizeof(bt_info_t));
+
     parse_bt_info(info_t, node);
     bt_args.bt_info = info_t;
-    contact_tracker(&bt_args);
 
-    generate_peer_id();
+    contact_tracker(&bt_args);
 
     //main client loop
     printf("Starting Main Loop\n");
@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
         //with new potentially useful peers
 
         //update peers,
-
+        break;
     }
 
     return 0;
