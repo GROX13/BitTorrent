@@ -88,26 +88,52 @@ int contact_tracker(bt_args_t *bt_args) {
 
     puts(new_announce);
 
+	char *requestToSend;
+    requestToSend = malloc(100);
+    puts(url_encode(bt_args->bt_info->announce));
+    sprintf(requestToSend, "GET /announce?info_hash=%s&peer_id=%s&port=%s"
+                    "&downloaded=0&left=0&event=started HTTP/1.0",
+            url_encode(hashed_info), url_encode(generate_peer_id()), url_encode(port));
+    printf("\n%s \nto send \n", requestToSend);
+
+	char *host;
+	host = malloc(strlen(new_announce)+6);
+	sprintf(host, "Host: %s", new_announce);
+
     CURL *curl;
-    CURLcode res;
-
-    curl = curl_easy_init();
-    if(curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, announce);
-        /* example.com is redirected, so we tell libcurl to follow redirection */
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-
-        /* Perform the request, res will get the return code */
-        res = curl_easy_perform(curl);
-        /* Check for errors */
-        if(res != CURLE_OK)
-            fprintf(stderr, "curl_easy_perform() failed: %s\n",
-                    curl_easy_strerror(res));
-
-        /* always cleanup */
-        curl_easy_cleanup(curl);
-    }
-
+	CURLcode res;
+	curl = curl_easy_init();
+  	if(curl) {
+    struct curl_slist *chunk = NULL;
+ 
+    /* Remove a header curl would otherwise add by itself */ 
+   	chunk = curl_slist_append(chunk, requestToSend);
+ 
+    /* Modify a header curl otherwise adds differently */ 
+ 	chunk = curl_slist_append(chunk, host);
+ 
+    /* Add a header with "blank" contents to the right of the colon. Note that
+       we're then using a semicolon in the string we pass to curl! */ 
+ //   chunk = curl_slist_append(chunk, "X-silly-header;");
+ 
+    /* set our custom set of headers */ 
+    res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+ 
+    curl_easy_setopt(curl, CURLOPT_URL, bt_args->bt_info->announce);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+ 
+    res = curl_easy_perform(curl);
+    /* Check for errors */ 
+    if(res != CURLE_OK)
+      fprintf(stderr, "curl_easy_perform() failed: %s\n",
+              curl_easy_strerror(res));
+ 
+    /* always cleanup */ 
+    curl_easy_cleanup(curl);
+ 
+    /* free the custom headers */ 
+    curl_slist_free_all(chunk);
+  }
 
    /* struct hostent *he;
     struct in_addr **addr_list;
@@ -123,7 +149,7 @@ int contact_tracker(bt_args_t *bt_args) {
         printf("%s ", inet_ntoa(*addr_list[i]));
     }
 
-    char *requestToSend;
+    
     int sock;
     struct sockaddr_in servAddr;
     struct sockaddr_in fromAddr;
@@ -132,7 +158,7 @@ int contact_tracker(bt_args_t *bt_args) {
 
     int portNum = 80;
     char data_recv[ECHOMAX];
-
+	char *requestToSend;
     requestToSend = malloc(100);
     puts(url_encode(bt_args->bt_info->announce));
     sprintf(requestToSend, "%s?info_hash=%s\n&peer_id=%s\n&port=%s"
