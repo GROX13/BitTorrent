@@ -10,12 +10,13 @@
 #include <sys/stat.h>
 #include <arpa/inet.h>
 
+#include <curl/curl.h>
 #include <openssl/sha.h> //hashing pieces
 
 #include "bencode.h"
 #include "bt_lib.h"
 #include "bt_setup.h"
-#include <curl/curl.h>
+
 #define ECHOMAX 255
 
 char *read_file(char *file, long long *len) {
