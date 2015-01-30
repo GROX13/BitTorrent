@@ -139,7 +139,7 @@ int contact_tracker(bt_args_t *bt_args) {
 	//Common behavior is for a downloader to try to listen on 
 	//port 6881 and if that port is taken try 6882, then 6883, etc. and give up after 6889.
 	int port = INIT_PORT;
-    sprintf(request_to_send, "%s/announce?info_hash=%s&peer_id=%s&port=%i"
+    sprintf(request_to_send, "%s?info_hash=%s&peer_id=%s&port=%i"
                     "&downloaded=0&left=0&event=started", bt_args->bt_info->announce,
             url_encode(hashed_info), url_encode(generate_peer_id()), port);
     
