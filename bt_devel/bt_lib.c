@@ -65,6 +65,16 @@ int contact_tracker(bt_args_t *bt_args) {
     printf("Number of pieces: %u\n", bt_args->bt_info->num_pieces);
     printf("Piece length: %d\n", bt_args->bt_info->piece_length);
 
+    char *file;
+    long long leng;
+    file = read_file(bt_args->torrent_file, &leng);
+
+    char *hashed_info = malloc(21);
+    int len = (int) strlen(strstr(strstr(file, "info"), "d"));
+    SHA1((unsigned char const *) strstr(strstr(file, "info"), "d"), (size_t) len, (unsigned char *) hashed_info);
+
+    int announce_len = (int) strlen(bt_args->bt_info->announce);
+
     return 0;
 }
 

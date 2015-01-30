@@ -6,7 +6,7 @@ LDLIBS = -lcurl
 
 SRC = bencode.c  bt_client.c bt_lib.c bt_setup.c
 OBJ = $(SRC:.c=.o)
-BIN = bt_client.out
+BIN = bt_client.x86_64
 
 all: $(BIN)
 
