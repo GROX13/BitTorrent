@@ -87,7 +87,8 @@ int contact_tracker(bt_args_t *bt_args) {
     strcpy(new_announce, (char *) strstr(announce, ":") + 3);
 
     puts(new_announce);
-    struct hostent *he;
+
+   /* struct hostent *he;
     struct in_addr **addr_list;
 
     if ((he = gethostbyname(new_announce)) == NULL) {
@@ -117,33 +118,33 @@ int contact_tracker(bt_args_t *bt_args) {
                     "\n&downloaded=0\n&left=0\n&event=started", bt_args->bt_info->announce,
             url_encode(hashed_info), url_encode(generate_peer_id()), url_encode(port));
     printf("\n%s \nto send \n", requestToSend);
-
+*/
     /* Create a datagram/UDP socket */
-    if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
+/*    if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
         printf("fail create socket");
         exit(1);
     }
-
-    memset(&servAddr, 0, sizeof(servAddr));    /* Zero out structure */
-    servAddr.sin_family = AF_INET;                 /* Internet addr family */
-    servAddr.sin_addr.s_addr = inet_addr(inet_ntoa(*addr_list[0]));
-    servAddr.sin_port = htons(portNum);     /* Server port */
+*/
+//    memset(&servAddr, 0, sizeof(servAddr));    /* Zero out structure */
+//   servAddr.sin_family = AF_INET;                 /* Internet addr family */
+//    servAddr.sin_addr.s_addr = inet_addr(inet_ntoa(*addr_list[0]));
+//    servAddr.sin_port = htons(portNum);     /* Server port */
 
 
     //send request to tracker server
-    if (send(sock, requestToSend, strlen(requestToSend), 0) != strlen(requestToSend)) {
+/*    if (send(sock, requestToSend, strlen(requestToSend), 0) != strlen(requestToSend)) {
         printf("fail send \n");
         exit(1);
     }
-
+*/
     /* Recv a response */
-    fromSize = sizeof(fromAddr);
+/*    fromSize = sizeof(fromAddr);
     if ((respStringLen = recvfrom(sock, data_recv, ECHOMAX, 0,
             (struct sockaddr *) &fromAddr, (socklen_t *) &fromSize)) != strlen(requestToSend)) {
         printf("fail to recv \n");
         exit(1);
     }
-
+*/
     return 0;
 }
 
