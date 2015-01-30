@@ -126,11 +126,12 @@ int contact_tracker(bt_args_t *bt_args) {
     char *file;
     long long leng;
     file = read_file(bt_args->torrent_file, &leng);
-    char *hashed_info = malloc(21);
-    int len = (int) strlen(strstr(strstr(file, "info"), "d"));
-    SHA1((unsigned char const *) strstr(strstr(file, "info"), "d"), (size_t) len, (unsigned char *) hashed_info);
+	char *new_file = malloc(strlen(file));
+	strncpy(new_file, file, strlen(file)-1);
 
-    int announce_len = (int) strlen(bt_args->bt_info->announce);
+    char *hashed_info = malloc(21);
+    int len = (int) strlen(strstr(strstr(new_file, "info"), "d"));
+    SHA1((unsigned char const *) strstr(strstr(new_file, "info"), "d"), (size_t) len, (unsigned char *) hashed_info);
 	
 	char *request_to_send;
     request_to_send = malloc(100);
