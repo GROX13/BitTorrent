@@ -1,6 +1,7 @@
 CC = gcc
 CPFLAGS = -g -Wall
 LDFLAGS = -lcrypto
+LDLIBS = -lcurl
 
 
 SRC = bencode.c  bt_client.c bt_lib.c bt_setup.c
@@ -10,7 +11,7 @@ BIN = bt_client.out
 all: $(BIN)
 
 $(BIN): $(OBJ)
-	$(CC) $(CPFLAGS) -o $(BIN) $(OBJ) $(LDFLAGS)
+	$(CC) $(CPFLAGS) -o $(BIN) $(OBJ) $(LDFLAGS) $(LDLIBS)
 
 
 %.o:%.c
