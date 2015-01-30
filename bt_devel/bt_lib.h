@@ -26,10 +26,10 @@
 #define MAX_CONNECTIONS 5
 
 /*initial port to try and open a listen socket on*/
-#define INIT_PORT 6667
+#define INIT_PORT 6881
 
 /*max port to try and open a listen socket on*/
-#define MAX_PORT 6699
+#define MAX_PORT 6889
 
 /*Different BitTorrent Message Types*/
 #define BT_CHOKE 0
