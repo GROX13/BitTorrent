@@ -144,7 +144,7 @@ int contact_tracker(bt_args_t *bt_args) {
             url_encode(hashed_info), url_encode(generate_peer_id()), port);
     
 	printf("Request URL for tracker: %s\n", request_to_send);
-	send_http_request(request_to_send);
+	puts(send_http_request(request_to_send));
     return 0;	
 }
 
