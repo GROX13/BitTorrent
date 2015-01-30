@@ -251,7 +251,9 @@ char *generate_peer_id() {
     _remove_char(c_time_string, ' ');
     _remove_char(c_time_string, ':');
 
-    char result[21] = CONS_RAND;
+    char *result = malloc(21);
+    memset(result, '\0', 21);
+    memcpy(result, CONS_RAND, 20);
 
     memcpy(result, c_time_string, strlen(c_time_string) - 1);
 
