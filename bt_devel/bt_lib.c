@@ -57,62 +57,61 @@ void reverse(char *x, int begin, int end) {
     reverse(x, ++begin, --end);
 }
 
-struct my_string{
-	char* memory;
-	size_t size;
+struct my_string {
+    char *memory;
+    size_t size;
 };
 
-static size_t my_string_append(void *contents, size_t size, size_t nmemb, void *userp)
-{
-  size_t realsize = size * nmemb;
-  struct my_string *mem = (struct my_string *)userp;
- 
-  mem->memory = realloc(mem->memory, mem->size + realsize + 1);
- 
-  memcpy(&(mem->memory[mem->size]), contents, realsize);
-  mem->size += realsize;
-  mem->memory[mem->size] = 0;
- 
-  return realsize;
+static size_t my_string_append(void *contents, size_t size, size_t nmemb, void *userp) {
+    size_t realsize = size * nmemb;
+    struct my_string *mem = (struct my_string *) userp;
+
+    mem->memory = realloc(mem->memory, mem->size + realsize + 1);
+
+    memcpy(&(mem->memory[mem->size]), contents, realsize);
+    mem->size += realsize;
+    mem->memory[mem->size] = 0;
+
+    return realsize;
 }
 
-char* send_http_request(char* url){
-	CURL *curl_handle;
-	CURLcode res;
-	struct my_string header;
-	struct my_string body;
-	header.memory = malloc(1);
-	header.size = 0;
-	body.memory = malloc(1);
-	body.size = 0;
-	/* init the curl session */ 
-	curl_handle = curl_easy_init();
-	// curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, args);
-	curl_easy_setopt(curl_handle, CURLOPT_HTTPGET, 1);
-	/* specify URL to get */ 
-	curl_easy_setopt(curl_handle, CURLOPT_URL, url);
-	/* send all data to this function  */ 
-	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, my_string_append);
-	/* we pass our 'chunk' struct to the callback function */ 
-	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&body);
-	curl_easy_setopt(curl_handle, CURLOPT_HEADERDATA, (void *)&header);
-	/* some servers don't like requests that are made without a user-agent
-	 field, so we provide one */ 
-	curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
-	/* get it! */ 
-	res = curl_easy_perform(curl_handle);
-	/* check for errors */ 
-	if(res != CURLE_OK) {
-		fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-		return NULL;
-	}else{
-		if(memcmp(body.memory, "d8:", 3) != 0){
-			printf("error\n%s\n", body.memory);
-			return NULL;
-		}else{
-			return body.memory;
-		}
-	}
+char *send_http_request(char *url) {
+    CURL *curl_handle;
+    CURLcode res;
+    struct my_string header;
+    struct my_string body;
+    header.memory = malloc(1);
+    header.size = 0;
+    body.memory = malloc(1);
+    body.size = 0;
+    /* init the curl session */
+    curl_handle = curl_easy_init();
+    // curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, args);
+    curl_easy_setopt(curl_handle, CURLOPT_HTTPGET, 1);
+    /* specify URL to get */
+    curl_easy_setopt(curl_handle, CURLOPT_URL, url);
+    /* send all data to this function  */
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, my_string_append);
+    /* we pass our 'chunk' struct to the callback function */
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &body);
+    curl_easy_setopt(curl_handle, CURLOPT_HEADERDATA, (void *) &header);
+    /* some servers don't like requests that are made without a user-agent
+     field, so we provide one */
+    curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+    /* get it! */
+    res = curl_easy_perform(curl_handle);
+    /* check for errors */
+    if (res != CURLE_OK) {
+        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        return NULL;
+    } else {
+        if (memcmp(body.memory, "d8:", 3) != 0) {
+            printf("error\n%s\n", body.memory);
+            return NULL;
+        } else {
+            return body.memory;
+        }
+    }
 }
 
 int contact_tracker(bt_args_t *bt_args) {
@@ -126,27 +125,43 @@ int contact_tracker(bt_args_t *bt_args) {
     char *file;
     long long leng;
     file = read_file(bt_args->torrent_file, &leng);
-	char *new_file = malloc(strlen(file));
-	strncpy(new_file, file, strlen(file)-2);
+    char *new_file = malloc(strlen(file));
+    strncpy(new_file, file, strlen(file) - 2);
 
     char *hashed_info = malloc(21);
     int len = (int) strlen(strstr(strstr(new_file, "info"), "d"));
-    SHA1((unsigned char const *) strstr(strstr(new_file, "info"), "d"), (size_t) len, (unsigned char *) hashed_info);
-	
-	char *request_to_send;
-    request_to_send = malloc(100);
-	
-	//aq unda iyos: Port number this peer is listening on. 
-	//Common behavior is for a downloader to try to listen on 
-	//port 6881 and if that port is taken try 6882, then 6883, etc. and give up after 6889.
-	int port = INIT_PORT;
-    sprintf(request_to_send, "%s?info_hash=%s&peer_id=%s&port=%i"
-                    "&downloaded=0&left=0&event=started", bt_args->bt_info->announce,
-            url_encode(hashed_info), url_encode(generate_peer_id()), port);
-    
-	printf("Request URL for tracker: %s\n", request_to_send);
-	puts(send_http_request(request_to_send));
-    return 0;	
+    char *inf = strstr(strstr(new_file, "info"), "d");
+    inf = "http://torrent.ubuntu.com:6969/announce?"
+            "info_hash=%B4%15%C9%13d%3E%5F%F4%9F%E3%7D0K%BB%5En%11%ADQ%01"
+            "&peer_id=%2DCD0303%2Df%168%A7%B6%FD%8Bi%98%CDm%02"
+            "&port=2706"
+            "&key=UAP6DIVK"
+            "&event=stopped"
+            "&uploaded=0"
+            "&downloaded=4472832"
+            "&left=1162412032"
+            "&compact=1"
+            "&numwant=100";
+//    SHA1((unsigned char const *) inf, (size_t) len, (unsigned char *) hashed_info);
+//
+//    char *request_to_send;
+//    request_to_send = malloc(100);
+//
+//    //aq unda iyos: Port number this peer is listening on.
+//    //Common behavior is for a downloader to try to listen on
+//    //port 6881 and if that port is taken try 6882, then 6883, etc. and give up after 6889.
+//    int port = INIT_PORT;
+//    sprintf(request_to_send, "%s?info_hash=%s&peer_id=%s&port=%i"
+//                    "&downloaded=0&left=0&event=started", bt_args->bt_info->announce,
+//            url_encode(hashed_info), url_encode(generate_peer_id()), port);
+//
+//    printf("Request URL for tracker: %s\n", request_to_send);
+//    puts(send_http_request(request_to_send));
+    char * res = send_http_request(inf);
+    if (res) {
+        puts(res);
+    }
+    return 0;
 }
 
 void calc_id(char *ip, unsigned short port, char *id) {
@@ -247,7 +262,7 @@ int _fill_info(bt_info_t *info_t, be_node *node, ssize_t indent, char *key) {
             if (!strcmp(key, "length"))
                 info_t->length = (int) node->val.i;
             if (!strcmp(key, "pieces"))
-            	info_t->num_pieces  = (int) node->val.i;
+                info_t->num_pieces = (int) node->val.i;
             if (!strcmp(key, "piece length"))
                 info_t->piece_length = (int) node->val.i;
 
