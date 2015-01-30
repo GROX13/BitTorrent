@@ -74,8 +74,20 @@ int contact_tracker(bt_args_t *bt_args) {
     SHA1((unsigned char const *) strstr(strstr(file, "info"), "d"), (size_t) len, (unsigned char *) hashed_info);
 
     int announce_len = (int) strlen(bt_args->bt_info->announce);
+	
+	char *request_to_send;
+    request_to_send = malloc(100);
 
-    return 0;
+	//aq unda iyos: Port number this peer is listening on. 
+	//Common behavior is for a downloader to try to listen on 
+	//port 6881 and if that port is taken try 6882, then 6883, etc. and give up after 6889.
+	char* port = "6969";
+    sprintf(request_to_send, "%s/announce?info_hash=%s&peer_id=%s&port=%s"
+                    "&downloaded=0&left=0&event=started", bt_args->bt_info->announce,
+            url_encode(hashed_info), url_encode(generate_peer_id()), port);
+    
+	printf("Request URL for tracker: %s\n", request_to_send);
+    return 0;	
 }
 
 void calc_id(char *ip, unsigned short port, char *id) {
@@ -175,8 +187,8 @@ int _fill_info(bt_info_t *info_t, be_node *node, ssize_t indent, char *key) {
         case BE_INT:
             if (!strcmp(key, "length"))
                 info_t->length = (int) node->val.i;
-            //            if (strcmp(key, ""))
-            //                info_t->num_pieces  = node->val.i;
+            if (!strcmp(key, "pieces"))
+            	info_t->num_pieces  = (int) node->val.i;
             if (!strcmp(key, "piece length"))
                 info_t->piece_length = (int) node->val.i;
 
