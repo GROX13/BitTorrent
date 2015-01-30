@@ -25,10 +25,10 @@
 
 /*enumerate for the different types of ben_node*/
 typedef enum {
-	BE_STR,
-	BE_INT,
-	BE_LIST,
-	BE_DICT,
+    BE_STR,
+    BE_INT,
+    BE_LIST,
+    BE_DICT,
 } be_type;
 
 /*predefined for compiler checks*/
@@ -40,29 +40,32 @@ struct be_node;
  */
 
 typedef struct be_dict {
-  char *key; //key of a dict
-  struct be_node *val; //val of a dict
+    char *key; //key of a dict
+    struct be_node *val; //val of a dict
 } be_dict;
 
 typedef struct be_node {
-  be_type type; //type of the node, e.g., a string or a list
-  union { //node can store all of these types
-    char *s; // a stirng
-    long long i; // a long long integer
-    struct be_node **l; //a pointer to an array of be_nodes representing a list
-    struct be_dict *d; //a dictionary 
-  } val; //this union is stored in val
+    be_type type; //type of the node, e.g., a string or a list
+    union { //node can store all of these types
+        char *s; // a stirng
+        long long i; // a long long integer
+        struct be_node **l; //a pointer to an array of be_nodes representing a list
+        struct be_dict *d; //a dictionary
+    } val; //this union is stored in val
 } be_node;
 
 
 long long be_str_len(be_node *node);
 
 be_node *be_decode(const char *bencode);
+
 be_node *be_decoden(const char *bencode, long long bencode_len);
+
 void be_free(be_node *node);
 
 //dump out the be_node encoding starting from the top
 void be_dump(be_node *node);
 
-be_node * load_be_node(char * torrent_file);
+be_node *load_be_node(char *torrent_file);
+
 #endif

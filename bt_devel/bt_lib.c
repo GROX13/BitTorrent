@@ -108,18 +108,18 @@ int contact_tracker(bt_args_t *bt_args) {
     int fromSize;
     int respStringLen;
 
-    int portNum =80;
+    int portNum = 80;
     char data_recv[ECHOMAX];
 
     requestToSend = malloc(100);
     puts(url_encode(bt_args->bt_info->announce));
     sprintf(requestToSend, "%s?info_hash=%s\n&peer_id=%s\n&port=%s"
-            "\n&downloaded=0\n&left=0\n&event=started",bt_args->bt_info->announce, 
-            url_encode(hashed_info),url_encode(generate_peer_id()),url_encode(port));
-    printf("\n%s \nto send \n",  requestToSend);
+                    "\n&downloaded=0\n&left=0\n&event=started", bt_args->bt_info->announce,
+            url_encode(hashed_info), url_encode(generate_peer_id()), url_encode(port));
+    printf("\n%s \nto send \n", requestToSend);
 
     /* Create a datagram/UDP socket */
-    if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0){
+    if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
         printf("fail create socket");
         exit(1);
     }
@@ -127,11 +127,11 @@ int contact_tracker(bt_args_t *bt_args) {
     memset(&servAddr, 0, sizeof(servAddr));    /* Zero out structure */
     servAddr.sin_family = AF_INET;                 /* Internet addr family */
     servAddr.sin_addr.s_addr = inet_addr(inet_ntoa(*addr_list[0]));
-    servAddr.sin_port   = htons(portNum);     /* Server port */
+    servAddr.sin_port = htons(portNum);     /* Server port */
 
-    
+
     //send request to tracker server
-    if (send(sock, requestToSend, strlen(requestToSend), 0) != strlen(requestToSend)){
+    if (send(sock, requestToSend, strlen(requestToSend), 0) != strlen(requestToSend)) {
         printf("fail send \n");
         exit(1);
     }
@@ -139,12 +139,12 @@ int contact_tracker(bt_args_t *bt_args) {
     /* Recv a response */
     fromSize = sizeof(fromAddr);
     if ((respStringLen = recvfrom(sock, data_recv, ECHOMAX, 0,
-            (struct sockaddr *) &fromAddr, (socklen_t *) &fromSize)) != strlen(requestToSend)){
+            (struct sockaddr *) &fromAddr, (socklen_t *) &fromSize)) != strlen(requestToSend)) {
         printf("fail to recv \n");
         exit(1);
     }
 
-    return 0;    
+    return 0;
 }
 
 void calc_id(char *ip, unsigned short port, char *id) {
