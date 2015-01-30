@@ -101,40 +101,40 @@ int contact_tracker(bt_args_t *bt_args) {
 	host = malloc(strlen(new_announce)+6);
 	sprintf(host, "Host: %s", new_announce);
 
-    CURL *curl;
-	CURLcode res;
-	curl = curl_easy_init();
-  	if(curl) {
-    struct curl_slist *chunk = NULL;
- 
-    /* Remove a header curl would otherwise add by itself */ 
-   	chunk = curl_slist_append(chunk, requestToSend);
- 
-    /* Modify a header curl otherwise adds differently */ 
- 	chunk = curl_slist_append(chunk, host);
- 
-    /* Add a header with "blank" contents to the right of the colon. Note that
-       we're then using a semicolon in the string we pass to curl! */ 
- //   chunk = curl_slist_append(chunk, "X-silly-header;");
- 
-    /* set our custom set of headers */ 
-    res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
- 
-    curl_easy_setopt(curl, CURLOPT_URL, bt_args->bt_info->announce);
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
- 
-    res = curl_easy_perform(curl);
-    /* Check for errors */ 
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
- 
-    /* always cleanup */ 
-    curl_easy_cleanup(curl);
- 
-    /* free the custom headers */ 
-    curl_slist_free_all(chunk);
-  }
+//    CURL *curl;
+//	CURLcode res;
+//	curl = curl_easy_init();
+//  	if(curl) {
+//    struct curl_slist *chunk = NULL;
+//
+//    /* Remove a header curl would otherwise add by itself */
+//   	chunk = curl_slist_append(chunk, requestToSend);
+//
+//    /* Modify a header curl otherwise adds differently */
+// 	chunk = curl_slist_append(chunk, host);
+//
+//    /* Add a header with "blank" contents to the right of the colon. Note that
+//       we're then using a semicolon in the string we pass to curl! */
+// //   chunk = curl_slist_append(chunk, "X-silly-header;");
+//
+//    /* set our custom set of headers */
+//    res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+//
+//    curl_easy_setopt(curl, CURLOPT_URL, bt_args->bt_info->announce);
+//    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+//
+//    res = curl_easy_perform(curl);
+//    /* Check for errors */
+//    if(res != CURLE_OK)
+//      fprintf(stderr, "curl_easy_perform() failed: %s\n",
+//              curl_easy_strerror(res));
+//
+//    /* always cleanup */
+//    curl_easy_cleanup(curl);
+//
+//    /* free the custom headers */
+//    curl_slist_free_all(chunk);
+//  }
 
    /* struct hostent *he;
     struct in_addr **addr_list;
