@@ -136,7 +136,6 @@ int contact_tracker(bt_args_t *bt_args) {
             "&peer_id=%2DCD0303%2Df%168%A7%B6%FD%8Bi%98%CDm%02"
             "&port=2706"
             "&key=UAP6DIVK"
-            "&event=stopped"
             "&uploaded=0"
             "&downloaded=4472832"
             "&left=1162412032"
