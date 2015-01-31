@@ -310,6 +310,63 @@ char *url_decode(char *str) {
     return buf;
 }
 
-void decode_tracker_info(char *info) {
+int _fill_peer_info(bt_peer *peer, be_node *node, ssize_t indent, char *key) {
+    size_t i;
 
+    indent = abs((int) indent);
+
+    switch (node->type) {
+        case BE_STR:
+            if (!strcmp(key, "tracker id"))
+                strcpy(peer->tracker_id, node->val.s);
+
+            break;
+
+        case BE_INT:
+            if (!strcmp(key, "complete"))
+                peer->complete = (int) node->val.i;
+            if (!strcmp(key, "incomplete"))
+                peer->incomplete = (int) node->val.i;
+            if (!strcmp(key, "interval"))
+                peer->interval = (int) node->val.i;
+
+            break;
+
+        case BE_LIST:
+            for (i = 0; node->val.l[i]; ++i)
+                _fill_peer_info(peer, node->val.l[i], indent + 1, "");
+
+            break;
+
+        case BE_DICT:
+            for (i = 0; node->val.d[i].val; ++i)
+                _fill_peer_info(peer, node->val.d[i].val, -(indent + 1), node->val.d[i].key);
+
+            break;
+    }
+    return 1;
 }
+
+/**
+* Returns 1 in case sucess
+*/
+int parse_info(bt_peer *peer, be_node *node) {
+    return _fill_peer_info(peer, node, 0, "");
+}
+
+
+void decode_tracker_info(char *info) {
+	be_node *node;
+	node = load_node(info);
+
+    be_dump(node);
+	
+	bt_peer *peer = malloc(sizeof(bt_peer));
+
+    parse_info(peer, node);
+    printf("complete: %i\n", peer->complete);
+	printf("incomplete: %i\n", peer->incomplete);
+	printf("interval: %i\n", peer->interval);
+	//puts((char*)(peer->peer_hashes));
+	//puts(info);
+}	

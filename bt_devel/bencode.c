@@ -300,6 +300,12 @@ char *_read_file(char *file, long long *len) {
     return ret;
 }
 
+be_node *load_node(char *torf_d){
+	be_node *node;
+	node = be_decode(torf_d);
+	return node;
+}	
+
 be_node *load_be_node(char *torf) {
     char *torf_d; //stores the raw data of the torrent file
     long long torf_s;

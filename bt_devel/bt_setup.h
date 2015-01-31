@@ -11,6 +11,14 @@
 #include "bencode.h"
 
 
+typedef struct bt_peer{
+    char tracker_id[FILE_NAME_MAX]; 
+    int complete; 
+    int incomplete; 
+    int interval; 
+    char **peer_hashes; 
+} bt_peer;
+
 /**
 * __parse_peer(peer_t * peer, char peer_st) -> void
 *

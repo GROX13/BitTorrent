@@ -67,5 +67,5 @@ void be_free(be_node *node);
 void be_dump(be_node *node);
 
 be_node *load_be_node(char *torrent_file);
-
+be_node *load_node(char *torf_d);
 #endif
