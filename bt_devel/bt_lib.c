@@ -129,14 +129,21 @@ int contact_tracker(bt_args_t *bt_args) {
 //    strncpy(new_file, file, strlen(file) - 2);
     memcpy(new_file, file, strlen(file) - 2);
 
-    char *hashed_info = malloc(21);
-    int len = (int) strlen(strstr(strstr(new_file, "info"), "d"));
+    char *hashed_info = malloc(2048);
+    
+    // int len = (int) strlen(strstr(strstr(new_file, "info"), "d"));
     char *inf = strstr(strstr(new_file, "info"), "d");
+    size_t len = (size_t) strlen(inf);
+    printf("Before: %d\n", len);
+    len = (size_t) be_str_len(be_decode(inf));
+    be_dump(be_decode(inf));
+    printf("After: %d\n", len);
+    len = 44589;
 
-    SHA1((unsigned char const *) inf, (size_t) len, (unsigned char *) hashed_info);
+    SHA1((unsigned char const *) inf, len, (unsigned char *) hashed_info);
 
     char *request_to_send;
-    request_to_send = malloc(1024);
+    request_to_send = malloc(2048);
 
 
     //aq unda iyos: Port number this peer is listening on.
