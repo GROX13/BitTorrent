@@ -19,7 +19,7 @@
 
 #define ECHOMAX 255
 
-char *read_file(char *file, long long *len) {
+char *_read(char *file, long long *len) {
     struct stat st;
     char *ret = NULL;
     FILE *fp;
@@ -114,22 +114,51 @@ char *send_http_request(char *url) {
     }
 }
 
-int contact_tracker(bt_args_t *bt_args) {
-    printf("Starting contact tracker:\n");
-    printf("Announce: %s\n", bt_args->bt_info->announce);
-    printf("Length: %d\n", bt_args->bt_info->length);
-    printf("Name: %s\n", bt_args->bt_info->name);
-    printf("Number of pieces: %u\n", bt_args->bt_info->num_pieces);
-    printf("Piece length: %d\n", bt_args->bt_info->piece_length);
+void _be_find(be_node *node, be_node *result, char *search) {
+    size_t i;
 
-    char *file;
+    switch (node->type) {
+        case BE_STR:
+
+            break;
+
+        case BE_INT:
+
+            break;
+
+        case BE_LIST:
+
+            for (i = 0; node->val.l[i]; ++i)
+                _be_find(node->val.l[i], result, search);
+
+            break;
+
+        case BE_DICT:
+
+            for (i = 0; node->val.d[i].val; ++i)
+                _be_find(node->val.d[i].val, result, search);
+
+            break;
+    }
+}
+
+int contact_tracker(bt_args_t *bt_args) {
+//    printf("Starting contact tracker:\n");
+//    printf("Announce: %s\n", bt_args->bt_info->announce);
+//    printf("Length: %d\n", bt_args->bt_info->length);
+//    printf("Name: %s\n", bt_args->bt_info->name);
+//    printf("Number of pieces: %u\n", bt_args->bt_info->num_pieces);
+//    printf("Piece length: %d\n", bt_args->bt_info->piece_length);
+
+    char *new_file;
     long long leng;
-    file = read_file(bt_args->torrent_file, &leng);
-    char *new_file = malloc(strlen(file));
+    new_file = _read(bt_args->torrent_file, &leng);
+//    char *new_file = malloc(strlen(file));
 //    strncpy(new_file, file, strlen(file) - 2);
-    memcpy(new_file, file, strlen(file) - 2);
+//    memcpy(new_file, file, strlen(file) - 2);
 
     char *hashed_info = malloc(2048);
+
     
     // int len = (int) strlen(strstr(strstr(new_file, "info"), "d"));
     char *inf = strstr(strstr(new_file, "info"), "d");
@@ -138,12 +167,20 @@ int contact_tracker(bt_args_t *bt_args) {
     len = (size_t) be_str_len(be_decode(inf));
     be_dump(be_decode(inf));
     printf("After: %d\n", len);
-    len = 44589;
+
+    be_node *result = malloc(sizeof(be_node));
+    _be_find(bt_args->bt_info, result, "info");
+    len = (size_t) be_str_len(result);
+    be_dump(be_decode(inf));
+    printf("After after: %d\n", len);
+
+    len = 44478;
 
     SHA1((unsigned char const *) inf, len, (unsigned char *) hashed_info);
 
     char *request_to_send;
     request_to_send = malloc(2048);
+    memset(request_to_send, '\0', 2048);
 
 
     //aq unda iyos: Port number this peer is listening on.
@@ -298,6 +335,27 @@ void print_peer(peer_t *peer) {
         printf("\n");
     }
 }
+
+/* check status on peers, maybe they went offline? */
+int check_peer(peer_t *peer) {
+    return 0;
+}
+
+/*check if peers want to send me something*/
+int poll_peers(bt_args_t *bt_args) {
+    return 0;
+}
+
+/*send a msg to a peer*/
+int send_to_peer(peer_t *peer, bt_msg_t *msg) {
+    return 0;
+}
+
+/*read a msg from a peer and store it in msg*/
+int read_from_peer(peer_t *peer, bt_msg_t *msg) {
+    return 0;
+}
+
 
 int _fill_info(bt_info_t *info_t, be_node *node, ssize_t indent, char *key) {
     size_t i;

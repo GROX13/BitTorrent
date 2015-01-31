@@ -186,7 +186,7 @@ be_node *be_decoden(const char *data, long long len) {
 }
 
 be_node *be_decode(const char *data) {
-    return be_decoden(data, strlen(data));
+    return be_decoden(data, (long long int) strlen(data));
 }
 
 inline void _be_free_str(char *str) {
@@ -234,7 +234,7 @@ void _be_dump(be_node *node, ssize_t indent) {
     size_t i;
 
     _be_dump_indent(indent);
-    indent = abs(indent);
+    indent = abs((int) indent);
 
     switch (node->type) {
         case BE_STR:
@@ -289,11 +289,11 @@ char *_read_file(char *file, long long *len) {
     if (!fp)
         return ret;
 
-    ret = malloc(*len);
+    ret = malloc((size_t) *len);
     if (!ret)
         return NULL;
 
-    fread(ret, 1, *len, fp);
+    fread(ret, 1, (size_t) *len, fp);
 
     fclose(fp);
 
