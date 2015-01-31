@@ -320,6 +320,9 @@ int _fill_peer_info(bt_peer *peer, be_node *node, ssize_t indent, char *key) {
             if (!strcmp(key, "tracker id"))
                 strcpy(peer->tracker_id, node->val.s);
 
+			if (!strcmp(key, "peers"))
+                strcpy(peer->peer_hashes, node->val.s);
+
             break;
 
         case BE_INT:
@@ -367,6 +370,27 @@ void decode_tracker_info(char *info) {
     printf("complete: %i\n", peer->complete);
 	printf("incomplete: %i\n", peer->incomplete);
 	printf("interval: %i\n", peer->interval);
-	//puts((char*)(peer->peer_hashes));
-	//puts(info);
+	printf("peers: %s\n",peer->peer_hashes);
+	int num_peers = strlen(peer->peer_hashes)/6;
+	printf("peers amount: %i\n", num_peers);
+	
+	int i;
+	int count = 0;
+	
+	for (i = 0; i < num_peers; i++){
+		int ip;	
+		short port;
+		ip = (int)((char*)peer->peer_hashes + count);
+		count = count + 4;
+ 		printf("ip: %i\n", ip);
+		port = (short)((char*)peer->peer_hashes + count);
+		count = count + 2;
+		printf("port: %hu\n", port);
+		//IP stringad 
+    	struct in_addr ip_addr;
+    	ip_addr.s_addr = ip;
+   		printf("The IP address is %s\n", inet_ntoa(ip_addr));
+	}
+	
+	
 }	

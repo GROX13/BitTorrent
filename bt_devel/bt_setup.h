@@ -16,7 +16,7 @@ typedef struct bt_peer{
     int complete; 
     int incomplete; 
     int interval; 
-    char **peer_hashes; 
+    char peer_hashes[1024]; 
 } bt_peer;
 
 /**
