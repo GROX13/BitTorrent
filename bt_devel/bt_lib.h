@@ -23,7 +23,7 @@
 #define FILE_NAME_MAX 1024
 
 /*Maxium number of connections*/
-#define MAX_CONNECTIONS 5
+#define MAX_CONNECTIONS 2048
 
 /*initial port to try and open a listen socket on*/
 #define INIT_PORT 6881

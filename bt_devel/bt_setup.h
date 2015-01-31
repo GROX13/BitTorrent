@@ -41,4 +41,6 @@ char *url_encode(char *str);
 
 char *url_decode(char *str);
 
+void decode_tracker_info(char *info);
+
 #endif

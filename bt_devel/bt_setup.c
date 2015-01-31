@@ -309,3 +309,7 @@ char *url_decode(char *str) {
     *pbuf = '\0';
     return buf;
 }
+
+void decode_tracker_info(char *info) {
+
+}

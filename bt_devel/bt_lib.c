@@ -180,6 +180,7 @@ int contact_tracker(bt_args_t *bt_args) {
     char * res = send_http_request(request_to_send);
     if (res) {
         puts(res);
+        decode_tracker_info(res);
     }
     return 0;
 }
