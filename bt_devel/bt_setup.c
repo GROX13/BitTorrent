@@ -386,6 +386,10 @@ void decode_tracker_info(char *info) {
 		port = (short)((char*)peer->peer_hashes + count);
 		count = count + 2;
 		printf("port: %hu\n", port);
+		//IP stringad 
+    	struct in_addr ip_addr;
+    	ip_addr.s_addr = ip;
+   		printf("The IP address is %s\n", inet_ntoa(ip_addr));
 	}
 	
 	
