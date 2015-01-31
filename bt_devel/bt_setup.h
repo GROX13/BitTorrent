@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "bt_setup.h"
 #include "bt_lib.h"
@@ -40,6 +41,17 @@ void usage(FILE *file);
 **/
 
 void parse_args(bt_args_t *bt_args, int argc, char **argv);
+
+/**
+* read_file(char *file, long long *len) -> char *
+*
+* parse the torrent file and return it's 
+* representation as a char array.
+* 
+* ERRORS: Will exit on various errors
+*
+**/
+char *read_file(char *file, long long *len);
 
 int create_socket(char *ip_addr, unsigned short port);
 

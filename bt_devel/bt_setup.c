@@ -394,3 +394,32 @@ void decode_tracker_info(char *info) {
 	
 	
 }	
+
+/**
+*
+**/
+char *read_file(char *file, long long *len) {
+    struct stat st;
+    char *ret = NULL;
+    FILE *fp;
+
+    if (stat(file, &st)) {
+        return ret;
+    }
+    *len = st.st_size;
+
+    fp = fopen(file, "r");
+    if (!fp)
+        return ret;
+
+    ret = malloc((size_t) *len);
+    if (!ret)
+        return NULL;
+
+    fread(ret, 1, (size_t) *len, fp);
+
+    fclose(fp);
+
+    return ret;
+}
+

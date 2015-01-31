@@ -85,8 +85,6 @@ typedef struct {
     /*set once torrent is parse*/
     bt_info_t *bt_info; //the parsed info for this torrent
 
-    //edited by us 
-    char *info_hash; // info dictionary hash
 } bt_args_t;
 
 

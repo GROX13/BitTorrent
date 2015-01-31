@@ -19,31 +19,6 @@
 
 #define ECHOMAX 255
 
-char *_read(char *file, long long *len) {
-    struct stat st;
-    char *ret = NULL;
-    FILE *fp;
-
-    if (stat(file, &st)) {
-        return ret;
-    }
-    *len = st.st_size;
-
-    fp = fopen(file, "r");
-    if (!fp)
-        return ret;
-
-    ret = malloc((size_t) *len);
-    if (!ret)
-        return NULL;
-
-    fread(ret, 1, (size_t) *len, fp);
-
-    fclose(fp);
-
-    return ret;
-}
-
 void reverse(char *x, int begin, int end) {
     char c;
 
@@ -152,7 +127,7 @@ int contact_tracker(bt_args_t *bt_args) {
 
     char *new_file;
     long long leng;
-    new_file = _read(bt_args->torrent_file, &leng);
+    new_file = read_file(bt_args->torrent_file, &leng);
 //    char *new_file = malloc(strlen(file));
 //    strncpy(new_file, file, strlen(file) - 2);
 //    memcpy(new_file, file, strlen(file) - 2);
@@ -379,10 +354,7 @@ int _fill_info(bt_info_t *info_t, be_node *node, ssize_t indent, char *key) {
                 info_t->length = (int) node->val.i;
                 break;
             }
-            if (!strcmp(key, "pieces")) {
-                info_t->num_pieces = (int) node->val.i;
-                break;
-            }
+    
             if (!strcmp(key, "piece length"))
                 info_t->piece_length = (int) node->val.i;
 
@@ -396,7 +368,7 @@ int _fill_info(bt_info_t *info_t, be_node *node, ssize_t indent, char *key) {
 
         case BE_DICT:
            if (strcmp(key, "info") == 0) 
-               printf("_____%d\n", be_str_len(node->val.d[i].val));
+               printf("_____%d\n", be_str_len(node));
             for (i = 0; node->val.d[i].val; ++i)
                 _fill_info(info_t, node->val.d[i].val, -(indent + 1), node->val.d[i].key);
 
@@ -406,9 +378,36 @@ int _fill_info(bt_info_t *info_t, be_node *node, ssize_t indent, char *key) {
 }
 
 /**
-* Returns 1 in case sucess
+* parse_bt_info(bt_info_t *bt_info, be_node *node) -> int
+*
+* Returns 1 in case sucess, 
 */
 int parse_bt_info(bt_info_t *bt_info, be_node *node) {
+    char *new_file;
+    long long leng;
+    new_file = read_file(bt_args->torrent_file, &leng);
+
+    char *hashed_info = malloc(25);
+    memset(hashed_info, '\0', 25);
+
+    char *inf = strstr(strstr(new_file, "info"), "d");
+    
+    size_t len = (size_t) strlen(inf);
+    printf("Before: %d\n", len);
+    len = (size_t) be_str_len(be_decode(inf));
+    be_dump(be_decode(inf));
+    printf("After: %d\n", len);
+
+    be_node *result = malloc(sizeof(be_node));
+    _be_find(bt_args->bt_info, result, "info");
+    len = (size_t) be_str_len(result);
+    be_dump(be_decode(inf));
+    printf("After after: %d\n", len);
+
+    len = 44478;
+
+    SHA1((unsigned char const *) inf, len, (unsigned char *) hashed_info);
+
     return _fill_info(bt_info, node, 0, "");
 }
 
