@@ -364,8 +364,10 @@ int _fill_info(bt_info_t *info_t, be_node *node, ssize_t indent, char *key) {
 
     switch (node->type) {
         case BE_STR:
-            if (!strcmp(key, "announce"))
+            if (!strcmp(key, "announce")) {
                 strcpy(info_t->announce, node->val.s);
+                break;
+            }
 
             if (!strcmp(key, "name"))
                 strcpy(info_t->name, node->val.s);
@@ -373,10 +375,14 @@ int _fill_info(bt_info_t *info_t, be_node *node, ssize_t indent, char *key) {
             break;
 
         case BE_INT:
-            if (!strcmp(key, "length"))
+            if (!strcmp(key, "length")) {
                 info_t->length = (int) node->val.i;
-            if (!strcmp(key, "pieces"))
+                break;
+            }
+            if (!strcmp(key, "pieces")) {
                 info_t->num_pieces = (int) node->val.i;
+                break;
+            }
             if (!strcmp(key, "piece length"))
                 info_t->piece_length = (int) node->val.i;
 
@@ -389,6 +395,8 @@ int _fill_info(bt_info_t *info_t, be_node *node, ssize_t indent, char *key) {
             break;
 
         case BE_DICT:
+           if (strcmp(key, "info") == 0) 
+               printf("_____%d\n", be_str_len(node->val.d[i].val));
             for (i = 0; node->val.d[i].val; ++i)
                 _fill_info(info_t, node->val.d[i].val, -(indent + 1), node->val.d[i].key);
 
