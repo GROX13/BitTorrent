@@ -200,6 +200,41 @@ void calc_id(char *ip, unsigned short port, char *id) {
 
 
 /**
+* add_peer(peer_t *peer, bt_args_t *bt_args, char *hostname, unsigned short port) -> int
+*
+* propogate a peer_t struct and add it to the bt_args structure
+*
+* Return: 0 on success, -1 on failiour
+* */
+int add_peer(peer_t *peer, bt_args_t *bt_args, char *hostname, unsigned short port) {
+    int i = 0;
+    for (; i < MAX_CONNECTIONS; ++i)
+        if (bt_args->peers[i] != NULL) {
+            bt_args->peers[i] = peer;
+            return 0;
+        }
+    return -1;
+}
+
+/**
+* drop_peer(peer_t *peer, bt_args_t *bt_args) -> int
+*
+* drop an unresponsive or failed peer from the bt_args
+*
+* Return: 0 on success, -1 on failiour
+* */
+int drop_peer(peer_t *peer, bt_args_t *bt_args) {
+    int i = 0;
+    for (; i < MAX_CONNECTIONS; ++i)
+        if (strcmp((char const *) bt_args->peers[i]->id, (char const *) peer->id) == 0
+            && bt_args->peers[i]->port == peer->port) {
+            bt_args->peers[i] = NULL;
+            return 0;
+        }
+    return 1;
+}
+
+/**
 * init_peer(peer_t * peer, int id, char * ip, unsigned short port) -> int
 *
 *
