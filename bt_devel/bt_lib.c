@@ -126,37 +126,51 @@ int contact_tracker(bt_args_t *bt_args) {
     long long leng;
     file = read_file(bt_args->torrent_file, &leng);
     char *new_file = malloc(strlen(file));
-    strncpy(new_file, file, strlen(file) - 2);
+//    strncpy(new_file, file, strlen(file) - 2);
+    memcpy(new_file, file, strlen(file) - 2);
 
     char *hashed_info = malloc(21);
     int len = (int) strlen(strstr(strstr(new_file, "info"), "d"));
     char *inf = strstr(strstr(new_file, "info"), "d");
-    inf = "http://torrent.ubuntu.com:6969/announce?"
-            "info_hash=%B4%15%C9%13d%3E%5F%F4%9F%E3%7D0K%BB%5En%11%ADQ%01"
-            "&peer_id=%2DCD0303%2Df%168%A7%B6%FD%8Bi%98%CDm%02"
-            "&port=2706"
-            "&key=UAP6DIVK"
-            "&uploaded=0"
-            "&downloaded=4472832"
-            "&left=1162412032"
-            "&compact=1"
-            "&numwant=100";
-//    SHA1((unsigned char const *) inf, (size_t) len, (unsigned char *) hashed_info);
-//
-//    char *request_to_send;
-//    request_to_send = malloc(100);
-//
-//    //aq unda iyos: Port number this peer is listening on.
-//    //Common behavior is for a downloader to try to listen on
-//    //port 6881 and if that port is taken try 6882, then 6883, etc. and give up after 6889.
-//    int port = INIT_PORT;
-//    sprintf(request_to_send, "%s?info_hash=%s&peer_id=%s&port=%i"
-//                    "&downloaded=0&left=0&event=started", bt_args->bt_info->announce,
-//            url_encode(hashed_info), url_encode(generate_peer_id()), port);
-//
-//    printf("Request URL for tracker: %s\n", request_to_send);
-//    puts(send_http_request(request_to_send));
-    char * res = send_http_request(inf);
+
+    SHA1((unsigned char const *) inf, (size_t) len, (unsigned char *) hashed_info);
+
+    char *request_to_send;
+    request_to_send = malloc(1024);
+
+
+    //aq unda iyos: Port number this peer is listening on.
+    //Common behavior is for a downloader to try to listen on
+    //port 6881 and if that port is taken try 6882, then 6883, etc. and give up after 6889.
+    int port = INIT_PORT;
+    sprintf(request_to_send, "%s?info_hash=%s&peer_id=%s&port=%i"
+                    "&downloaded=0&left=0&event=started", bt_args->bt_info->announce,
+            url_encode(hashed_info), url_encode(generate_peer_id()), port);
+
+    printf("Request URL for tracker: %s\n", request_to_send);
+
+    // http://torrent.ubuntu.com:6969/announce?
+    // info_hash=%5e%ef%fc%8e%b5%da%b4%ec%1c%a6%fd%ce%f0%93t%d7j%1389
+    // &peer_id=SatJan311528262015RR
+    // &port=6881
+    // &downloaded=0
+    // &left=0
+    // &event=started
+
+    request_to_send =
+            "http://torrent.ubuntu.com:6969/"
+                    "announce?info_hash=%B4%15%C9%13d%3E%5F%F4%9F%E3%7D0K%BB%5En%11%ADQ%01"
+                    "&peer_id=%2DCD0303%2D%3D%27%7CP%94%84T%ED%BC%14%F4%20"
+                    "&port=2706"
+                    "&key=2YUMOFZ3"
+                    "&event=started"
+                    "&uploaded=0"
+                    "&downloaded=0"
+                    "&left=1162936320"
+                    "&compact=1"
+                    "&numwant=100";
+
+    char * res = send_http_request(request_to_send);
     if (res) {
         puts(res);
     }
