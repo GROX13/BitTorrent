@@ -23,23 +23,25 @@
 *
 **/
 
-void usage(FILE *file) {
-    if (file == NULL) {
+void usage(FILE *file)
+{
+    if (file == NULL)
+    {
         file = stdout;
     }
 
     fprintf(file,
             "bt-client [OPTIONS] file.torrent\n"
-                    "  -h            \t Print this help screen\n"
-                    "  -b ip         \t Bind to this ip for incoming connections, ports\n"
-                    "                \t are selected automatically\n"
-                    "  -s save_file  \t Save the torrent in directory save_dir (dflt: .)\n"
-                    "  -l log_file   \t Save logs to log_filw (dflt: bt-client.log)\n"
-                    "  -p ip:port    \t Instead of contacing the tracker for a peer list,\n"
-                    "                \t use this peer instead, ip:port (ip or hostname)\n"
-                    "                \t (include multiple -p for more than 1 peer)\n"
-                    "  -I id         \t Set the node identifier to id (dflt: random)\n"
-                    "  -v            \t verbose, print additional verbose info\n");
+            "  -h            \t Print this help screen\n"
+            "  -b ip         \t Bind to this ip for incoming connections, ports\n"
+            "                \t are selected automatically\n"
+            "  -s save_file  \t Save the torrent in directory save_dir (dflt: .)\n"
+            "  -l log_file   \t Save logs to log_filw (dflt: bt-client.log)\n"
+            "  -p ip:port    \t Instead of contacing the tracker for a peer list,\n"
+            "                \t use this peer instead, ip:port (ip or hostname)\n"
+            "                \t (include multiple -p for more than 1 peer)\n"
+            "  -I id         \t Set the node identifier to id (dflt: random)\n"
+            "  -v            \t verbose, print additional verbose info\n");
 }
 
 /**
@@ -50,7 +52,8 @@ void usage(FILE *file) {
 * ERRORS: Will exit on various errors
 **/
 
-void __parse_peer(peer_t *peer, char *peer_st) {
+void __parse_peer(peer_t *peer, char *peer_st)
+{
     char *parse_str;
     char *word;
     unsigned short port;
@@ -65,29 +68,33 @@ void __parse_peer(peer_t *peer, char *peer_st) {
 
     //only can have 2 tokens max, but may have less
     for (word = strtok(parse_str, sep), i = 0;
-         (word && i < 3);
-         word = strtok(NULL, sep), i++) {
+            (word && i < 3);
+            word = strtok(NULL, sep), i++)
+    {
 
         printf("%d:%s\n", i, word);
-        switch (i) {
-            case 0://id
-                ip = word;
-                break;
-            case 1://ip
-                port = atoi(word);
-            default:
-                break;
+        switch (i)
+        {
+        case 0://id
+            ip = word;
+            break;
+        case 1://ip
+            port = atoi(word);
+        default:
+            break;
         }
 
     }
 
-    if (i < 2) {
+    if (i < 2)
+    {
         fprintf(stderr, "ERROR: Parsing Peer: Not enough values in '%s'\n", peer_st);
         usage(stderr);
         exit(1);
     }
 
-    if (word) {
+    if (word)
+    {
         fprintf(stderr, "ERROR: Parsing Peer: Too many values in '%s'\n", peer_st);
         usage(stderr);
         exit(1);
@@ -115,7 +122,8 @@ void __parse_peer(peer_t *peer, char *peer_st) {
 * ERRORS: Will exit on various errors
 *
 **/
-void parse_args(bt_args_t *bt_args, int argc, char *argv[]) {
+void parse_args(bt_args_t *bt_args, int argc, char *argv[])
+{
     int ch; //ch for each flag
     int n_peers = 0;
     int i;
@@ -137,48 +145,52 @@ void parse_args(bt_args_t *bt_args, int argc, char *argv[]) {
     //default lag file
     strncpy(bt_args->log_file, "bt-client.log", FILE_NAME_MAX);
 
-    for (i = 0; i < MAX_CONNECTIONS; i++) {
+    for (i = 0; i < MAX_CONNECTIONS; i++)
+    {
         bt_args->peers[i] = NULL; //initially NULL
     }
 
     bt_args->id = 0;
 
-    while ((ch = getopt(argc, argv, "hp:s:l:vI:")) != -1) {
-        switch (ch) {
-            case 'h': //help
-                usage(stdout);
-                exit(0);
-                break;
-            case 'v': //verbose
-                bt_args->verbose = 1;
-                break;
-            case 's': //save file
-                strncpy(bt_args->save_file, optarg, FILE_NAME_MAX);
-                break;
-            case 'l': //log file
-                strncpy(bt_args->log_file, optarg, FILE_NAME_MAX);
-                break;
-            case 'p': //peer
-                n_peers++;
-                //check if we are going to overflow
-                if (n_peers > MAX_CONNECTIONS) {
-                    fprintf(stderr, "ERROR: Can only support %d initial peers", MAX_CONNECTIONS);
-                    usage(stderr);
-                    exit(1);
-                }
-
-                bt_args->peers[n_peers] = malloc(sizeof(peer_t));
-
-                //parse peers
-                __parse_peer(bt_args->peers[n_peers], optarg);
-                break;
-            case 'I':
-                bt_args->id = (unsigned int) atoi(optarg);
-                break;
-            default:
-                fprintf(stderr, "ERROR: Unknown option '-%c'\n", ch);
-                usage(stdout);
+    while ((ch = getopt(argc, argv, "hp:s:l:vI:")) != -1)
+    {
+        switch (ch)
+        {
+        case 'h': //help
+            usage(stdout);
+            exit(0);
+            break;
+        case 'v': //verbose
+            bt_args->verbose = 1;
+            break;
+        case 's': //save file
+            strncpy(bt_args->save_file, optarg, FILE_NAME_MAX);
+            break;
+        case 'l': //log file
+            strncpy(bt_args->log_file, optarg, FILE_NAME_MAX);
+            break;
+        case 'p': //peer
+            n_peers++;
+            //check if we are going to overflow
+            if (n_peers > MAX_CONNECTIONS)
+            {
+                fprintf(stderr, "ERROR: Can only support %d initial peers", MAX_CONNECTIONS);
+                usage(stderr);
                 exit(1);
+            }
+
+            bt_args->peers[n_peers] = malloc(sizeof(peer_t));
+
+            //parse peers
+            __parse_peer(bt_args->peers[n_peers], optarg);
+            break;
+        case 'I':
+            bt_args->id = (unsigned int) atoi(optarg);
+            break;
+        default:
+            fprintf(stderr, "ERROR: Unknown option '-%c'\n", ch);
+            usage(stdout);
+            exit(1);
         }
     }
 
@@ -186,7 +198,8 @@ void parse_args(bt_args_t *bt_args, int argc, char *argv[]) {
     argc -= optind;
     argv += optind;
 
-    if (argc == 0) {
+    if (argc == 0)
+    {
         fprintf(stderr, "ERROR: Require torrent file\n");
         usage(stderr);
         exit(1);
@@ -201,13 +214,15 @@ void parse_args(bt_args_t *bt_args, int argc, char *argv[]) {
 /**
 *
 * */
-int create_socket(char *ip_addr, unsigned short port) {
+int create_socket(char *ip_addr, unsigned short port)
+{
     int socket_desc;
     struct sockaddr_in server;
 
     //Create socket
     socket_desc = socket(AF_INET, SOCK_STREAM, 0);
-    if (socket_desc == -1) {
+    if (socket_desc == -1)
+    {
         printf("Could not create socket");
     }
 
@@ -216,7 +231,8 @@ int create_socket(char *ip_addr, unsigned short port) {
     server.sin_port = htons(port);
 
     //Connect to remote server
-    if (connect(socket_desc, (struct sockaddr *) &server, sizeof(server)) < 0) {
+    if (connect(socket_desc, (struct sockaddr *) &server, sizeof(server)) < 0)
+    {
         puts("connect error");
         return 1;
     }
@@ -225,23 +241,26 @@ int create_socket(char *ip_addr, unsigned short port) {
     return socket_desc;
 }
 
-void _remove_char(char *str, char garbage) {
+void _remove_char(char *str, char garbage)
+{
 
     char *src, *dst;
-    for (src = dst = str; *src != '\0'; src++) {
+    for (src = dst = str; *src != '\0'; src++)
+    {
         *dst = *src;
         if (*dst != garbage) dst++;
     }
     *dst = '\0';
 }
 
-char *generate_peer_id() {
+char *generate_peer_id()
+{
     time_t current_time;
     char *c_time_string;
 
     current_time = time(NULL);
 
-    if (current_time == ((time_t) -1))
+    if (current_time == ((time_t) - 1))
         (void) fprintf(stderr, "Failure to compute the current time.");
 
     c_time_string = ctime(&current_time);
@@ -263,21 +282,25 @@ char *generate_peer_id() {
 }
 
 /* Converts a hex character to its integer value */
-char from_hex(char ch) {
+char from_hex(char ch)
+{
     return (char) (isdigit(ch) ? ch - '0' : tolower(ch) - 'a' + 10);
 }
 
 /* Converts an integer value to its hex character*/
-char to_hex(char code) {
+char to_hex(char code)
+{
     static char hex[] = "0123456789abcdef";
     return hex[code & 15];
 }
 
 /* Returns a url-encoded version of str */
 /* IMPORTANT: be sure to free() the returned string after use */
-char *url_encode(char *str) {
+char *url_encode(char *str)
+{
     char *pstr = str, *buf = malloc(strlen(str) * 3 + 1), *pbuf = buf;
-    while (*pstr) {
+    while (*pstr)
+    {
         if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.' || *pstr == '~')
             *pbuf++ = *pstr;
         else if (*pstr == ' ')
@@ -292,17 +315,25 @@ char *url_encode(char *str) {
 
 /* Returns a url-decoded version of str */
 /* IMPORTANT: be sure to free() the returned string after use */
-char *url_decode(char *str) {
+char *url_decode(char *str)
+{
     char *pstr = str, *buf = malloc(strlen(str) + 1), *pbuf = buf;
-    while (*pstr) {
-        if (*pstr == '%') {
-            if (pstr[1] && pstr[2]) {
+    while (*pstr)
+    {
+        if (*pstr == '%')
+        {
+            if (pstr[1] && pstr[2])
+            {
                 *pbuf++ = from_hex(pstr[1]) << 4 | from_hex(pstr[2]);
                 pstr += 2;
             }
-        } else if (*pstr == '+') {
+        }
+        else if (*pstr == '+')
+        {
             *pbuf++ = ' ';
-        } else {
+        }
+        else
+        {
             *pbuf++ = *pstr;
         }
         pstr++;
@@ -311,42 +342,44 @@ char *url_decode(char *str) {
     return buf;
 }
 
-int _fill_peer_info(bt_peer *peer, be_node *node, ssize_t indent, char *key) {
+int _fill_peer_info(bt_peer *peer, be_node *node, ssize_t indent, char *key)
+{
     size_t i;
 
     indent = abs((int) indent);
 
-    switch (node->type) {
-        case BE_STR:
-            if (!strcmp(key, "tracker id"))
-                strcpy(peer->tracker_id, node->val.s);
+    switch (node->type)
+    {
+    case BE_STR:
+        if (!strcmp(key, "tracker id"))
+            strcpy(peer->tracker_id, node->val.s);
 
-            if (!strcmp(key, "peers"))
-                strcpy(peer->peer_hashes, node->val.s);
+        if (!strcmp(key, "peers"))
+            strcpy(peer->peer_hashes, node->val.s);
 
-            break;
+        break;
 
-        case BE_INT:
-            if (!strcmp(key, "complete"))
-                peer->complete = (int) node->val.i;
-            if (!strcmp(key, "incomplete"))
-                peer->incomplete = (int) node->val.i;
-            if (!strcmp(key, "interval"))
-                peer->interval = (int) node->val.i;
+    case BE_INT:
+        if (!strcmp(key, "complete"))
+            peer->complete = (int) node->val.i;
+        if (!strcmp(key, "incomplete"))
+            peer->incomplete = (int) node->val.i;
+        if (!strcmp(key, "interval"))
+            peer->interval = (int) node->val.i;
 
-            break;
+        break;
 
-        case BE_LIST:
-            for (i = 0; node->val.l[i]; ++i)
-                _fill_peer_info(peer, node->val.l[i], indent + 1, "");
+    case BE_LIST:
+        for (i = 0; node->val.l[i]; ++i)
+            _fill_peer_info(peer, node->val.l[i], indent + 1, "");
 
-            break;
+        break;
 
-        case BE_DICT:
-            for (i = 0; node->val.d[i].val; ++i)
-                _fill_peer_info(peer, node->val.d[i].val, -(indent + 1), node->val.d[i].key);
+    case BE_DICT:
+        for (i = 0; node->val.d[i].val; ++i)
+            _fill_peer_info(peer, node->val.d[i].val, -(indent + 1), node->val.d[i].key);
 
-            break;
+        break;
     }
     return 1;
 }
@@ -354,12 +387,14 @@ int _fill_peer_info(bt_peer *peer, be_node *node, ssize_t indent, char *key) {
 /**
 * Returns 1 in case sucess
 */
-int parse_info(bt_peer *peer, be_node *node) {
+int parse_info(bt_peer *peer, be_node *node)
+{
     return _fill_peer_info(peer, node, 0, "");
 }
 
 
-void decode_tracker_info(bt_args_t *bt_args, char *info) {
+void decode_tracker_info(bt_args_t *bt_args, char *info)
+{
     be_node *node;
     node = load_node(info);
 
@@ -378,12 +413,13 @@ void decode_tracker_info(bt_args_t *bt_args, char *info) {
     int i;
     int count = 0;
 
-    for (i = 0; i < num_peers; i++) {
+    for (i = 0; i < num_peers; i++)
+    {
         uint32_t ip;
         uint16_t port;
-        ip = (uint32_t) ((char *) peer->peer_hashes + count);
+        ip = *(uint32_t *) (peer->peer_hashes + count);
         count = count + 4;
-        port = (uint16_t) ((char *) peer->peer_hashes + count);
+        port = *(uint16_t *) (peer->peer_hashes + count);
         count = count + 2;
         //IP stringad
         struct in_addr ip_addr;
@@ -394,8 +430,8 @@ void decode_tracker_info(bt_args_t *bt_args, char *info) {
         calc_id(inet_ntoa(ip_addr), port, id);
         peer_t *peer_t1 = malloc(sizeof(peer_t));
         init_peer(peer_t1, id, inet_ntoa(ip_addr), port);
-        char *hostname;
-        add_peer(peer_t1, bt_args, hostname, port);
+        // char *hostname;
+        add_peer(peer_t1, bt_args, NULL, port);
         print_peer(peer_t1);
         free(peer_t1);
     }
@@ -405,12 +441,14 @@ void decode_tracker_info(bt_args_t *bt_args, char *info) {
 /**
 *
 **/
-char *read_file(char *file, long long *len) {
+char *read_file(char *file, long long *len)
+{
     struct stat st;
     char *ret = NULL;
     FILE *fp;
 
-    if (stat(file, &st)) {
+    if (stat(file, &st))
+    {
         return ret;
     }
     *len = st.st_size;
@@ -419,7 +457,7 @@ char *read_file(char *file, long long *len) {
     if (!fp)
         return ret;
 
-    ret = malloc((size_t) *len);
+    ret = malloc((size_t) * len);
     if (!ret)
         return NULL;
 
@@ -445,9 +483,10 @@ char *read_file(char *file, long long *len) {
 * Carry length over to a new bencode object.
 * This is done so that we don't exhaust the buffer */
 static int __carry_length(
-        bencode_t *be,
-        const char *pos
-) {
+    bencode_t *be,
+    const char *pos
+)
+{
     assert(0 < be->len);
     return be->len - (pos - be->str);
 }
@@ -457,17 +496,19 @@ static int __carry_length(
 * @param val Output of number represented by string
 * @return 0 if error; otherwise 1 */
 static long int __read_string_int(
-        const char *sp,
-        const char **end,
-        long int *val
-) {
+    const char *sp,
+    const char **end,
+    long int *val
+)
+{
     *val = 0;
 
     if (!isdigit(*sp))
         return 0;
 
     /* work out number */
-    do {
+    do
+    {
         *val *= 10;
         *val += *sp - '0';
         sp++;
@@ -479,26 +520,30 @@ static long int __read_string_int(
 }
 
 int bencode_is_dict(
-        const bencode_t *be
-) {
+    const bencode_t *be
+)
+{
     return be->str && *be->str == 'd';
 }
 
 int bencode_is_int(
-        const bencode_t *be
-) {
+    const bencode_t *be
+)
+{
     return be->str && *be->str == 'i';
 }
 
 int bencode_is_list(
-        const bencode_t *be
-) {
+    const bencode_t *be
+)
+{
     return be->str && *be->str == 'l';
 }
 
 int bencode_is_string(
-        const bencode_t *be
-) {
+    const bencode_t *be
+)
+{
     const char *sp;
 
     sp = be->str;
@@ -519,16 +564,19 @@ int bencode_is_string(
 * @param sp The bencode string we are processing
 * @return Pointer to string on success, otherwise NULL */
 static const char *__iterate_to_next_string_pos(
-        bencode_t *be,
-        const char *sp
-) {
+    bencode_t *be,
+    const char *sp
+)
+{
     bencode_t iter;
 
     bencode_init(&iter, sp, __carry_length(be, sp));
 
-    if (bencode_is_dict(&iter)) {
+    if (bencode_is_dict(&iter))
+    {
         /* navigate to the end of the dictionary */
-        while (bencode_dict_has_next(&iter)) {
+        while (bencode_dict_has_next(&iter))
+        {
             /* ERROR: input string is invalid */
             if (0 == bencode_dict_get_next(&iter, NULL, NULL, NULL))
                 return NULL;
@@ -536,9 +584,11 @@ static const char *__iterate_to_next_string_pos(
 
         return iter.str + 1;
     }
-    else if (bencode_is_list(&iter)) {
+    else if (bencode_is_list(&iter))
+    {
         /* navigate to the end of the list */
-        while (bencode_list_has_next(&iter)) {
+        while (bencode_list_has_next(&iter))
+        {
             /* ERROR: input string is invalid */
             if (-1 == bencode_list_get_next(&iter, NULL))
                 return NULL;
@@ -546,7 +596,8 @@ static const char *__iterate_to_next_string_pos(
 
         return iter.str + 1;
     }
-    else if (bencode_is_string(&iter)) {
+    else if (bencode_is_string(&iter))
+    {
         int len;
         const char *str;
 
@@ -556,7 +607,8 @@ static const char *__iterate_to_next_string_pos(
 
         return str + len;
     }
-    else if (bencode_is_int(&iter)) {
+    else if (bencode_is_int(&iter))
+    {
         const char *end;
         long int val;
 
@@ -573,15 +625,17 @@ static const char *__iterate_to_next_string_pos(
 }
 
 static const char *__read_string_len(
-        const char *sp,
-        int *slen
-) {
+    const char *sp,
+    int *slen
+)
+{
     *slen = 0;
 
     if (!isdigit(*sp))
         return NULL;
 
-    do {
+    do
+    {
         *slen *= 10;
         *slen += *sp - '0';
         sp++;
@@ -595,10 +649,11 @@ static const char *__read_string_len(
 }
 
 void bencode_init(
-        bencode_t *be,
-        const char *str,
-        const int len
-) {
+    bencode_t *be,
+    const char *str,
+    const int len
+)
+{
     memset(be, 0, sizeof(bencode_t));
     be->str = be->start = str;
     be->str = str;
@@ -607,9 +662,10 @@ void bencode_init(
 }
 
 int bencode_int_value(
-        bencode_t *be,
-        long int *val
-) {
+    bencode_t *be,
+    long int *val
+)
+{
     const char *end;
 
     if (0 == __read_string_int(&be->str[1], &end, val))
@@ -621,8 +677,9 @@ int bencode_int_value(
 }
 
 int bencode_dict_has_next(
-        bencode_t *be
-) {
+    bencode_t *be
+)
+{
     const char *sp = be->str;
 
     assert(be);
@@ -634,7 +691,8 @@ int bencode_dict_has_next(
             || *sp == '\0'
             || *sp == '\r'
             /* at the end of the input string */
-            || be->str >= be->start + be->len - 1) {
+            || be->str >= be->start + be->len - 1)
+    {
         return 0;
     }
 
@@ -642,11 +700,12 @@ int bencode_dict_has_next(
 }
 
 int bencode_dict_get_next(
-        bencode_t *be,
-        bencode_t *be_item,
-        const char **key,
-        int *klen
-) {
+    bencode_t *be,
+    bencode_t *be_item,
+    const char **key,
+    int *klen
+)
+{
     const char *sp = be->str;
     const char *keyin;
     int len;
@@ -654,12 +713,14 @@ int bencode_dict_get_next(
     assert(*sp != 'e');
 
     /* if at start increment to 1st key */
-    if (*sp == 'd') {
+    if (*sp == 'd')
+    {
         sp++;
     }
 
     /* can't get the next item if we are at the end of the dict */
-    if (*sp == 'e') {
+    if (*sp == 'e')
+    {
         return 0;
     }
 
@@ -667,13 +728,15 @@ int bencode_dict_get_next(
     keyin = __read_string_len(sp, &len);
 
     /* 2. if we have a value bencode, lets put the value inside */
-    if (be_item) {
+    if (be_item)
+    {
         *klen = len;
         bencode_init(be_item, keyin + len, __carry_length(be, keyin + len));
     }
 
     /* 3. iterate to next dict key, or move to next item in parent */
-    if (!(be->str = __iterate_to_next_string_pos(be, keyin + len))) {
+    if (!(be->str = __iterate_to_next_string_pos(be, keyin + len)))
+    {
         /*  if there isn't anything else or we are at the end of the string */
         return 0;
     }
@@ -689,7 +752,8 @@ int bencode_dict_get_next(
 
     assert(be->str);
 
-    if (key) {
+    if (key)
+    {
         *key = keyin;
     }
 
@@ -697,10 +761,11 @@ int bencode_dict_get_next(
 }
 
 int bencode_string_value(
-        bencode_t *be,
-        const char **str,
-        int *slen
-) {
+    bencode_t *be,
+    const char **str,
+    int *slen
+)
+{
     const char *sp;
 
     *slen = 0;
@@ -713,7 +778,8 @@ int bencode_string_value(
     assert(0 < be->len);
 
     /*  make sure we still fit within the buffer */
-    if (sp + *slen > be->start + (long int) be->len) {
+    if (sp + *slen > be->start + (long int) be->len)
+    {
         *str = NULL;
         return 0;
     }
@@ -723,8 +789,9 @@ int bencode_string_value(
 }
 
 int bencode_list_has_next(
-        bencode_t *be
-) {
+    bencode_t *be
+)
+{
     const char *sp;
 
     sp = be->str;
@@ -732,13 +799,15 @@ int bencode_list_has_next(
     /* empty list */
     if (*sp == 'l' &&
             sp == be->start &&
-            *(sp + 1) == 'e') {
+            *(sp + 1) == 'e')
+    {
         be->str++;
         return 0;
     }
 
     /* end of list */
-    if (*sp == 'e') {
+    if (*sp == 'e')
+    {
         return 0;
     }
 
@@ -746,9 +815,10 @@ int bencode_list_has_next(
 }
 
 int bencode_list_get_next(
-        bencode_t *be,
-        bencode_t *be_item
-) {
+    bencode_t *be,
+    bencode_t *be_item
+)
+{
     const char *sp;
 
     sp = be->str;
@@ -761,26 +831,31 @@ int bencode_list_get_next(
     if (!sp || *sp == 'e')
         return 0;
 
-    if (*sp == 'l') {
+    if (*sp == 'l')
+    {
         /* just move off the start of this list */
-        if (be->start == be->str) {
+        if (be->start == be->str)
+        {
             sp++;
         }
     }
 
     /* can't get the next item if we are at the end of the list */
-    if (*sp == 'e') {
+    if (*sp == 'e')
+    {
         be->str = sp;
         return 0;
     }
 
     /* populate the be_item if it is available */
-    if (be_item) {
+    if (be_item)
+    {
         bencode_init(be_item, sp, __carry_length(be, sp));
     }
 
     /* iterate to next value */
-    if (!(be->str = __iterate_to_next_string_pos(be, sp))) {
+    if (!(be->str = __iterate_to_next_string_pos(be, sp)))
+    {
         return -1;
     }
 
@@ -788,17 +863,19 @@ int bencode_list_get_next(
 }
 
 void bencode_clone(
-        bencode_t *be,
-        bencode_t *output
-) {
+    bencode_t *be,
+    bencode_t *output
+)
+{
     memcpy(output, be, sizeof(bencode_t));
 }
 
 int bencode_dict_get_start_and_len(
-        bencode_t *be,
-        const char **start,
-        int *len
-) {
+    bencode_t *be,
+    const char **start,
+    int *len
+)
+{
     bencode_t ben, ben2;
     const char *ren;
     int tmplen;
