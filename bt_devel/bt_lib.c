@@ -19,7 +19,8 @@
 
 #define ECHOMAX 255
 
-void reverse(char *x, int begin, int end) {
+void reverse(char *x, int begin, int end)
+{
     char c;
 
     if (begin >= end)
@@ -32,12 +33,14 @@ void reverse(char *x, int begin, int end) {
     reverse(x, ++begin, --end);
 }
 
-struct my_string {
+struct my_string
+{
     char *memory;
     size_t size;
 };
 
-static size_t my_string_append(void *contents, size_t size, size_t nmemb, void *userp) {
+static size_t my_string_append(void *contents, size_t size, size_t nmemb, void *userp)
+{
     size_t realsize = size * nmemb;
     struct my_string *mem = (struct my_string *) userp;
 
@@ -50,7 +53,8 @@ static size_t my_string_append(void *contents, size_t size, size_t nmemb, void *
     return realsize;
 }
 
-char *send_http_request(char *url) {
+char *send_http_request(char *url)
+{
     CURL *curl_handle;
     CURLcode res;
     struct my_string header;
@@ -76,136 +80,120 @@ char *send_http_request(char *url) {
     /* get it! */
     res = curl_easy_perform(curl_handle);
     /* check for errors */
-    if (res != CURLE_OK) {
+    if (res != CURLE_OK)
+    {
         fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         return NULL;
-    } else {
-        if (memcmp(body.memory, "d8:", 3) != 0) {
+    }
+    else
+    {
+        if (memcmp(body.memory, "d8:", 3) != 0)
+        {
             printf("error\n%s\n", body.memory);
             return NULL;
-        } else {
+        }
+        else
+        {
             return body.memory;
         }
     }
 }
 
-void _be_find(be_node *node, be_node *result, char *search) {
+void _be_find(be_node *node, be_node *result, char *search)
+{
     size_t i;
 
-    switch (node->type) {
-        case BE_STR:
+    switch (node->type)
+    {
+    case BE_STR:
 
-            break;
+        break;
 
-        case BE_INT:
+    case BE_INT:
 
-            break;
+        break;
 
-        case BE_LIST:
+    case BE_LIST:
 
-            for (i = 0; node->val.l[i]; ++i)
-                _be_find(node->val.l[i], result, search);
+        for (i = 0; node->val.l[i]; ++i)
+            _be_find(node->val.l[i], result, search);
 
-            break;
+        break;
 
-        case BE_DICT:
+    case BE_DICT:
 
-            for (i = 0; node->val.d[i].val; ++i)
-                _be_find(node->val.d[i].val, result, search);
+        for (i = 0; node->val.d[i].val; ++i)
+            _be_find(node->val.d[i].val, result, search);
 
-            break;
+        break;
     }
 }
 
-int contact_tracker(bt_args_t *bt_args) {
-    // char *new_file;
-    // long long leng;
+int contact_tracker(bt_args_t *bt_args)
+{
+    char *new_file;
+    long long leng;
 
-    // new_file = read_file(bt_args->torrent_file, &leng);
+    new_file = read_file(bt_args->torrent_file, &leng);
 
-    // printf("Length ----> %d\n", leng);
-    // char *hashed_info = malloc(2048);
-    // char *next;
 
-    // bencode_t *be = malloc(sizeof(bencode_t)),
-    //         *be_next = malloc(sizeof(bencode_t));
+    char *hashed_info = malloc(FILE_NAME_MAX);
 
-    // bencode_init(be, new_file, (int) leng);
+    int len;
+    char *inf = strstr(strstr(new_file, "info"), "d");
 
-    // while (bencode_dict_has_next(be)) {
-    //     bencode_dict_get_next(be, be_next, (char const **) &next, (int *) &leng);
-    //     be = be_next;
-    // }
+    len = 44478;
 
-    // int len;
-    // char *inf = strstr(strstr(new_file, "info"), "d");
-    // bencode_dict_get_start_and_len(be, &inf, &len);
-
-    // printf("len %d\n", len);
-    // len = (int) strlen(strstr(strstr(new_file, "info"), "d"));
-
-    // printf("-----> %d\n", (inf - new_file));
-    // size_t len = (size_t) strlen(inf);
-    // printf("Before: %d\n", len);
-    // len = (size_t) be_str_len(be_decode(inf));
-    // be_dump(be_decode(inf));
-    // printf("After: %d\n", len);
-
-    // be_node *result = malloc(sizeof(be_node));
-    // _be_find(bt_args->bt_info, result, "info");
-    // len = (size_t) be_str_len(result);
-    // be_dump(be_decode(inf));
-    // printf("After after: %d\n", len);
-
-    // len = 44478;
-
-    // SHA1((unsigned char const *) inf, len, (unsigned char *) hashed_info);
+    SHA1((unsigned char const *) inf, len, (unsigned char *) hashed_info);
 
     char *request_to_send;
-    // request_to_send = malloc(2048);
-    // memset(request_to_send, '\0', 2048);
+    request_to_send = malloc(FILE_NAME_MAX);
+    memset(request_to_send, '\0', FILE_NAME_MAX);
 
+    bt_args->info_hash = hashed_info;
 
-    // //aq unda iyos: Port number this peer is listening on.
-    // //Common behavior is for a downloader to try to listen on
-    // //port 6881 and if that port is taken try 6882, then 6883, etc. and give up after 6889.
+    //aq unda iyos: Port number this peer is listening on.
+    //Common behavior is for a downloader to try to listen on
+    //port 6881 and if that port is taken try 6882, then 6883, etc. and give up after 6889.
     // int port = INIT_PORT;
+    // bt_args->bt_info->num_pieces = bt_args->bt_info->length / bt_args->bt_info->piece_length;
     // sprintf(request_to_send, "%s?info_hash=%s&peer_id=%s&port=%i"
-    //                 "&downloaded=0&left=0&event=started", bt_args->bt_info->announce,
+    //         "&downloaded=0&left=1162936320&event=started&compact=1", bt_args->bt_info->announce,
     //         url_encode(hashed_info), url_encode(generate_peer_id()), port);
 
     // printf("Request URL for tracker: %s\n", request_to_send);
 
-    // // http://torrent.ubuntu.com:6969/announce?
-    // // info_hash=%5e%ef%fc%8e%b5%da%b4%ec%1c%a6%fd%ce%f0%93t%d7j%1389
-    // // &peer_id=SatJan311528262015RR
-    // // &port=6881
-    // // &downloaded=0
-    // // &left=0
-    // // &event=started
+    // http://torrent.ubuntu.com:6969/announce?
+    // info_hash=%5e%ef%fc%8e%b5%da%b4%ec%1c%a6%fd%ce%f0%93t%d7j%1389
+    // &peer_id=SatJan311528262015RR
+    // &port=6881
+    // &downloaded=0
+    // &left=0
+    // &event=started
 
     request_to_send =
-            "http://torrent.ubuntu.com:6969/"
-                    "announce?info_hash=%B4%15%C9%13d%3E%5F%F4%9F%E3%7D0K%BB%5En%11%ADQ%01"
-                    "&peer_id=%2DCD0303%2D%3D%27%7CP%94%84T%ED%BC%14%F4%20"
-                    "&port=2706"
-                    "&key=2YUMOFZ3"
-                    "&event=started"
-                    "&uploaded=0"
-                    "&downloaded=0"
-                    "&left=1162936320"
-                    "&compact=1"
-                    "&numwant=100";
+        "http://torrent.ubuntu.com:6969/"
+        "announce?info_hash=%B4%15%C9%13d%3E%5F%F4%9F%E3%7D0K%BB%5En%11%ADQ%01"
+        "&peer_id=%2DCD0303%2D%3D%27%7CP%94%84T%ED%BC%14%F4%20"
+        "&port=6681"
+        "&key=2YUMOFZ3"
+        "&event=started"
+        "&uploaded=0"
+        "&downloaded=0"
+        "&left=1162936320"
+        "&compact=1";
 
-    char * res = send_http_request(request_to_send);
-    if (res) {
-        puts(res);
-        decode_tracker_info(res);
+    char *result = send_http_request(request_to_send);
+    if (result)
+    {
+        printf("Trackers responce is: %s\n", result);
+        decode_tracker_info(result);
     }
     return 0;
 }
 
-void calc_id(char *ip, unsigned short port, char *id) {
+void calc_id(char *ip, unsigned short port, char *id)
+{
     char data[256];
     int len;
 
@@ -226,10 +214,12 @@ void calc_id(char *ip, unsigned short port, char *id) {
 *
 * Return: 0 on success, -1 on failiour
 * */
-int add_peer(peer_t *peer, bt_args_t *bt_args, char *hostname, unsigned short port) {
+int add_peer(peer_t *peer, bt_args_t *bt_args, char *hostname, unsigned short port)
+{
     int i = 0;
     for (; i < MAX_CONNECTIONS; ++i)
-        if (bt_args->peers[i] != NULL) {
+        if (bt_args->peers[i] != NULL)
+        {
             bt_args->peers[i] = peer;
             return 0;
         }
@@ -243,11 +233,13 @@ int add_peer(peer_t *peer, bt_args_t *bt_args, char *hostname, unsigned short po
 *
 * Return: 0 on success, -1 on failiour
 * */
-int drop_peer(peer_t *peer, bt_args_t *bt_args) {
+int drop_peer(peer_t *peer, bt_args_t *bt_args)
+{
     int i = 0;
     for (; i < MAX_CONNECTIONS; ++i)
         if (strcmp((char const *) bt_args->peers[i]->id, (char const *) peer->id) == 0
-                && bt_args->peers[i]->port == peer->port) {
+                && bt_args->peers[i]->port == peer->port)
+        {
             bt_args->peers[i] = NULL;
             return 0;
         }
@@ -266,7 +258,8 @@ int drop_peer(peer_t *peer, bt_args_t *bt_args) {
 * ip address.
 *
 **/
-int init_peer(peer_t *peer, char *id, char *ip, unsigned short port) {
+int init_peer(peer_t *peer, char *id, char *ip, unsigned short port)
+{
 
     struct hostent *hostinfo;
     //set the host id and port for referece
@@ -274,7 +267,8 @@ int init_peer(peer_t *peer, char *id, char *ip, unsigned short port) {
     peer->port = port;
 
     //get the host by name
-    if ((hostinfo = gethostbyname(ip)) == NULL) {
+    if ((hostinfo = gethostbyname(ip)) == NULL)
+    {
         perror("gethostbyname failure, no such host?");
         herror("gethostbyname");
         exit(1);
@@ -288,8 +282,8 @@ int init_peer(peer_t *peer, char *id, char *ip, unsigned short port) {
 
     //copy the address to the right place
     bcopy((char *) (hostinfo->h_addr),
-            (char *) &(peer->sockaddr.sin_addr.s_addr),
-            (size_t) hostinfo->h_length);
+          (char *) & (peer->sockaddr.sin_addr.s_addr),
+          (size_t) hostinfo->h_length);
 
     //encode the port
     peer->sockaddr.sin_port = htons(port);
@@ -304,15 +298,18 @@ int init_peer(peer_t *peer, char *id, char *ip, unsigned short port) {
 * print out debug info of a peer
 *
 **/
-void print_peer(peer_t *peer) {
+void print_peer(peer_t *peer)
+{
     int i;
 
-    if (peer) {
+    if (peer)
+    {
         printf("peer: %s:%u ",
-                inet_ntoa(peer->sockaddr.sin_addr),
-                peer->port);
+               inet_ntoa(peer->sockaddr.sin_addr),
+               peer->port);
         printf("id: ");
-        for (i = 0; i < ID_SIZE; i++) {
+        for (i = 0; i < ID_SIZE; i++)
+        {
             printf("%02x", peer->id[i]);
         }
         printf("\n");
@@ -320,27 +317,32 @@ void print_peer(peer_t *peer) {
 }
 
 /* check status on peers, maybe they went offline? */
-int check_peer(peer_t *peer) {
+int check_peer(peer_t *peer)
+{
     return 0;
 }
 
 /*check if peers want to send me something*/
-int poll_peers(bt_args_t *bt_args) {
+int poll_peers(bt_args_t *bt_args)
+{
     return 0;
 }
 
 /*send a msg to a peer*/
-int send_to_peer(peer_t *peer, bt_msg_t *msg) {
+int send_to_peer(peer_t *peer, bt_msg_t *msg)
+{
     return 0;
 }
 
 /*read a msg from a peer and store it in msg*/
-int read_from_peer(peer_t *peer, bt_msg_t *msg) {
+int read_from_peer(peer_t *peer, bt_msg_t *msg)
+{
     return 0;
 }
 
 
-int _fill_info(bt_info_t *info_t, be_node *node, ssize_t indent, char *key) {
+int _fill_info(bt_info_t *info_t, be_node *node, ssize_t indent, char *key)
+{
     size_t i;
 
     if (info_t == NULL || node == NULL || key == NULL)
@@ -348,46 +350,50 @@ int _fill_info(bt_info_t *info_t, be_node *node, ssize_t indent, char *key) {
 
     indent = abs((int) indent);
 
-    switch (node->type) {
-        case BE_STR:
-            if (!strcmp(key, "announce")) {
-                strcpy(info_t->announce, node->val.s);
-                break;
-            }
-
-            if (!strcmp(key, "pieces")) {
-                info_t->piece_hashes = &(node->val.s);
-                printf("%lld\n", be_str_len(node));
-                break;
-            }
-
-            if (!strcmp(key, "name"))
-                strcpy(info_t->name, node->val.s);
-
+    switch (node->type)
+    {
+    case BE_STR:
+        if (!strcmp(key, "announce"))
+        {
+            strcpy(info_t->announce, node->val.s);
             break;
+        }
 
-        case BE_INT:
-            if (!strcmp(key, "length")) {
-                info_t->length = (int) node->val.i;
-                break;
-            }
-
-            if (!strcmp(key, "piece length"))
-                info_t->piece_length = (int) node->val.i;
-
+        if (!strcmp(key, "pieces"))
+        {
+            info_t->piece_hashes = &(node->val.s);
+            printf("%lld\n", be_str_len(node));
             break;
+        }
 
-        case BE_LIST:
-            for (i = 0; node->val.l[i]; ++i)
-                _fill_info(info_t, node->val.l[i], indent + 1, "");
+        if (!strcmp(key, "name"))
+            strcpy(info_t->name, node->val.s);
 
+        break;
+
+    case BE_INT:
+        if (!strcmp(key, "length"))
+        {
+            info_t->length = (int) node->val.i;
             break;
+        }
 
-        case BE_DICT:
-            for (i = 0; node->val.d[i].val; ++i)
-                _fill_info(info_t, node->val.d[i].val, -(indent + 1), node->val.d[i].key);
+        if (!strcmp(key, "piece length"))
+            info_t->piece_length = (int) node->val.i;
 
-            break;
+        break;
+
+    case BE_LIST:
+        for (i = 0; node->val.l[i]; ++i)
+            _fill_info(info_t, node->val.l[i], indent + 1, "");
+
+        break;
+
+    case BE_DICT:
+        for (i = 0; node->val.d[i].val; ++i)
+            _fill_info(info_t, node->val.d[i].val, -(indent + 1), node->val.d[i].key);
+
+        break;
     }
     return 1;
 }
@@ -397,7 +403,8 @@ int _fill_info(bt_info_t *info_t, be_node *node, ssize_t indent, char *key) {
 *
 * Returns 1 in case sucess, will exit on varios errors
 */
-int parse_bt_info(bt_info_t *bt_info, be_node *node) {
+int parse_bt_info(bt_info_t *bt_info, be_node *node)
+{
     return _fill_info(bt_info, node, 0, "");
 }
 

@@ -82,6 +82,8 @@ typedef struct {
     int sockets[MAX_CONNECTIONS]; //Array of possible sockets
     struct pollfd poll_sockets[MAX_CONNECTIONS]; //Arry of pollfd for polling for input
 
+    /*info sha1 hash*/
+    char *info_hash;
     /*set once torrent is parse*/
     bt_info_t *bt_info; //the parsed info for this torrent
 
