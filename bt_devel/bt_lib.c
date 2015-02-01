@@ -183,11 +183,11 @@ int contact_tracker(bt_args_t *bt_args)
         "&left=1162936320"
         "&compact=1";
 
-    char *result = send_http_request(bt_args, request_to_send);
+    char *result = send_http_request(request_to_send);
     if (result)
     {
         printf("Trackers responce is: %s\n", result);
-        decode_tracker_info(result);
+        decode_tracker_info(result, bt_args);
     }
     return 0;
 }
