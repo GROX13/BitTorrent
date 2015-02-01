@@ -335,12 +335,20 @@ int read_from_peer(peer_t *peer, bt_msg_t *msg) {
 int _fill_info(bt_info_t *info_t, be_node *node, ssize_t indent, char *key) {
     size_t i;
 
+    if (info_t == NULL || node == NULL || key == NULL)
+        return 0;
+
     indent = abs((int) indent);
 
     switch (node->type) {
         case BE_STR:
             if (!strcmp(key, "announce")) {
                 strcpy(info_t->announce, node->val.s);
+                break;
+            }
+
+            if (!strcmp(key, "pieces")) {
+                info_t->piece_hashes = &(node->val.s);
                 break;
             }
 
@@ -367,8 +375,6 @@ int _fill_info(bt_info_t *info_t, be_node *node, ssize_t indent, char *key) {
             break;
 
         case BE_DICT:
-           if (strcmp(key, "info") == 0) 
-               printf("_____%d\n", be_str_len(node));
             for (i = 0; node->val.d[i].val; ++i)
                 _fill_info(info_t, node->val.d[i].val, -(indent + 1), node->val.d[i].key);
 
@@ -380,34 +386,9 @@ int _fill_info(bt_info_t *info_t, be_node *node, ssize_t indent, char *key) {
 /**
 * parse_bt_info(bt_info_t *bt_info, be_node *node) -> int
 *
-* Returns 1 in case sucess, 
+* Returns 1 in case sucess, will exit on varios errors
 */
 int parse_bt_info(bt_info_t *bt_info, be_node *node) {
-    char *new_file;
-    long long leng;
-    new_file = read_file(bt_args->torrent_file, &leng);
-
-    char *hashed_info = malloc(25);
-    memset(hashed_info, '\0', 25);
-
-    char *inf = strstr(strstr(new_file, "info"), "d");
-    
-    size_t len = (size_t) strlen(inf);
-    printf("Before: %d\n", len);
-    len = (size_t) be_str_len(be_decode(inf));
-    be_dump(be_decode(inf));
-    printf("After: %d\n", len);
-
-    be_node *result = malloc(sizeof(be_node));
-    _be_find(bt_args->bt_info, result, "info");
-    len = (size_t) be_str_len(result);
-    be_dump(be_decode(inf));
-    printf("After after: %d\n", len);
-
-    len = 44478;
-
-    SHA1((unsigned char const *) inf, len, (unsigned char *) hashed_info);
-
     return _fill_info(bt_info, node, 0, "");
 }
 
