@@ -398,6 +398,7 @@ void decode_tracker_info(char *info) {
         printf("The Peer ID is %s\n", id);
         peer_t *peer_t1 = malloc(sizeof(peer_t));
         init_peer(peer_t1, id, inet_ntoa(ip_addr), port);
+        //add_peer(peer_t1, bt_args, char *hostname, unsigned short port);
         free(peer_t1);
     }
 
