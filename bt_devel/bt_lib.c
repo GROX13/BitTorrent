@@ -118,35 +118,32 @@ void _be_find(be_node *node, be_node *result, char *search) {
 }
 
 int contact_tracker(bt_args_t *bt_args) {
-//    printf("Starting contact tracker:\n");
-//    printf("Announce: %s\n", bt_args->bt_info->announce);
-//    printf("Length: %d\n", bt_args->bt_info->length);
-//    printf("Name: %s\n", bt_args->bt_info->name);
-//    printf("Number of pieces: %u\n", bt_args->bt_info->num_pieces);
-//    printf("Piece length: %d\n", bt_args->bt_info->piece_length);
+    // char *new_file;
+    // long long leng;
 
-    char *new_file;
-    long long leng;
+    // new_file = read_file(bt_args->torrent_file, &leng);
 
-    new_file = read_file(bt_args->torrent_file, &leng);
-//    char *new_file = malloc(strlen(file));
-//    strncpy(new_file, file, strlen(file) - 2);
-//    memcpy(new_file, file, strlen(file) - 2);
+    // printf("Length ----> %d\n", leng);
+    // char *hashed_info = malloc(2048);
+    // char *next;
 
-    printf("Length ----> %d\n", leng);
-    char *hashed_info = malloc(2048);
+    // bencode_t *be = malloc(sizeof(bencode_t)),
+    //         *be_next = malloc(sizeof(bencode_t));
 
-    bencode_t *be = malloc(sizeof(bencode_t));
-    
-    bencode_init(be, new_file, (int) leng);
+    // bencode_init(be, new_file, (int) leng);
 
-    int len;
-    char *inf = strstr(strstr(new_file, "info"), "d");
-    bencode_dict_get_start_and_len(be, &inf, &len);
+    // while (bencode_dict_has_next(be)) {
+    //     bencode_dict_get_next(be, be_next, (char const **) &next, (int *) &leng);
+    //     be = be_next;
+    // }
 
-    printf("len %d\n", len);
+    // int len;
+    // char *inf = strstr(strstr(new_file, "info"), "d");
+    // bencode_dict_get_start_and_len(be, &inf, &len);
+
+    // printf("len %d\n", len);
     // len = (int) strlen(strstr(strstr(new_file, "info"), "d"));
-    
+
     // printf("-----> %d\n", (inf - new_file));
     // size_t len = (size_t) strlen(inf);
     // printf("Before: %d\n", len);
@@ -164,7 +161,7 @@ int contact_tracker(bt_args_t *bt_args) {
 
     // SHA1((unsigned char const *) inf, len, (unsigned char *) hashed_info);
 
-    // char *request_to_send;
+    char *request_to_send;
     // request_to_send = malloc(2048);
     // memset(request_to_send, '\0', 2048);
 
@@ -187,24 +184,24 @@ int contact_tracker(bt_args_t *bt_args) {
     // // &left=0
     // // &event=started
 
-    // request_to_send =
-    //         "http://torrent.ubuntu.com:6969/"
-    //                 "announce?info_hash=%B4%15%C9%13d%3E%5F%F4%9F%E3%7D0K%BB%5En%11%ADQ%01"
-    //                 "&peer_id=%2DCD0303%2D%3D%27%7CP%94%84T%ED%BC%14%F4%20"
-    //                 "&port=2706"
-    //                 "&key=2YUMOFZ3"
-    //                 "&event=started"
-    //                 "&uploaded=0"
-    //                 "&downloaded=0"
-    //                 "&left=1162936320"
-    //                 "&compact=1"
-    //                 "&numwant=100";
+    request_to_send =
+            "http://torrent.ubuntu.com:6969/"
+                    "announce?info_hash=%B4%15%C9%13d%3E%5F%F4%9F%E3%7D0K%BB%5En%11%ADQ%01"
+                    "&peer_id=%2DCD0303%2D%3D%27%7CP%94%84T%ED%BC%14%F4%20"
+                    "&port=2706"
+                    "&key=2YUMOFZ3"
+                    "&event=started"
+                    "&uploaded=0"
+                    "&downloaded=0"
+                    "&left=1162936320"
+                    "&compact=1"
+                    "&numwant=100";
 
-    // char * res = send_http_request(request_to_send);
-    // if (res) {
-    //     puts(res);
-    //     decode_tracker_info(res);
-    // }
+    char * res = send_http_request(request_to_send);
+    if (res) {
+        puts(res);
+        decode_tracker_info(res);
+    }
     return 0;
 }
 
@@ -250,7 +247,7 @@ int drop_peer(peer_t *peer, bt_args_t *bt_args) {
     int i = 0;
     for (; i < MAX_CONNECTIONS; ++i)
         if (strcmp((char const *) bt_args->peers[i]->id, (char const *) peer->id) == 0
-            && bt_args->peers[i]->port == peer->port) {
+                && bt_args->peers[i]->port == peer->port) {
             bt_args->peers[i] = NULL;
             return 0;
         }
@@ -374,7 +371,7 @@ int _fill_info(bt_info_t *info_t, be_node *node, ssize_t indent, char *key) {
                 info_t->length = (int) node->val.i;
                 break;
             }
-    
+
             if (!strcmp(key, "piece length"))
                 info_t->piece_length = (int) node->val.i;
 
