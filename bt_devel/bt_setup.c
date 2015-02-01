@@ -359,7 +359,7 @@ int parse_info(bt_peer *peer, be_node *node) {
 }
 
 
-void decode_tracker_info(char *info) {
+void decode_tracker_info(bt_args_t *bt_args, char *info) {
     be_node *node;
     node = load_node(info);
 

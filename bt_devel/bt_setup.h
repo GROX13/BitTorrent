@@ -69,7 +69,7 @@ char *url_encode(char *str);
 
 char *url_decode(char *str);
 
-void decode_tracker_info(char *info);
+void decode_tracker_info(bt_args_t *bt_args, char *info);
 
 /**
 * Initialise a bencode object.
