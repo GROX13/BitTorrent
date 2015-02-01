@@ -151,7 +151,7 @@ int contact_tracker(bt_args_t *bt_args)
     memset(request_to_send, '\0', FILE_NAME_MAX);
 
     bt_args->info_hash = hashed_info;
-
+    bt_args->bt_peer_id = "SatJan311528262015RR";
     //aq unda iyos: Port number this peer is listening on.
     //Common behavior is for a downloader to try to listen on
     //port 6881 and if that port is taken try 6882, then 6883, etc. and give up after 6889.

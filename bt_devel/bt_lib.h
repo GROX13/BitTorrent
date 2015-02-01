@@ -95,6 +95,8 @@ typedef struct
 
     /*info sha1 hash*/
     char *info_hash;
+    /*peer id*/
+    char *bt_peer_id;
     /*set once torrent is parse*/
     bt_info_t *bt_info; //the parsed info for this torrent
 

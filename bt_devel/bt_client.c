@@ -16,7 +16,8 @@
 #include "bt_lib.h"
 #include "bt_setup.h"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 
     bt_args_t bt_args;
     be_node *node; // top node in the bencoding
@@ -25,14 +26,16 @@ int main(int argc, char *argv[]) {
     parse_args(&bt_args, argc, argv);
 
 
-    if (bt_args.verbose) {
+    if (bt_args.verbose)
+    {
         printf("Args:\n");
         printf("verbose: %d\n", bt_args.verbose);
         printf("save_file: %s\n", bt_args.save_file);
         printf("log_file: %s\n", bt_args.log_file);
         printf("torrent_file: %s\n", bt_args.torrent_file);
 
-        for (i = 0; i < MAX_CONNECTIONS; i++) {
+        for (i = 0; i < MAX_CONNECTIONS; i++)
+        {
             if (bt_args.peers[i] != NULL)
                 print_peer(bt_args.peers[i]);
         }
@@ -43,7 +46,8 @@ int main(int argc, char *argv[]) {
     //read and parse the torent file
     node = load_be_node(bt_args.torrent_file);
 
-    if (bt_args.verbose) {
+    if (bt_args.verbose)
+    {
         be_dump(node);
     }
 
@@ -54,9 +58,32 @@ int main(int argc, char *argv[]) {
 
     contact_tracker(&bt_args);
 
+    for (i = 0; i < MAX_CONNECTIONS; ++i)
+    {
+        if (bt_args.peers[i])
+        {
+            bt_msg_t msg;
+            bt_handshake_t handshake_t;
+
+            msg.length = 69;
+            msg.type = BT_HANDSHAKE_T;
+
+            handshake_t.protocol_name_length = 19;
+            handshake_t.protocol_name = "BitTorrent protocol";
+            memset(handshake_t.reserved_bytes, 0, 16);
+            handshake_t.hash_info = bt_args.info_hash;
+            handshake_t.peer_id = bt_args.bt_peer_id;
+
+            msg.payload.handshake = handshake_t;
+            
+            send_to_peer(bt_args.peers[i], &msg);
+        }
+    }
+
     //main client loop
     printf("Starting Main Loop\n");
-    while (1) {
+    while (1)
+    {
 
         //try to accept incoming connection from new peer
 
