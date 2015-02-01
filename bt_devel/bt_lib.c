@@ -187,7 +187,7 @@ int contact_tracker(bt_args_t *bt_args)
     if (result)
     {
         printf("Trackers responce is: %s\n", result);
-        decode_tracker_info(result, bt_args);
+        decode_tracker_info(bt_args, result);
     }
     return 0;
 }
