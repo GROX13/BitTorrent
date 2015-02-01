@@ -174,7 +174,7 @@ int contact_tracker(bt_args_t *bt_args)
     request_to_send =
         "http://torrent.ubuntu.com:6969/"
         "announce?info_hash=%B4%15%C9%13d%3E%5F%F4%9F%E3%7D0K%BB%5En%11%ADQ%01"
-        "&peer_id=%2DCD0303%2D%3D%27%7CP%94%84T%ED%BC%14%F4%20"
+        "&peer_id=SatJan311528262015RR"
         "&port=6681"
         "&key=2YUMOFZ3"
         "&event=started"
@@ -362,7 +362,6 @@ int _fill_info(bt_info_t *info_t, be_node *node, ssize_t indent, char *key)
         if (!strcmp(key, "pieces"))
         {
             info_t->piece_hashes = &(node->val.s);
-            printf("%lld\n", be_str_len(node));
             break;
         }
 
