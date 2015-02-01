@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
             handshake_t.peer_id = bt_args.bt_peer_id;
 
             msg.payload.handshake = handshake_t;
-            
+
             send_to_peer(bt_args.peers[i], &msg);
         }
     }
