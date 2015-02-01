@@ -218,7 +218,7 @@ int add_peer(peer_t *peer, bt_args_t *bt_args, char *hostname, unsigned short po
 {
     int i = 0;
     for (; i < MAX_CONNECTIONS; ++i)
-        if (bt_args->peers[i] != NULL)
+        if (!bt_args->peers[i])
         {
             bt_args->peers[i] = peer;
             return 0;
