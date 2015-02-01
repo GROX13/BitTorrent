@@ -383,26 +383,22 @@ void decode_tracker_info(bt_args_t *bt_args, char *info) {
         uint16_t port;
         ip = (uint32_t) ((char *) peer->peer_hashes + count);
         count = count + 4;
-        printf("ip: %i\n", ip);
         port = (uint16_t) ((char *) peer->peer_hashes + count);
         count = count + 2;
-        printf("port: %hu\n", port);
         //IP stringad
         struct in_addr ip_addr;
         ip_addr.s_addr = htonl(ip);
-        printf("The IP address is %s\n", inet_ntoa(ip_addr));
 
         char *id = malloc(21);
         memset(id, 0, 21);
         calc_id(inet_ntoa(ip_addr), port, id);
-        printf("The Peer ID is %s\n", id);
         peer_t *peer_t1 = malloc(sizeof(peer_t));
         init_peer(peer_t1, id, inet_ntoa(ip_addr), port);
         char *hostname;
         add_peer(peer_t1, bt_args, hostname, port);
+        print_peer(peer_t1);
         free(peer_t1);
     }
-
 
 }
 
