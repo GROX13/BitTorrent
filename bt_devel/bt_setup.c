@@ -423,7 +423,7 @@ void decode_tracker_info(bt_args_t *bt_args, char *info)
         count = count + 2;
         //IP stringad
         struct in_addr ip_addr;
-        ip_addr.s_addr = htonl(ip);
+        ip_addr.s_addr = ip;
 
         char *id = malloc(21);
         memset(id, 0, 21);
@@ -433,7 +433,7 @@ void decode_tracker_info(bt_args_t *bt_args, char *info)
         // char *hostname;
         add_peer(peer_t1, bt_args, NULL, port);
         print_peer(peer_t1);
-        free(peer_t1);
+        //free(peer_t1);
     }
 
 }

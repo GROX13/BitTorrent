@@ -74,10 +74,8 @@ int main(int argc, char *argv[])
             memset(handshake_t.reserved_bytes, 0, 8);
             memcpy(handshake_t.hash_info, bt_args.info_hash , 20);
             memcpy(handshake_t.peer_id ,bt_args.bt_peer_id, 20);
-
+			
             msg.payload.handshake = handshake_t;
-            puts(handshake_t.peer_id);
-			puts(handshake_t.protocol_name);
             send_to_peer(bt_args.peers[i], &msg);
         }
     }
