@@ -60,6 +60,7 @@ int main(int argc, char *argv[])
 
     for (i = 0; i < MAX_CONNECTIONS; ++i)
     {
+		
         if (bt_args.peers[i])
         {
             bt_msg_t msg;
@@ -69,13 +70,14 @@ int main(int argc, char *argv[])
             msg.type = BT_HANDSHAKE_T;
 
             handshake_t.protocol_name_length = 19;
-            handshake_t.protocol_name = "BitTorrent protocol";
-            memset(handshake_t.reserved_bytes, 0, 16);
-            handshake_t.hash_info = bt_args.info_hash;
-            handshake_t.peer_id = bt_args.bt_peer_id;
+            strncpy(handshake_t.protocol_name ,"BitTorrent protocol",19);
+            memset(handshake_t.reserved_bytes, 0, 8);
+            strncpy(handshake_t.hash_info, bt_args.info_hash , 20);
+            strncpy(handshake_t.peer_id ,bt_args.bt_peer_id, 20);
 
             msg.payload.handshake = handshake_t;
-            
+            puts(handshake_t.peer_id);
+			puts(handshake_t.protocol_name);
             send_to_peer(bt_args.peers[i], &msg);
         }
     }
