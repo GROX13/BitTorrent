@@ -379,8 +379,8 @@ void decode_tracker_info(char *info) {
 	int count = 0;
 	
 	for (i = 0; i < num_peers; i++){
-		int ip;	
-		short port;
+		uint32_t ip;	
+		uint16_t port;
 		ip = (int)((char*)peer->peer_hashes + count);
 		count = count + 4;
  		printf("ip: %i\n", ip);
@@ -396,7 +396,7 @@ void decode_tracker_info(char *info) {
         calc_id(inet_ntoa(ip_addr), port, id);
         printf("The Peer ID is %s\n", id);
         peer_t *peer;
-        init_peer(peer, id, inet_ntoa(ip_addr), port);
+        //init_peer(peer, id, inet_ntoa(ip_addr), port);
 	}
 	
 	
