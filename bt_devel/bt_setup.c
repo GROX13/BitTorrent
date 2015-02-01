@@ -391,6 +391,12 @@ void decode_tracker_info(char *info) {
     	struct in_addr ip_addr;
     	ip_addr.s_addr = ip;
    		printf("The IP address is %s\n", inet_ntoa(ip_addr));
+        
+        char *id;
+        calc_id(inet_ntoa(ip_addr), port, id);
+        printf("The Peer ID is %s\n", id);
+        peer_t *peer;
+        init_peer(peer, id, inet_ntoa(ip_addr), port);
 	}
 	
 	
