@@ -319,18 +319,41 @@ void print_peer(peer_t *peer)
 /* check status on peers, maybe they went offline? */
 int check_peer(peer_t *peer)
 {
+
     return 0;
 }
 
 /*check if peers want to send me something*/
 int poll_peers(bt_args_t *bt_args)
 {
+
     return 0;
 }
 
 /*send a msg to a peer*/
 int send_to_peer(peer_t *peer, bt_msg_t *msg)
 {
+    switch (msg->type)
+    {
+    case BT_HANDSHAKE_T:
+
+        break;
+
+    case BT_BITFIELD_T:
+
+        break;
+
+    case BT_REQUEST_T:
+
+        break;
+
+    case BT_CANCEL_T:
+
+        break;
+    case BT_PIECE_T:
+
+        break;
+    }
     return 0;
 }
 
