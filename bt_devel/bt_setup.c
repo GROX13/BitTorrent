@@ -389,7 +389,7 @@ void decode_tracker_info(char *info) {
         printf("port: %hu\n", port);
         //IP stringad
         struct in_addr ip_addr;
-        ip_addr.s_addr = ip;
+        ip_addr.s_addr = htonl(ip);
         printf("The IP address is %s\n", inet_ntoa(ip_addr));
 
         char *id = malloc(21);
