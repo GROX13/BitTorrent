@@ -138,13 +138,13 @@ int contact_tracker(bt_args_t *bt_args) {
 
     bencode_t *be = malloc(sizeof(bencode_t));
     
-    bencode_init(be, read_file, (int) leng);
+    bencode_init(be, new_file, (int) leng);
 
     int len;
     char *inf = strstr(strstr(new_file, "info"), "d");
     bencode_dict_get_start_and_len(be, &inf, &len);
 
-    printf("%d\n", len);
+    printf("len %d\n", len);
     // len = (int) strlen(strstr(strstr(new_file, "info"), "d"));
     
     // printf("-----> %d\n", (inf - new_file));
