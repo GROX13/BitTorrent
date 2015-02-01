@@ -109,11 +109,11 @@ typedef struct
 
 typedef struct
 {
-    int protocol_name_length;
-    char *protocol_name;
-    char reserved_bytes[16];
-    char *hash_info;
-    char *peer_id;
+    uint8_t protocol_name_length;
+    char protocol_name[19];
+    char reserved_bytes[8];
+    char hash_info[20];
+    char peer_id[20];
 } bt_handshake_t;
 
 typedef struct
