@@ -7,7 +7,7 @@
 #include <ctype.h>
 #include <glob.h>
 #include <assert.h>
-
+#include <inttypes.h>
 
 #include "bt_setup.h"
 #include "bt_lib.h"
@@ -489,16 +489,18 @@ int handshake(peer_t *peer, bt_handshake_t msg) {
 	if(size == 68){
 		memcpy(&peer->id, &buff[48], 20);
 		printf("PEER ID IS: %s\n", peer->id);
-		
-		
 	}	
 
-    size = (int) read(sockfd, buff, 2000);
+	int msg_len = 0;
+	size = (int) read(sockfd, &msg_len, sizeof(int));
+	msg_len = ntohl(msg_len);
+	printf("Message length is: %i\n", msg_len);
 	
-    printf("received size: %i\nreceived %s\n", size, buff);
-    printf("____________\n");
-	uint8_t msg_id = *((uint8_t *) &buff[4]);
-	printf("Message ID is: %i\n", msg_id);
+
+	uint8_t msg_id;
+	size = (int) read(sockfd, &msg_id, sizeof(char));
+	printf("Message id is:  %" SCNd8 "\n", msg_id);
+   
 	switch (msg_id)
     {
 
@@ -523,26 +525,25 @@ int handshake(peer_t *peer, bt_handshake_t msg) {
 
     case BT_BITFILED:;
 		bt_bitfield_t *bt_bitfield = malloc(sizeof(bt_bitfield_t));
-		bt_bitfield->size = (size_t)(size - 5);
+		bt_bitfield->size = (size_t)(msg_len - 1);
 		printf("bitfield size is : %i\n ", bt_bitfield->size);
-		memcpy(bt_bitfield->bitfield, &buff[5], bt_bitfield->size); 
+		bt_bitfield->bitfield = malloc(bt_bitfield->size);
+		size = (int) read(sockfd, bt_bitfield->bitfield, bt_bitfield->size);
         break;
 
     case BT_REQUEST:;
 		bt_request_t *bt_request = malloc(sizeof(bt_request_t));
-		//vici rom ar mushaobs, magram sxvnairad ver vanicheb da gavasworot
-		bt_request->index = *(int*)&buff[5];
-		bt_request->begin = *(int*)&buff[9];
-		bt_request->length = *(int*)&buff[13];
+		size = (int) read(sockfd, &bt_request->index, sizeof(int));
+        size = (int) read(sockfd, &bt_request->begin, sizeof(int));
+		size = (int) read(sockfd, &bt_request->length, sizeof(int));
         break;
 
     case BT_PIECE:;
 		bt_piece_t * bt_piece = malloc(sizeof(bt_piece_t));
-		//vici rom ar mushaobs, magram sxvnairad ver vanicheb da gavasworot
-		int block_size = *(int*)&buff[0];
-		bt_piece->index = *(int*)&buff[5];
-		bt_piece->begin = *(int*)&buff[9];
-		memcpy(bt_piece->piece, &buff[13], block_size);
+		int block_len = msg_len - 9;
+		size = (int) read(sockfd, &bt_piece->index, sizeof(int));
+        size = (int) read(sockfd, &bt_piece->begin, sizeof(int));
+		size = (int) read(sockfd, &bt_piece->piece, block_len);
         break;
 
 	case BT_CANCEL:
@@ -553,7 +554,7 @@ int handshake(peer_t *peer, bt_handshake_t msg) {
         break;
     }
 	
-    return 1;
+    return 0;
 }
 
 /**
