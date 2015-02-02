@@ -77,14 +77,8 @@ int main(int argc, char *argv[])
 
             msg.payload.handshake = handshake_t;
             send_to_peer(bt_args.peers[i], &msg);
-        }
-    }
-
-    for (i = 0; i < MAX_CONNECTIONS; ++i)
-    {
-        if (bt_args.peers[i])
-        {
-            read_from_peer(bt_args.peers[i], NULL);
+            if (i == 2)
+                break;
         }
     }
 

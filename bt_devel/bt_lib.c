@@ -381,11 +381,16 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
         memcpy(&data[offset], msg->payload.handshake.peer_id, size);
 
         size = write(sockfd, data, sizeof(bt_handshake_t));
-        // printf("sent size: %i\n", size);
-        // char buff[68];
-        // size = read(sockfd, buff, 68);
-        // printf("received size: %i\n", size);
-        // puts(buff);
+        printf("____________\n");
+        printf("sent size: %i\n", size);
+
+        char buff[2000];
+        memset(buff, '\0', 2000);
+        size = read(sockfd, buff, 2000);
+        printf("received size: %i\nreceived %s\n", size, buff);
+        size = read(sockfd, buff, 2000);
+        printf("received size: %i\nreceived %s\n", size, buff);
+        printf("____________\n");
         break;
 
     case BT_BITFIELD_T:
@@ -424,8 +429,14 @@ int read_from_peer(peer_t *peer, bt_msg_t *msg)
     //    server.sin_family = AF_INET;
     //    server.sin_port = htons( 80 );
 
+    struct sockaddr_in addr;
+
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(peer->sockaddr.sin_port);
+    addr.sin_addr = peer->sockaddr.sin_addr;
+
     //Connect to remote server
-    if (connect(socket_desc , (struct sockaddr *)&peer->sockaddr , sizeof(peer->sockaddr)) < 0)
+    if (connect(socket_desc , (struct sockaddr *)&addr, sizeof(peer->sockaddr)) < 0)
     {
         puts("connect error");
         return 1;
