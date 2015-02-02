@@ -331,60 +331,59 @@ int poll_peers(bt_args_t *bt_args)
 }
 
 
- //   char reserved_bytes[8];
- //   char hash_info[20];
- //   char peer_id[20];
+//   char reserved_bytes[8];
+//   char hash_info[20];
+//   char peer_id[20];
 /*send a msg to a peer*/
 int send_to_peer(peer_t *peer, bt_msg_t *msg)
 {
+    int sockfd;
+    struct sockaddr_in addr;
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd == -1)
+        perror("Couldn't create the socket");
 
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(peer->sockaddr.sin_port);
+    addr.sin_addr = peer->sockaddr.sin_addr;
+    //peer->sockaddr
+    if (connect (sockfd, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) == -1)
+    {
+        perror("Connection Problem");
+        return 1;
+    }
     switch (msg->type)
     {
     case BT_HANDSHAKE_T:;
-		int sockfd;
-	  	struct sockaddr_in addr;
-	  	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	  	if(sockfd == -1)
-			perror("Couldn't create the socket");
-		  
-		  addr.sin_family = AF_INET;
-		  addr.sin_port = htons(peer->sockaddr.sin_port);
-		  addr.sin_addr = peer->sockaddr.sin_addr;
 
-		 if (connect (sockfd, (struct sockaddr*)&addr, sizeof(struct sockaddr_in)) == -1){
-    		perror("Connection Problem");
-   			return 1;
-  		}
-		
+        // datashi structuris gadawera
 
-		// datashi structuris gadawera
-  		
-		char data[68];
-		int size = sizeof(msg->payload.handshake.protocol_name_length);
-		int offset = 0;
-		memcpy(&data[offset], &msg->payload.handshake.protocol_name_length, size);
-		offset = offset + size;
-		size =  sizeof(msg->payload.handshake.protocol_name);
-		memcpy(&data[offset], msg->payload.handshake.protocol_name, size);
-	
-		offset = offset + size;
-		size = sizeof(msg->payload.handshake.reserved_bytes);
-		memcpy(&data[offset], msg->payload.handshake.reserved_bytes, size);
-	
-		offset = offset + size;
-		size = sizeof(msg->payload.handshake.hash_info);
-		memcpy(&data[offset], msg->payload.handshake.hash_info, size);
-	
-		offset = offset + size;
-		size = sizeof(msg->payload.handshake.peer_id);
-		memcpy(&data[offset], msg->payload.handshake.peer_id, size);
-	
-		size = write(sockfd, data, sizeof(bt_handshake_t));
-		printf("sent size: %i\n",size);
-		char buff[68];
-  		size = read(sockfd, buff, 68);
-		printf("received size: %i\n",size);
-		puts(buff);
+        char data[68];
+        int size = sizeof(msg->payload.handshake.protocol_name_length);
+        int offset = 0;
+        memcpy(&data[offset], &msg->payload.handshake.protocol_name_length, size);
+        offset = offset + size;
+        size =  sizeof(msg->payload.handshake.protocol_name);
+        memcpy(&data[offset], msg->payload.handshake.protocol_name, size);
+
+        offset = offset + size;
+        size = sizeof(msg->payload.handshake.reserved_bytes);
+        memcpy(&data[offset], msg->payload.handshake.reserved_bytes, size);
+
+        offset = offset + size;
+        size = sizeof(msg->payload.handshake.hash_info);
+        memcpy(&data[offset], msg->payload.handshake.hash_info, size);
+
+        offset = offset + size;
+        size = sizeof(msg->payload.handshake.peer_id);
+        memcpy(&data[offset], msg->payload.handshake.peer_id, size);
+
+        size = write(sockfd, data, sizeof(bt_handshake_t));
+        printf("sent size: %i\n", size);
+        char buff[68];
+        size = read(sockfd, buff, 68);
+        printf("received size: %i\n", size);
+        puts(buff);
         break;
 
     case BT_BITFIELD_T:
