@@ -438,6 +438,59 @@ void decode_tracker_info(bt_args_t *bt_args, char *info)
 
 }
 
+int handshake(peer_t *peer, bt_handshake_t msg) {
+    int sockfd;
+    struct sockaddr_in addr;
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd == -1)
+        perror("Couldn't create the socket");
+
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(peer->sockaddr.sin_port);
+    addr.sin_addr = peer->sockaddr.sin_addr;
+    //peer->sockaddr
+    if (connect (sockfd, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) == -1)
+    {
+        perror("Connection Problem");
+        return 1;
+    }
+
+    // datashi structuris gadawera
+
+    char data[68];
+    int size = sizeof(msg.protocol_name_length);
+    int offset = 0;
+    memcpy(&data[offset], &msg.protocol_name_length, (size_t) size);
+    offset = offset + size;
+    size =  sizeof(msg.protocol_name);
+    memcpy(&data[offset], msg.protocol_name, (size_t) size);
+
+    offset = offset + size;
+    size = sizeof(msg.reserved_bytes);
+    memcpy(&data[offset], msg.reserved_bytes, (size_t) size);
+
+    offset = offset + size;
+    size = sizeof(msg.hash_info);
+    memcpy(&data[offset], msg.hash_info, (size_t) size);
+
+    offset = offset + size;
+    size = sizeof(msg.peer_id);
+    memcpy(&data[offset], msg.peer_id, (size_t) size);
+
+    size = (int) write(sockfd, data, sizeof(bt_handshake_t));
+    printf("____________\n");
+    printf("sent size: %i\n", size);
+
+    char buff[2000];
+    memset(buff, '\0', 2000);
+    size = (int) read(sockfd, buff, 2000);
+    printf("received size: %i\nreceived %s\n", size, buff);
+    size = (int) read(sockfd, buff, 2000);
+    printf("received size: %i\nreceived %s\n", size, buff);
+    printf("____________\n");
+    return 1;
+}
+
 /**
 *
 **/

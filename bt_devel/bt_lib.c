@@ -356,42 +356,6 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
     }
     switch (msg->type)
     {
-    case BT_HANDSHAKE_T:;
-
-        // datashi structuris gadawera
-
-        char data[68];
-        int size = sizeof(msg->payload.handshake.protocol_name_length);
-        int offset = 0;
-        memcpy(&data[offset], &msg->payload.handshake.protocol_name_length, size);
-        offset = offset + size;
-        size =  sizeof(msg->payload.handshake.protocol_name);
-        memcpy(&data[offset], msg->payload.handshake.protocol_name, size);
-
-        offset = offset + size;
-        size = sizeof(msg->payload.handshake.reserved_bytes);
-        memcpy(&data[offset], msg->payload.handshake.reserved_bytes, size);
-
-        offset = offset + size;
-        size = sizeof(msg->payload.handshake.hash_info);
-        memcpy(&data[offset], msg->payload.handshake.hash_info, size);
-
-        offset = offset + size;
-        size = sizeof(msg->payload.handshake.peer_id);
-        memcpy(&data[offset], msg->payload.handshake.peer_id, size);
-
-        size = write(sockfd, data, sizeof(bt_handshake_t));
-        printf("____________\n");
-        printf("sent size: %i\n", size);
-
-        char buff[2000];
-        memset(buff, '\0', 2000);
-        size = read(sockfd, buff, 2000);
-        printf("received size: %i\nreceived %s\n", size, buff);
-        size = read(sockfd, buff, 2000);
-        printf("received size: %i\nreceived %s\n", size, buff);
-        printf("____________\n");
-        break;
 
     case BT_BITFIELD_T:
 
@@ -407,6 +371,7 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
     case BT_PIECE_T:
 
         break;
+        
     }
     return 0;
 }

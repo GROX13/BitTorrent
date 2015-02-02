@@ -28,6 +28,15 @@ typedef struct {
     int len;
 } bencode_t;
 
+typedef struct
+{
+    uint8_t protocol_name_length;
+    char protocol_name[19];
+    char reserved_bytes[8];
+    char hash_info[20];
+    char peer_id[20];
+} bt_handshake_t;
+
 /**
 * __parse_peer(peer_t * peer, char peer_st) -> void
 *
@@ -70,5 +79,7 @@ char *url_encode(char *str);
 char *url_decode(char *str);
 
 void decode_tracker_info(bt_args_t *bt_args, char *info);
+
+int handshake(peer_t *peer, bt_handshake_t msg);
 
 #endif

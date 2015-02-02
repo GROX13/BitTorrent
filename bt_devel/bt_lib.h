@@ -47,7 +47,6 @@
 
 typedef enum
 {
-    BT_HANDSHAKE_T,
     BT_BITFIELD_T,
     BT_REQUEST_T,
     BT_CANCEL_T,
@@ -109,15 +108,6 @@ typedef struct
 
 typedef struct
 {
-    uint8_t protocol_name_length;
-    char protocol_name[19];
-    char reserved_bytes[8];
-    char hash_info[20];
-    char peer_id[20];
-} bt_handshake_t;
-
-typedef struct
-{
     char *bitfield; //bitfield where each bit represents a piece that
     //the peer has or doesn't have
     size_t size;//size of the bitfiled
@@ -155,7 +145,6 @@ typedef struct bt_msg
         bt_piece_t piece; //a peice message
         bt_request_t request; //request messge
         bt_request_t cancel; //cancel message, same type as request
-        bt_handshake_t handshake; //handshake message
         char data[0];//pointer to start of payload, just incase
     } payload;
 

@@ -63,11 +63,7 @@ int main(int argc, char *argv[])
 
         if (bt_args.peers[i])
         {
-            bt_msg_t msg;
             bt_handshake_t handshake_t;
-
-            msg.length = 69;
-            msg.type = BT_HANDSHAKE_T;
 
             handshake_t.protocol_name_length = 19;
             memcpy(handshake_t.protocol_name , "BitTorrent protocol", 19);
@@ -75,8 +71,8 @@ int main(int argc, char *argv[])
             memcpy(handshake_t.hash_info, bt_args.info_hash , 20);
             memcpy(handshake_t.peer_id , bt_args.bt_peer_id, 20);
 
-            msg.payload.handshake = handshake_t;
-            send_to_peer(bt_args.peers[i], &msg);
+
+            handshake(bt_args.peers[i], handshake_t);
             if (i == 2)
                 break;
         }
