@@ -132,7 +132,7 @@ typedef struct bt_msg
 {
     int length; //length of remaining message,
     //0 length message is a keep-alive message
-    //unsigned char bt_type;//type of bt_mesage
+    //unsigned char bt_type; type of bt_mesage
 
     bt_msg_type type;//type of bt_mesage
 

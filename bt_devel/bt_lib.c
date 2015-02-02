@@ -13,6 +13,7 @@
 #include <curl/curl.h>
 #include <bits/errno.h>
 #include <asm-generic/errno-base.h>
+#include <pthread.h>
 #include <openssl/sha.h> //hashing pieces
 
 #include "bencode.h"
@@ -333,27 +334,32 @@ int poll_peers(bt_args_t *bt_args)
 }
 
 
-//   char reserved_bytes[8];
-//   char hash_info[20];
-//   char peer_id[20];
-/*send a msg to a peer*/
+/**
+*  char reserved_bytes[8];
+*  char hash_info[20];
+*  char peer_id[20];
+*  send a msg to a peer
+**/
 int send_to_peer(peer_t *peer, bt_msg_t *msg)
 {
     int sockfd;
-    struct sockaddr_in addr;
+    // struct sockaddr_in addr;
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1)
         perror("Couldn't create the socket");
 
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(peer->sockaddr.sin_port);
-    addr.sin_addr = peer->sockaddr.sin_addr;
-    //peer->sockaddr
-    if (connect (sockfd, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) == -1)
+    // addr.sin_family = AF_INET;
+    // addr.sin_port = htons(peer->sockaddr.sin_port);
+    // addr.sin_addr = peer->sockaddr.sin_addr;
+
+    // peer->sockaddr
+
+    if (connect(sockfd, (struct sockaddr *) & (peer->sockaddr), sizeof(struct sockaddr_in)) == -1)
     {
         perror("Connection Problem");
         return 1;
     }
+
     switch (msg->type)
     {
 
@@ -371,17 +377,42 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
     case BT_PIECE_T:
 
         break;
-        
+
+    default:
+        break;
     }
+    return 0;
+}
+
+/*
+ * This will handle connection for each client
+ * */
+void *_connection_handler(void *socket_desc)
+{
+    //Get the socket descriptor
+    int sock = *(int *)socket_desc;
+
+    char *message;
+
+    //Send some messages to the client
+    message = "Greetings! I am your connection handler\n";
+    write(sock , message , strlen(message));
+
+    message = "Its my duty to communicate with you";
+    write(sock , message , strlen(message));
+
+    //Free the socket pointer
+    free(socket_desc);
+
     return 0;
 }
 
 /*read a msg from a peer and store it in msg*/
 int read_from_peer(peer_t *peer, bt_msg_t *msg)
 {
-    int socket_desc;
-    //    struct sockaddr_in server;
-    char server_reply[2000];
+    int socket_desc , new_socket , c , *new_sock;
+    struct sockaddr_in server , client;
+    char *message;
 
     //Create socket
     socket_desc = socket(AF_INET , SOCK_STREAM , 0);
@@ -390,35 +421,54 @@ int read_from_peer(peer_t *peer, bt_msg_t *msg)
         printf("Could not create socket");
     }
 
-    //    server.sin_addr.s_addr = inet_addr("74.125.235.20");
-    //    server.sin_family = AF_INET;
-    //    server.sin_port = htons( 80 );
+    //Prepare the sockaddr_in structure
+    server.sin_family = AF_INET;
+    server.sin_addr.s_addr = INADDR_ANY;
+    server.sin_port = htons( 8888 );
 
-    struct sockaddr_in addr;
-
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(peer->sockaddr.sin_port);
-    addr.sin_addr = peer->sockaddr.sin_addr;
-
-    //Connect to remote server
-    if (connect(socket_desc , (struct sockaddr *)&addr, sizeof(peer->sockaddr)) < 0)
+    //Bind
+    if ( bind(socket_desc, (struct sockaddr *)&server , sizeof(server)) < 0)
     {
-        puts("connect error");
+        puts("bind failed");
+        return 1;
+    }
+    puts("bind done");
+
+    //Listen
+    listen(socket_desc , 3);
+
+    //Accept and incoming connection
+    puts("Waiting for incoming connections...");
+    c = sizeof(struct sockaddr_in);
+    while ( (new_socket = accept(socket_desc, (struct sockaddr *)&client, (socklen_t *)&c)) )
+    {
+        puts("Connection accepted");
+
+        //Reply to the client
+        message = "Hello Client , I have received your connection. And now I will assign a handler for you\n";
+        write(new_socket , message , strlen(message));
+
+        pthread_t sniffer_thread;
+        new_sock = malloc(1);
+        *new_sock = new_socket;
+
+        if ( pthread_create( &sniffer_thread , NULL ,  _connection_handler , (void *) new_sock) < 0)
+        {
+            perror("could not create thread");
+            return 1;
+        }
+
+        //Now join the thread , so that we dont terminate before the thread
+        //pthread_join( sniffer_thread , NULL);
+        puts("Handler assigned");
+    }
+
+    if (new_socket < 0)
+    {
+        perror("accept failed");
         return 1;
     }
 
-    puts("Connected\n");
-    while (1)
-    {
-        ssize_t count;
-
-        count = read(socket_desc, server_reply, sizeof server_reply);
-        if (count < 2000)
-
-            break;
-
-        puts(server_reply);
-    }
     return 0;
 }
 
