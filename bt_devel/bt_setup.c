@@ -485,9 +485,74 @@ int handshake(peer_t *peer, bt_handshake_t msg) {
     memset(buff, '\0', 2000);
     size = (int) read(sockfd, buff, 2000);
     printf("received size: %i\nreceived %s\n", size, buff);
+	
+	if(size == 68){
+		memcpy(&peer->id, &buff[48], 20);
+		printf("PEER ID IS: %s\n", peer->id);
+		
+		
+	}	
+
     size = (int) read(sockfd, buff, 2000);
+	
     printf("received size: %i\nreceived %s\n", size, buff);
     printf("____________\n");
+	uint8_t msg_id = *((uint8_t *) &buff[4]);
+	printf("Message ID is: %i\n", msg_id);
+	switch (msg_id)
+    {
+
+    case BT_CHOKE:
+		peer->choked = 0;
+        break;
+
+    case BT_UNCHOKE:
+		peer->choked = 1;
+        break;
+
+    case BT_INTERSTED:
+		peer->interested = 0;	
+        break;
+    case BT_NOT_INTERESTED:
+		peer->interested = 1;	
+        break;
+
+	case BT_HAVE:
+
+        break;
+
+    case BT_BITFILED:;
+		bt_bitfield_t *bt_bitfield = malloc(sizeof(bt_bitfield_t));
+		bt_bitfield->size = (size_t)(size - 5);
+		printf("bitfield size is : %i\n ", bt_bitfield->size);
+		memcpy(bt_bitfield->bitfield, &buff[5], bt_bitfield->size); 
+        break;
+
+    case BT_REQUEST:;
+		bt_request_t *bt_request = malloc(sizeof(bt_request_t));
+		//vici rom ar mushaobs, magram sxvnairad ver vanicheb da gavasworot
+		bt_request->index = *(int*)&buff[5];
+		bt_request->begin = *(int*)&buff[9];
+		bt_request->length = *(int*)&buff[13];
+        break;
+
+    case BT_PIECE:;
+		bt_piece_t * bt_piece = malloc(sizeof(bt_piece_t));
+		//vici rom ar mushaobs, magram sxvnairad ver vanicheb da gavasworot
+		int block_size = *(int*)&buff[0];
+		bt_piece->index = *(int*)&buff[5];
+		bt_piece->begin = *(int*)&buff[9];
+		memcpy(bt_piece->piece, &buff[13], block_size);
+        break;
+
+	case BT_CANCEL:
+
+        break;
+
+    default:
+        break;
+    }
+	
     return 1;
 }
 
