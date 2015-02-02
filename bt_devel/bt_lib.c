@@ -379,8 +379,6 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
 		size = sizeof(msg->payload.handshake.peer_id);
 		memcpy(&data[offset], msg->payload.handshake.peer_id, size);
 	
-  		
-		
 		size = write(sockfd, data, sizeof(bt_handshake_t));
 		printf("sent size: %i\n",size);
 		char buff[68];
