@@ -11,6 +11,8 @@
 #include <arpa/inet.h>
 
 #include <curl/curl.h>
+#include <bits/errno.h>
+#include <asm-generic/errno-base.h>
 #include <openssl/sha.h> //hashing pieces
 
 #include "bencode.h"
@@ -379,11 +381,11 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
         memcpy(&data[offset], msg->payload.handshake.peer_id, size);
 
         size = write(sockfd, data, sizeof(bt_handshake_t));
-        printf("sent size: %i\n", size);
-        char buff[68];
-        size = read(sockfd, buff, 68);
-        printf("received size: %i\n", size);
-        puts(buff);
+        // printf("sent size: %i\n", size);
+        // char buff[68];
+        // size = read(sockfd, buff, 68);
+        // printf("received size: %i\n", size);
+        // puts(buff);
         break;
 
     case BT_BITFIELD_T:
@@ -407,6 +409,40 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
 /*read a msg from a peer and store it in msg*/
 int read_from_peer(peer_t *peer, bt_msg_t *msg)
 {
+    int socket_desc;
+    //    struct sockaddr_in server;
+    char server_reply[2000];
+
+    //Create socket
+    socket_desc = socket(AF_INET , SOCK_STREAM , 0);
+    if (socket_desc == -1)
+    {
+        printf("Could not create socket");
+    }
+
+    //    server.sin_addr.s_addr = inet_addr("74.125.235.20");
+    //    server.sin_family = AF_INET;
+    //    server.sin_port = htons( 80 );
+
+    //Connect to remote server
+    if (connect(socket_desc , (struct sockaddr *)&peer->sockaddr , sizeof(peer->sockaddr)) < 0)
+    {
+        puts("connect error");
+        return 1;
+    }
+
+    puts("Connected\n");
+    while (1)
+    {
+        ssize_t count;
+
+        count = read(socket_desc, server_reply, sizeof server_reply);
+        if (count < 2000)
+
+            break;
+
+        puts(server_reply);
+    }
     return 0;
 }
 
