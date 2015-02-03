@@ -147,6 +147,7 @@ int contact_tracker(bt_args_t *bt_args)
     char *inf = strstr(strstr(new_file, "info"), "d");
 
     len = 44478;
+    printf("True is %d my is %lld\n", len, be_len(inf));
 
     SHA1((unsigned char const *) inf, len, (unsigned char *) hashed_info);
 

@@ -318,21 +318,24 @@ be_node *load_be_node(char *torf) {
 }
 
 long long be_len(const char *bencode) {
-    int length = 0;
+    int length = 0, queue = 0;
     char *local = (char *) bencode;
     while (1) {
         switch (*local) {
 
             /* lists */
             case 'l': {
-                local = local +1;
+                local += 1;
+                length += 1;
+                queue += 1;
                 break;
             }
 
                 /* dictionaries */
             case 'd': {
-                local = local + 1;
+                local += 1;
                 length += 1;
+                queue += 1;
                 break;
             }
 
@@ -347,6 +350,16 @@ long long be_len(const char *bencode) {
                 length += 1;
                 local += 1;
                 break;
+            }
+
+                /* end */
+            case 'e': {
+                queue -= 1;
+                if (queue == 0) {
+                    return length + 1;
+                } else {
+                    break;
+                }
             }
 
                 /* byte strings */
@@ -369,7 +382,7 @@ long long be_len(const char *bencode) {
 
                 /* invalid */
             default:
-                return length + 1;
+                return -1;
 
         }
     }
