@@ -397,7 +397,7 @@ void decode_tracker_info(bt_args_t *bt_args, char *info)
 {
     be_node *node = be_decode(info);
 //    node = load_node(info);
-
+    printf("%lld\n", be_len(info));
     be_dump(node);
 
     bt_peer *peer = malloc(sizeof(bt_peer));

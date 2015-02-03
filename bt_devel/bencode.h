@@ -57,6 +57,8 @@ typedef struct be_node {
 
 long long be_str_len(be_node *node);
 
+long long be_len(const char *bencode);
+
 be_node *be_decode(const char *bencode);
 
 be_node *be_decoden(const char *bencode, long long bencode_len);

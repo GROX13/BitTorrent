@@ -316,3 +316,10 @@ be_node *load_be_node(char *torf) {
 
     return node;
 }
+
+long long be_len(const char *bencode) {
+    int length = 0;
+    char * local = (char *) bencode;
+    
+    return length;
+}
