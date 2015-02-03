@@ -353,7 +353,7 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
         perror("Couldn't create the socket");
 
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(peer->sockaddr.sin_port);
+    addr.sin_port = peer->sockaddr.sin_port;
     addr.sin_addr = peer->sockaddr.sin_addr;
 
     // (peer->sockaddr)
