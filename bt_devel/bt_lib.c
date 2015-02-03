@@ -353,13 +353,13 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
         perror("Couldn't create the socket");
 
     addr.sin_family = AF_INET;
-    addr.sin_port = peer->sockaddr.sin_port;
+    addr.sin_port = htons(peer->sockaddr.sin_port);
     addr.sin_addr = peer->sockaddr.sin_addr;
 
     // (peer->sockaddr)
 
 
-    if (connect(sockfd, (struct sockaddr *) &addr , sizeof(struct sockaddr_in)) == -1)
+    if (connect(sockfd, (struct sockaddr *) &addr, sizeof(struct sockaddr_in)) == -1)
     {
         perror("Connection Problem");
         return (int) ret_val;
@@ -375,55 +375,55 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
 
     case BT_BITFIELD_T:
         msg_type = BT_BITFILED;
-        memcpy((char *)buff, &msg_size, sizeof(uint32_t));
-        memcpy((char *)buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-        memcpy((char *)buff + sizeof(uint32_t) + sizeof(uint8_t), msg->payload.bitfiled.bitfield, msg->payload.bitfiled.size);
+        memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+        memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+        memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t), msg->payload.bitfiled.bitfield, msg->payload.bitfiled.size);
         ret_val = write(sockfd, buff, msg_size);
         break;
 
     case BT_REQUEST_T:
         msg_type = BT_REQUEST;
-        memcpy((char *)buff, &msg_size, sizeof(uint32_t));
-            print_bytes(buff);
-        memcpy((char *)buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-            print_bytes(buff);
-        memcpy((char *)buff + sizeof(uint32_t) + sizeof(uint8_t),
+        memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+        memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+        memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
                &msg->payload.request.index, sizeof(uint32_t));
-            print_bytes(buff);
-        memcpy((char *)buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
+        memcpy((char *) buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
                &msg->payload.request.begin, sizeof(uint32_t));
-            print_bytes(buff);
-        memcpy((char *)buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
+        memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
                &msg->payload.request.length, sizeof(uint32_t));
-            print_bytes(buff);
+        print_bytes(buff);
         ret_val = write(sockfd, buff, msg_size);
         break;
 
     case BT_CANCEL_T:
         msg_type = BT_CANCEL;
-        memcpy((char *)buff, &msg_size, sizeof(uint32_t));
-        memcpy((char *)buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-        memcpy((char *)buff + sizeof(uint32_t) + sizeof(uint8_t),
+        memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+        memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+        memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
                &msg->payload.request.index, sizeof(uint32_t));
-        memcpy((char *)buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
+        memcpy((char *) buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
                &msg->payload.request.begin, sizeof(uint32_t));
-        memcpy((char *)buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
+        memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
                &msg->payload.request.length, sizeof(uint32_t));
         ret_val = write(sockfd, buff, msg_size);
         break;
     case BT_PIECE_T:
         msg_type = BT_PIECE;
-        memcpy((char *)buff, &msg_size, sizeof(uint32_t));
-        memcpy((char *)buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-        memcpy((char *)buff + sizeof(uint32_t) + sizeof(uint8_t),
+        memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+        memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+        memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
                &msg->payload.piece.index, sizeof(uint32_t));
-        memcpy((char *)buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
+        memcpy((char *) buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
                &msg->payload.piece.begin, sizeof(uint32_t));
-        memcpy((char *)buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
+        memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
                &msg->payload.piece.piece, msg_size - (3 * sizeof(uint32_t) + sizeof(uint8_t)));
         ret_val = write(sockfd, buff, msg_size);
         break;
-
+    case BT_INTERESTED_T:
+        memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+        memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+        ret_val = write(sockfd, buff, msg_size);
+        break;
     default:
         break;
     }
@@ -438,16 +438,16 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
 void *_connection_handler(void *socket_desc)
 {
     //Get the socket descriptor
-    int sock = *(int *)socket_desc;
+    int sock = *(int *) socket_desc;
 
     char *message;
 
     //Send some messages to the client
     message = "Greetings! I am your connection handler\n";
-    write(sock , message , strlen(message));
+    write(sock, message, strlen(message));
 
     message = "Its my duty to communicate with you";
-    write(sock , message , strlen(message));
+    write(sock, message, strlen(message));
 
     //Free the socket pointer
     free(socket_desc);
@@ -458,12 +458,12 @@ void *_connection_handler(void *socket_desc)
 /*read a msg from a peer and store it in msg*/
 int read_from_peer(peer_t *peer, bt_msg_t *msg)
 {
-    int socket_desc , new_socket , c , *new_sock;
-    struct sockaddr_in server , client;
+    int socket_desc, new_socket, c, *new_sock;
+    struct sockaddr_in server, client;
     char *message;
 
     //Create socket
-    socket_desc = socket(AF_INET , SOCK_STREAM , 0);
+    socket_desc = socket(AF_INET, SOCK_STREAM, 0);
     if (socket_desc == -1)
     {
         printf("Could not create socket");
@@ -472,10 +472,10 @@ int read_from_peer(peer_t *peer, bt_msg_t *msg)
     //Prepare the sockaddr_in structure
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_port = htons( 8888 );
+    server.sin_port = htons(8888);
 
     //Bind
-    if ( bind(socket_desc, (struct sockaddr *)&server , sizeof(server)) < 0)
+    if (bind(socket_desc, (struct sockaddr *) &server, sizeof(server)) < 0)
     {
         puts("bind failed");
         return 1;
@@ -483,24 +483,24 @@ int read_from_peer(peer_t *peer, bt_msg_t *msg)
     puts("bind done");
 
     //Listen
-    listen(socket_desc , 3);
+    listen(socket_desc, 3);
 
     //Accept and incoming connection
     puts("Waiting for incoming connections...");
     c = sizeof(struct sockaddr_in);
-    while ( (new_socket = accept(socket_desc, (struct sockaddr *)&client, (socklen_t *)&c)) )
+    while ((new_socket = accept(socket_desc, (struct sockaddr *) &client, (socklen_t *) &c)))
     {
         puts("Connection accepted");
 
         //Reply to the client
         message = "Hello Client , I have received your connection. And now I will assign a handler for you\n";
-        write(new_socket , message , strlen(message));
+        write(new_socket, message, strlen(message));
 
         pthread_t sniffer_thread;
         new_sock = malloc(1);
         *new_sock = new_socket;
 
-        if ( pthread_create( &sniffer_thread , NULL ,  _connection_handler , (void *) new_sock) < 0)
+        if (pthread_create(&sniffer_thread, NULL, _connection_handler, (void *) new_sock) < 0)
         {
             perror("could not create thread");
             return 1;

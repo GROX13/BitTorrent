@@ -80,9 +80,9 @@ int main(int argc, char *argv[])
 
     peer_t *peer = bt_args.peers[0];
     bt_msg_t msg; 
-    msg.length = htonl(17);
+    msg.length = htonl(13);
     msg.type = BT_REQUEST_T;
-    msg.payload.request.index = htonl(0);
+    msg.payload.request.index = htonl(1);
     msg.payload.request.begin = htonl(0);
     msg.payload.request.length = htonl(1024);
     send_to_peer(peer, &msg);

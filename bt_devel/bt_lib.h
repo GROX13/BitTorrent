@@ -51,6 +51,7 @@ typedef enum
     BT_REQUEST_T,
     BT_CANCEL_T,
     BT_PIECE_T,
+    BT_INTERESTED_T,
 } bt_msg_type;
 
 //holds information about a peer
