@@ -124,9 +124,9 @@ typedef struct
 
 typedef struct
 {
-    int index; //which piece index
-    int begin; //offset within piece
-    int length; //amount wanted, within a power of two
+    uint32_t index; //which piece index
+    uint32_t begin; //offset within piece
+    uint32_t length; //amount wanted, within a power of two
 } bt_request_t;
 
 typedef struct
@@ -139,7 +139,7 @@ typedef struct
 
 typedef struct bt_msg
 {
-    int length; //length of remaining message,
+    uint32_t length; //length of remaining message,
     //0 length message is a keep-alive message
     //unsigned char bt_type; type of bt_mesage
 
