@@ -82,4 +82,6 @@ void decode_tracker_info(bt_args_t *bt_args, char *info);
 
 int handshake(peer_t *peer, bt_handshake_t msg);
 
+int print_bytes(void * buff);
+
 #endif

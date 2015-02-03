@@ -14,6 +14,7 @@
 #include <bits/errno.h>
 #include <asm-generic/errno-base.h>
 #include <pthread.h>
+#include <monetary.h>
 #include <openssl/sha.h> //hashing pieces
 
 #include "bencode.h"
@@ -344,23 +345,24 @@ int poll_peers(bt_args_t *bt_args)
 **/
 int send_to_peer(peer_t *peer, bt_msg_t *msg)
 {
-    int sockfd, ret_val = -1;
-    // struct sockaddr_in addr;
+    int sockfd;
+    ssize_t ret_val = -1;
+    struct sockaddr_in addr;
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1)
         perror("Couldn't create the socket");
 
-    // addr.sin_family = AF_INET;
-    // addr.sin_port = htons(peer->sockaddr.sin_port);
-    // addr.sin_addr = peer->sockaddr.sin_addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(peer->sockaddr.sin_port);
+    addr.sin_addr = peer->sockaddr.sin_addr;
 
-    // peer->sockaddr
+    // (peer->sockaddr)
 
 
-    if (connect(sockfd, (struct sockaddr *) & (peer->sockaddr), sizeof(struct sockaddr_in)) == -1)
+    if (connect(sockfd, (struct sockaddr *) &addr , sizeof(struct sockaddr_in)) == -1)
     {
         perror("Connection Problem");
-        return ret_val;
+        return (int) ret_val;
     }
 
     uint32_t msg_size = (uint32_t) msg->length;
@@ -382,13 +384,18 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
     case BT_REQUEST_T:
         msg_type = BT_REQUEST;
         memcpy(buff, &msg_size, sizeof(uint32_t));
+            print_bytes(buff);
         memcpy(buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+            print_bytes(buff);
         memcpy(buff + sizeof(uint32_t) + sizeof(uint8_t),
                &msg->payload.request.index, sizeof(uint32_t));
+            print_bytes(buff);
         memcpy(buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
                &msg->payload.request.begin, sizeof(uint32_t));
+            print_bytes(buff);
         memcpy(buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
                &msg->payload.request.length, sizeof(uint32_t));
+            print_bytes(buff);
         ret_val = write(sockfd, buff, msg_size);
         break;
 
@@ -422,7 +429,7 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
     }
 
     free(buff);
-    return ret_val;
+    return (int) ret_val;
 }
 
 /*

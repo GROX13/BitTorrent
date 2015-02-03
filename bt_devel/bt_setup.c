@@ -526,7 +526,7 @@ int handshake(peer_t *peer, bt_handshake_t msg) {
     case BT_BITFILED:;
 		bt_bitfield_t *bt_bitfield = malloc(sizeof(bt_bitfield_t));
 		bt_bitfield->size = (size_t)(msg_len - 1);
-		printf("bitfield size is : %i\n ", bt_bitfield->size);
+		printf("bitfield size is : %zu\n", bt_bitfield->size);
 		bt_bitfield->bitfield = malloc(bt_bitfield->size);
 		size = (int) read(sockfd, bt_bitfield->bitfield, bt_bitfield->size);
         break;
@@ -587,3 +587,11 @@ char *read_file(char *file, long long *len)
     return ret;
 }
 
+int print_bytes(void *buff) {
+    size_t i;
+    printf("(");
+    for (i = 0; i < 17; ++i)
+        printf("%02X", ((unsigned char*)buff)[i]);
+    printf(")\n");
+    return 0;
+}
