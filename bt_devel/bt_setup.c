@@ -489,9 +489,10 @@ int handshake(peer_t *peer, bt_handshake_t msg) {
 	if(size == 68){
 		memcpy(&peer->id, &buff[48], 20);
 		printf("PEER ID IS: %s\n", peer->id);
-	}	
-
-	int msg_len = 0;
+	}
+	bt_msg_t *msg1 = malloc(sizeof(bt_msg_t));	
+	read_from_peer(peer, msg1);
+	/*int msg_len = 0;
 	size = (int) read(sockfd, &msg_len, sizeof(int));
 	msg_len = ntohl(msg_len);
 	printf("Message length is: %i\n", msg_len);
@@ -552,7 +553,7 @@ int handshake(peer_t *peer, bt_handshake_t msg) {
 
     default:
         break;
-    }
+    }*/
 	
     return 0;
 }
