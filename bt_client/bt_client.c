@@ -1,117 +1,114 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <netinet/ip.h> //ip hdeader library (must come before ip_icmp.h)
+#include <netinet/ip_icmp.h> //icmp header
+#include <arpa/inet.h> //internet address library
+#include <netdb.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <signal.h>
 
+
+#include "bencode.h"
+#include "bt_lib.h"
 #include "bt_setup.h"
-#include "bt_library.h"
-#include "bt_bencode.h"
-
-static int create_socket(char * ip_addr, char * port)
-{
-    struct addrinfo adr_info, * result, * result_ptr;
-    int sock, socket_fd = -1;
-    memset(&adr_info, 0, sizeof(struct addrinfo));
-    adr_info.ai_family = AF_UNSPEC;
-    adr_info.ai_socktype = SOCK_STREAM;
-    adr_info.ai_flags = AI_PASSIVE;
-
-    sock = getaddrinfo(NULL, port, &adr_info, &result);
-    if (sock != 0)
-    {
-        perror("Error while geting address info");
-        return -1;
-    }
-
-    for (result_ptr = result; result_ptr != NULL; result_ptr = result_ptr->ai_next)
-    {
-        socket_fd = socket(result_ptr->ai_family, result_ptr->ai_socktype, result_ptr->ai_protocol);
-        if (socket_fd == -1)
-            continue;
-
-        sock = bind(socket_fd, result_ptr->ai_addr, result_ptr->ai_addrlen);
-        if (sock == 0)
-            break;
-        close(socket_fd);
-    }
-
-    freeaddrinfo(result);
-
-    if (result_ptr == NULL)
-    {
-        perror("Error while bind");
-        close(socket_fd);
-        return -1;
-    }
-
-    return socket_fd;
-}
 
 int main(int argc, char *argv[])
 {
+
+    bt_args_t bt_args;
     be_node *node; // top node in the bencoding
-    // connect_to_tracker(argc, argv);
-    //    bencode_t ben;
-    //
-    //
-    char filename[1024];
-    get_filename(argc, argv, filename);
-    puts(filename);
-    //
-    //    char *file;
-    // long long leng;
-    // file = read_file(filename, &leng);
-    node = load_be_node(filename);
-    puts("done");
-    be_dump(node);
-
-    bt_info_t *bt_info  = malloc(sizeof(bt_info_t));
-    parse_bt_info(bt_info, node);
-    puts("All Done");
-
     int i;
-    struct hostent *he;
-    struct in_addr **addr_list;
 
-    if (argc != 2) {
-        fprintf(stderr,"usage: ghbn hostname\n");
-        return 1;
+    parse_args(&bt_args, argc, argv);
+
+
+    if (bt_args.verbose)
+    {
+        printf("Args:\n");
+        printf("verbose: %d\n", bt_args.verbose);
+        printf("save_file: %s\n", bt_args.save_file);
+        printf("log_file: %s\n", bt_args.log_file);
+        printf("torrent_file: %s\n", bt_args.torrent_file);
+
+        for (i = 0; i < MAX_CONNECTIONS; i++)
+        {
+            if (bt_args.peers[i] != NULL)
+                print_peer(bt_args.peers[i]);
+        }
+
+
     }
 
-    if ((he = gethostbyname("google.ge")) == NULL) {  // get the host info
-        herror("gethostbyname");
-        return 2;
+    //read and parse the torent file
+    node = load_be_node(bt_args.torrent_file);
+
+    if (bt_args.verbose)
+    {
+        be_dump(node);
     }
 
-    // print information about this host:
-    printf("Official name is: %s\n", he->h_name);
-    printf("    IP addresses: ");
-    addr_list = (struct in_addr **)he->h_addr_list;
-    for(i = 0; addr_list[i] != NULL; i++) {
-        printf("%s ", inet_ntoa(*addr_list[i]));
+    bt_info_t *info_t = malloc(sizeof(bt_info_t));
+
+    parse_bt_info(info_t, node);
+    bt_args.bt_info = info_t;
+
+    contact_tracker(&bt_args);
+
+    for (i = 0; i < MAX_CONNECTIONS; ++i)
+    {
+
+        if (bt_args.peers[i])
+        {
+            bt_handshake_t handshake_t;
+
+            handshake_t.protocol_name_length = 19;
+            memcpy(handshake_t.protocol_name , "BitTorrent protocol", 19);
+            memset(handshake_t.reserved_bytes, 0, 8);
+            memcpy(handshake_t.hash_info, bt_args.info_hash , 20);
+            memcpy(handshake_t.peer_id , bt_args.bt_peer_id, 20);
+
+
+            handshake(bt_args.peers[i], handshake_t);
+            // if (i == 2)
+            break;
+        }
     }
-    printf("\n");
 
-    //    char *address;
-    //    address = inet_ntoa(pHostInfo->h_addr);
+    peer_t *peer = bt_args.peers[0];
+    bt_msg_t msg; 
+    msg.length = htonl(13);
+    msg.type = BT_REQUEST_T;
+    msg.payload.request.index = htonl(1);
+    msg.payload.request.begin = htonl(0);
+    msg.payload.request.length = htonl(8 * 2048);
+    //send_to_peer(peer, &msg);
 
-    //
-    //    //puts(file);
-    //
-    //
-    //    bencode_t ben2;
-    //
-    //
-    //    const char *ren;
-    //
-    //    int len, ret;
-    //
-    //    // bencode_init(&ben, file, strlen(file));
-    //
-    //    // ret = bencode_dict_get_next(&ben, &ben2, &ren, &len);
-    //    // printf("foo %s %i\n", ren, len);
-    //    // bencode_string_value(&ben2, &ren, &len);
-    //    //printf("bla %s %i\n", ren, len);
+    //main client loop
+    printf("Starting Main Loop\n");
+    while (1)
+    {
+
+        //try to accept incoming connection from new peer
+
+
+        //poll current peers for incoming traffic
+        //   write pieces to files
+        //   udpdate peers choke or unchoke status
+        //   responses to have/havenots/interested etc.
+
+        //for peers that are not choked
+        //   request pieaces from outcoming traffic
+
+        //check livelenss of peers and replace dead (or useless) peers
+        //with new potentially useful peers
+
+        //update peers,
+        break;
+    }
 
     return 0;
 }
