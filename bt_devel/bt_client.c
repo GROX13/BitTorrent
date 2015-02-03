@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     msg.type = BT_REQUEST_T;
     msg.payload.request.index = htonl(1);
     msg.payload.request.begin = htonl(0);
-    msg.payload.request.length = htonl(1024);
+    msg.payload.request.length = htonl(8 * 2048);
     send_to_peer(peer, &msg);
 
     //main client loop

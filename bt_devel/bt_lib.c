@@ -368,7 +368,7 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
     uint32_t msg_size = (uint32_t) msg->length;
     uint8_t msg_type;
     // Allocate needed space
-    void *buff = malloc(msg_size);
+    void *buff = malloc(msg_size + sizeof(uint32_t));
 
     switch (msg->type)
     {
@@ -478,11 +478,10 @@ int read_from_peer(peer_t *peer, bt_msg_t *msg)
 	msg_len = ntohl(msg_len);
 	msg->length = msg_len;
 	printf("Message length is: %i\n", msg_len);
-	
+	printf("%d\n", size);
 
 	uint8_t msg_id;
 	size = (int) read(sockfd, &msg_id, sizeof(char));
-	printf("Message id is:  %" SCNd8 "\n", msg_id);
    
 	switch (msg_id)
     {
