@@ -103,36 +103,6 @@ char *send_http_request(char *url)
     }
 }
 
-void _be_find(be_node *node, be_node *result, char *search)
-{
-    size_t i;
-
-    switch (node->type)
-    {
-    case BE_STR:
-
-        break;
-
-    case BE_INT:
-
-        break;
-
-    case BE_LIST:
-
-        for (i = 0; node->val.l[i]; ++i)
-            _be_find(node->val.l[i], result, search);
-
-        break;
-
-    case BE_DICT:
-
-        for (i = 0; node->val.d[i].val; ++i)
-            _be_find(node->val.d[i].val, result, search);
-
-        break;
-    }
-}
-
 int contact_tracker(bt_args_t *bt_args)
 {
     char *new_file;
@@ -140,54 +110,46 @@ int contact_tracker(bt_args_t *bt_args)
 
     new_file = read_file(bt_args->torrent_file, &leng);
 
-
-    char *hashed_info = malloc(FILE_NAME_MAX);
-
-    int len;
     char *inf = strstr(strstr(new_file, "info"), "d");
+    // length on ubuntu 14 should be 44478
+    long long len = be_len(inf);
 
-    len = 44478;
-    printf("True is %d my is %lld\n", len, be_len(inf));
+    memset(bt_args->info_hash, '\0', BT_INFO_HASH_SIZE);
+    memset(bt_args->bt_peer_id, '\0', BT_INFO_HASH_SIZE);
+    SHA1((unsigned char const *) inf, (size_t) len, (unsigned char *) bt_args->info_hash);
 
-    SHA1((unsigned char const *) inf, len, (unsigned char *) hashed_info);
-
-    char *request_to_send;
+    char *request_to_send = malloc(FILE_NAME_MAX);
     request_to_send = malloc(FILE_NAME_MAX);
-    memset(request_to_send, '\0', FILE_NAME_MAX);
 
-    bt_args->info_hash = hashed_info;
-    bt_args->bt_peer_id = "SatJan311528262015RR";
+    memset(request_to_send, '\0', FILE_NAME_MAX);
+    memcpy(bt_args->bt_peer_id, generate_peer_id(), 20);
     //aq unda iyos: Port number this peer is listening on.
     //Common behavior is for a downloader to try to listen on
     //port 6881 and if that port is taken try 6882, then 6883, etc. and give up after 6889.
-    // int port = INIT_PORT;
-    // bt_args->bt_info->num_pieces = bt_args->bt_info->length / bt_args->bt_info->piece_length;
-    // sprintf(request_to_send, "%s?info_hash=%s&peer_id=%s&port=%i"
-    //         "&downloaded=0&left=1162936320&event=started&compact=1", bt_args->bt_info->announce,
-    //         url_encode(hashed_info), url_encode(generate_peer_id()), port);
+    int port = INIT_PORT;
+    bt_args->bt_info->num_pieces = bt_args->bt_info->length / bt_args->bt_info->piece_length;
+    sprintf(request_to_send,
+            "%s?info_hash=%s&peer_id=%s&port=%i&uploaded=0"
+            "&downloaded=0&left=%d&event=started&compact=1",
+            bt_args->bt_info->announce, url_encode(bt_args->info_hash),
+            url_encode(bt_args->bt_peer_id), port, bt_args->bt_info->length);
 
-    // printf("Request URL for tracker: %s\n", request_to_send);
+    /*
+     * correct request to send on ubuntu torrent
+     *
+     *  "http://torrent.ubuntu.com:6969/"
+     *      "announce?info_hash=%B4%15%C9%13d%3E%5F%F4%9F%E3%7D0K%BB%5En%11%ADQ%01"
+     *      "announce?info_hash=%b4%15%c9%13d%3e_%f4%9f%e3%7d0K%bb%5en%11%adQ%01"
+     *      "&peer_id=TueFeb32137332015RRR"
+     *      "&port=6681"
+     *      "&event=started"
+     *      "&uploaded=0"
+     *      "&downloaded=0"
+     *      "&left=1162936320"
+     *      "&compact=1";
+     */
 
-    // http://torrent.ubuntu.com:6969/announce?
-    // info_hash=%5e%ef%fc%8e%b5%da%b4%ec%1c%a6%fd%ce%f0%93t%d7j%1389
-    // &peer_id=SatJan311528262015RR
-    // &port=6881
-    // &downloaded=0
-    // &left=0
-    // &event=started
-
-    request_to_send =
-        "http://torrent.ubuntu.com:6969/"
-        "announce?info_hash=%B4%15%C9%13d%3E%5F%F4%9F%E3%7D0K%BB%5En%11%ADQ%01"
-        "&peer_id=SatJan311528262015RR"
-        "&port=6681"
-        "&key=2YUMOFZ3"
-        "&event=started"
-        "&uploaded=0"
-        "&downloaded=0"
-        "&left=1162936320"
-        "&compact=1";
-
+    printf("Request URL for tracker: %s\n", request_to_send);
     char *result = send_http_request(request_to_send);
     if (result)
     {
@@ -459,7 +421,7 @@ void *_connection_handler(void *socket_desc)
 /*read a msg from a peer and store it in msg*/
 int read_from_peer(peer_t *peer, bt_msg_t *msg)
 {
-	int sockfd;
+    int sockfd;
     struct sockaddr_in addr;
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1)
@@ -474,136 +436,136 @@ int read_from_peer(peer_t *peer, bt_msg_t *msg)
         perror("Connection Problem");
         return 1;
     }
-	int msg_len = 0;
-	int size = (int) read(sockfd, &msg_len, sizeof(int));
-	msg_len = ntohl(msg_len);
-	msg->length = msg_len;
-	printf("Message length is: %i\n", msg_len);
-	printf("%d\n", size);
+    int msg_len = 0;
+    int size = (int) read(sockfd, &msg_len, sizeof(int));
+    msg_len = ntohl(msg_len);
+    msg->length = msg_len;
+    printf("Message length is: %i\n", msg_len);
+    printf("%d\n", size);
 
-	uint8_t msg_id;
-	size = (int) read(sockfd, &msg_id, sizeof(char));
-   
-	switch (msg_id)
+    uint8_t msg_id;
+    size = (int) read(sockfd, &msg_id, sizeof(char));
+
+    switch (msg_id)
     {
 
     case BT_CHOKE:
-		peer->choked = 0;
+        peer->choked = 0;
         break;
 
     case BT_UNCHOKE:
-		peer->choked = 1;
+        peer->choked = 1;
         break;
 
     case BT_INTERSTED:
-		peer->interested = 0;
-		msg->type = BT_INTERESTED_T;	
+        peer->interested = 0;
+        msg->type = BT_INTERESTED_T;
         break;
     case BT_NOT_INTERESTED:
-		peer->interested = 1;	
+        peer->interested = 1;
         break;
 
-	case BT_HAVE:
+    case BT_HAVE:
 
         break;
-    
+
     case BT_BITFILED:;
-		msg->type =  BT_BITFIELD_T;	
-		bt_bitfield_t *bt_bitfield = malloc(sizeof(bt_bitfield_t));
-		bt_bitfield->size = (size_t)(msg_len - 1);
-		printf("bitfield size is : %zu\n", bt_bitfield->size);
-		bt_bitfield->bitfield = malloc(bt_bitfield->size);
-		size = (int) read(sockfd, bt_bitfield->bitfield, bt_bitfield->size);
-		memcpy(&msg->payload.bitfiled, bt_bitfield, sizeof(bt_bitfield_t));
+        msg->type =  BT_BITFIELD_T;
+        bt_bitfield_t *bt_bitfield = malloc(sizeof(bt_bitfield_t));
+        bt_bitfield->size = (size_t)(msg_len - 1);
+        printf("bitfield size is : %zu\n", bt_bitfield->size);
+        bt_bitfield->bitfield = malloc(bt_bitfield->size);
+        size = (int) read(sockfd, bt_bitfield->bitfield, bt_bitfield->size);
+        memcpy(&msg->payload.bitfiled, bt_bitfield, sizeof(bt_bitfield_t));
         break;
 
     case BT_REQUEST:;
-		msg->type = BT_REQUEST_T;	
-		bt_request_t *bt_request = malloc(sizeof(bt_request_t));
-		size = (int) read(sockfd, &bt_request->index, sizeof(int));
+        msg->type = BT_REQUEST_T;
+        bt_request_t *bt_request = malloc(sizeof(bt_request_t));
+        size = (int) read(sockfd, &bt_request->index, sizeof(int));
         size = (int) read(sockfd, &bt_request->begin, sizeof(int));
-		size = (int) read(sockfd, &bt_request->length, sizeof(int));
-		memcpy(&msg->payload.request, bt_request, sizeof(bt_request_t));
+        size = (int) read(sockfd, &bt_request->length, sizeof(int));
+        memcpy(&msg->payload.request, bt_request, sizeof(bt_request_t));
         break;
-	//es ar vici sworia tu ara
+    //es ar vici sworia tu ara
     case BT_PIECE:;
-		msg->type = BT_PIECE_T;
-		bt_piece_t * bt_piece = malloc(sizeof(bt_piece_t));
-		int block_len = msg_len - 9;
-		size = (int) read(sockfd, &bt_piece->index, sizeof(int));
+        msg->type = BT_PIECE_T;
+        bt_piece_t *bt_piece = malloc(sizeof(bt_piece_t));
+        int block_len = msg_len - 9;
+        size = (int) read(sockfd, &bt_piece->index, sizeof(int));
         size = (int) read(sockfd, &bt_piece->begin, sizeof(int));
-		size = (int) read(sockfd, &bt_piece->piece, block_len);
-		memcpy(&msg->payload.piece, bt_piece, sizeof(bt_piece_t));
+        size = (int) read(sockfd, &bt_piece->piece, block_len);
+        memcpy(&msg->payload.piece, bt_piece, sizeof(bt_piece_t));
         break;
 
-	case BT_CANCEL:
-		msg->type = BT_CANCEL_T;
+    case BT_CANCEL:
+        msg->type = BT_CANCEL_T;
         break;
 
     default:
         break;
     }
-	
-    return 0;	
-   /* int socket_desc, new_socket, c, *new_sock;
-    struct sockaddr_in server, client;
-    char *message;
 
-    //Create socket
-    socket_desc = socket(AF_INET, SOCK_STREAM, 0);
-    if (socket_desc == -1)
-    {
-        printf("Could not create socket");
-    }
+    return 0;
+    /* int socket_desc, new_socket, c, *new_sock;
+     struct sockaddr_in server, client;
+     char *message;
 
-    //Prepare the sockaddr_in structure
-    server.sin_family = AF_INET;
-    server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_port = htons(8888);
+     //Create socket
+     socket_desc = socket(AF_INET, SOCK_STREAM, 0);
+     if (socket_desc == -1)
+     {
+         printf("Could not create socket");
+     }
 
-    //Bind
-    if (bind(socket_desc, (struct sockaddr *) &server, sizeof(server)) < 0)
-    {
-        puts("bind failed");
-        return 1;
-    }
-    puts("bind done");
+     //Prepare the sockaddr_in structure
+     server.sin_family = AF_INET;
+     server.sin_addr.s_addr = INADDR_ANY;
+     server.sin_port = htons(8888);
 
-    //Listen
-    listen(socket_desc, 3);
+     //Bind
+     if (bind(socket_desc, (struct sockaddr *) &server, sizeof(server)) < 0)
+     {
+         puts("bind failed");
+         return 1;
+     }
+     puts("bind done");
 
-    //Accept and incoming connection
-    puts("Waiting for incoming connections...");
-    c = sizeof(struct sockaddr_in);
-    while ((new_socket = accept(socket_desc, (struct sockaddr *) &client, (socklen_t *) &c)))
-    {
-        puts("Connection accepted");
+     //Listen
+     listen(socket_desc, 3);
 
-        //Reply to the client
-        message = "Hello Client , I have received your connection. And now I will assign a handler for you\n";
-        write(new_socket, message, strlen(message));
+     //Accept and incoming connection
+     puts("Waiting for incoming connections...");
+     c = sizeof(struct sockaddr_in);
+     while ((new_socket = accept(socket_desc, (struct sockaddr *) &client, (socklen_t *) &c)))
+     {
+         puts("Connection accepted");
 
-        pthread_t sniffer_thread;
-        new_sock = malloc(1);
-        *new_sock = new_socket;
+         //Reply to the client
+         message = "Hello Client , I have received your connection. And now I will assign a handler for you\n";
+         write(new_socket, message, strlen(message));
 
-        if (pthread_create(&sniffer_thread, NULL, _connection_handler, (void *) new_sock) < 0)
-        {
-            perror("could not create thread");
-            return 1;
-        }
+         pthread_t sniffer_thread;
+         new_sock = malloc(1);
+         *new_sock = new_socket;
 
-        //Now join the thread , so that we dont terminate before the thread
-        //pthread_join( sniffer_thread , NULL);
-        puts("Handler assigned");
-    }
+         if (pthread_create(&sniffer_thread, NULL, _connection_handler, (void *) new_sock) < 0)
+         {
+             perror("could not create thread");
+             return 1;
+         }
 
-    if (new_socket < 0)
-    {
-        perror("accept failed");
-        return 1;
-    }
-	*/
+         //Now join the thread , so that we dont terminate before the thread
+         //pthread_join( sniffer_thread , NULL);
+         puts("Handler assigned");
+     }
+
+     if (new_socket < 0)
+     {
+         perror("accept failed");
+         return 1;
+     }
+    */
     return 0;
 }
 

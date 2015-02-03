@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
     msg.payload.request.index = htonl(1);
     msg.payload.request.begin = htonl(0);
     msg.payload.request.length = htonl(8 * 2048);
-    send_to_peer(peer, &msg);
+    //send_to_peer(peer, &msg);
 
     //main client loop
     printf("Starting Main Loop\n");

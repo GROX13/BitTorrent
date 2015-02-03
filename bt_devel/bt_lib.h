@@ -45,6 +45,12 @@
 /*size (in bytes) of id field for peers*/
 #define ID_SIZE 20
 
+/*size (in bytes) of some info fields*/
+#define BT_PEER_SIZE 64
+#define BT_INFO_HASH_SIZE 64
+#define FILE_LENGTH_MAX 8192
+
+
 typedef enum
 {
     BT_BITFIELD_T,
@@ -81,22 +87,24 @@ typedef struct
 typedef struct
 {
     int verbose; //verbose level
-    char save_file[FILE_NAME_MAX];
     //the filename to save to
+    char save_file[FILE_NAME_MAX];
+    //the file to save to
     FILE *f_save;
-    char log_file[FILE_NAME_MAX];
     //the log file
-    char torrent_file[FILE_NAME_MAX];
+    char log_file[FILE_NAME_MAX];
     // *.torrent file
+    char torrent_file[FILE_NAME_MAX];
+    //my peer id
+    char bt_peer_id[BT_PEER_SIZE];
+    //info sha1 hash
+    char info_hash[BT_INFO_HASH_SIZE];
+
     peer_t *peers[MAX_CONNECTIONS]; // array of peer_t pointers
     unsigned int id; //this bt_clients id
     int sockets[MAX_CONNECTIONS]; //Array of possible sockets
     struct pollfd poll_sockets[MAX_CONNECTIONS]; //Arry of pollfd for polling for input
 
-    /*info sha1 hash*/
-    char *info_hash;
-    /*peer id*/
-    char *bt_peer_id;
     /*set once torrent is parse*/
     bt_info_t *bt_info; //the parsed info for this torrent
 

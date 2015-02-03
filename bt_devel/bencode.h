@@ -57,6 +57,7 @@ typedef struct be_node {
 
 long long be_str_len(be_node *node);
 
+//gets length of bencoded string
 long long be_len(const char *bencode);
 
 be_node *be_decode(const char *bencode);
