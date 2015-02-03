@@ -328,11 +328,12 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
         return (int) ret_val;
     }
 
-    uint32_t msg_size = (uint32_t) msg->length;
+    uint32_t msg_size = htonl(msg->length);
     uint8_t msg_type;
     // Allocate needed space
     void *buff = malloc(msg_size + sizeof(uint32_t));
-
+    uint8_t b = 2;
+    uint32_t a = htonl(1);
     switch (msg->type)
     {
 
@@ -345,17 +346,20 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
         break;
 
     case BT_REQUEST_T:
-        msg_type = BT_REQUEST;
-        memcpy((char *) buff, &msg_size, sizeof(uint32_t));
-        memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-        memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
-               &msg->payload.request.index, sizeof(uint32_t));
-        memcpy((char *) buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
-               &msg->payload.request.begin, sizeof(uint32_t));
-        memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
-               &msg->payload.request.length, sizeof(uint32_t));
+
+        msg_size = sizeof(uint32_t) + sizeof(uint8_t);
+        memcpy((char *) buff, &a, sizeof(uint32_t));
+        memcpy((char *) buff + sizeof(uint32_t), &b, sizeof(uint8_t));
+//        memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
+//               &msg->payload.request.index, sizeof(uint32_t));
+//        memcpy((char *) buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
+//               &msg->payload.request.begin, sizeof(uint32_t));
+//        memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
+//               &msg->payload.request.length, sizeof(uint32_t));
         print_bytes(buff);
+
         ret_val = write(sockfd, buff, msg_size);
+            printf("%d\n", (int) ret_val);
         break;
 
     case BT_CANCEL_T:
