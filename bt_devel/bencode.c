@@ -300,11 +300,11 @@ char *_read_file(char *file, long long *len) {
     return ret;
 }
 
-be_node *load_node(char *torf_d){
-	be_node *node;
-	node = be_decode(torf_d);
-	return node;
-}	
+be_node *load_node(char *torf_d) {
+    be_node *node;
+    node = be_decode(torf_d);
+    return node;
+}
 
 be_node *load_be_node(char *torf) {
     char *torf_d; //stores the raw data of the torrent file
@@ -319,7 +319,58 @@ be_node *load_be_node(char *torf) {
 
 long long be_len(const char *bencode) {
     int length = 0;
-    char * local = (char *) bencode;
-    
-    return length;
+    char *local = (char *) bencode;
+    while (1) {
+        switch (*local) {
+
+            /* lists */
+            case 'l': {
+                local = local +1;
+                break;
+            }
+
+                /* dictionaries */
+            case 'd': {
+                local = local + 1;
+                length += 1;
+                break;
+            }
+
+                /* integers */
+            case 'i': {
+                local += 1;
+                length += 1;
+                for (; *local != 'e';) {
+                    length += 1;
+                    local += 1;
+                }
+                length += 1;
+                local += 1;
+                break;
+            }
+
+                /* byte strings */
+            case '0'...'9': {
+                long long i = 0, data_len = 0;
+                char *dst, len[10];
+                memset(len, '\0', 10);
+                for (; *local != ':'; i++) {
+                    len[i] = *local;
+                    data_len += 1;
+                    local += 1;
+                }
+                dst = len;
+                length += data_len;
+                i = _be_decode_int((char const **) &dst, &data_len);
+                local += (i + 1);
+                length += (i + 1);
+                break;
+            }
+
+                /* invalid */
+            default:
+                return length + 1;
+
+        }
+    }
 }
