@@ -86,7 +86,11 @@ int main(int argc, char *argv[])
     msg.payload.request.begin = 0;
     msg.payload.request.length = (8 * 2048);
     send_to_peer(peer, &msg);
+	
+	FILE *save_file = create_file(&bt_args,"save.txt","ab+");
+	char str[] = "Bla";
 
+	fwrite(str , 1, sizeof(str) , save_file);
     //main client loop
     printf("Starting Main Loop\n");
     while (1)

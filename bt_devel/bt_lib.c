@@ -477,6 +477,7 @@ int read_from_peer(peer_t *peer, bt_msg_t *msg)
         bt_bitfield->bitfield = malloc(bt_bitfield->size);
         size = (int) read(sockfd, bt_bitfield->bitfield, bt_bitfield->size);
         memcpy(&msg->payload.bitfiled, bt_bitfield, sizeof(bt_bitfield_t));
+		puts("blaaa");
         break;
 
     case BT_REQUEST:;
@@ -635,4 +636,24 @@ int parse_bt_info(bt_info_t *bt_info, be_node *node)
 {
     return _fill_info(bt_info, node, 0, "");
 }
+typedef struct
+{
+    int index; //which piece index
+    int begin; //offset within piece
+    char piece[0]; //pointer to start of the data for a piece
+} bt_piece_t;
+
+/* save a piece of the file */
+int save_piece(bt_args_t *bt_args, bt_piece_t *piece){
+	FILE *file = bt_args->f_save;
+		
+	return 0;
+}
+
+
+
+
+
+
+
 

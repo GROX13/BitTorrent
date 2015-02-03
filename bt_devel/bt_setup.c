@@ -493,8 +493,8 @@ int handshake(peer_t *peer, bt_handshake_t msg) {
 		printf("PEER ID IS: %s\n", peer->id);
 	}
 	bt_msg_t *msg1 = malloc(sizeof(bt_msg_t));	
-	// read_from_peer(peer, msg1);
-	/*int msg_len = 0;
+	//read_from_peer(peer, msg1);
+	int msg_len = 0;
 	size = (int) read(sockfd, &msg_len, sizeof(int));
 	msg_len = ntohl(msg_len);
 	printf("Message length is: %i\n", msg_len);
@@ -532,6 +532,8 @@ int handshake(peer_t *peer, bt_handshake_t msg) {
 		printf("bitfield size is : %zu\n", bt_bitfield->size);
 		bt_bitfield->bitfield = malloc(bt_bitfield->size);
 		size = (int) read(sockfd, bt_bitfield->bitfield, bt_bitfield->size);
+        printf("bitfield size is : %zu\n", size);
+        //size = (int) read(sockfd, bt_bitfield->bitfield, bt_bitfield->size);
         break;
 
     case BT_REQUEST:;
@@ -555,7 +557,7 @@ int handshake(peer_t *peer, bt_handshake_t msg) {
 
     default:
         break;
-    }*/
+    }
 	
     return 0;
 }
@@ -598,3 +600,26 @@ int print_bytes(void *buff) {
     printf(")\n");
     return 0;
 }
+
+FILE *create_file(bt_args_t *bt_args, char *filename, char* file_type){
+    FILE *fp = fopen(filename, file_type);
+    memcpy(&bt_args->save_file, filename, strlen(filename));
+    bt_args->f_save = fp;
+    return fp;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

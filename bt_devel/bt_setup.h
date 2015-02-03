@@ -70,6 +70,8 @@ void parse_args(bt_args_t *bt_args, int argc, char **argv);
 **/
 char *read_file(char *file, long long *len);
 
+FILE *create_file(bt_args_t *bt_args, char *filename, char* file_type);
+
 int create_socket(char *ip_addr, unsigned short port);
 
 char *generate_peer_id();
