@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 
 
             handshake(bt_args.peers[i], handshake_t);
-            // if (i == 2)
+            if (i == 0)
             break;
         }
     }

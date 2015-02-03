@@ -434,6 +434,8 @@ void decode_tracker_info(bt_args_t *bt_args, char *info)
         add_peer(peer_t1, bt_args, NULL, port);
         print_peer(peer_t1);
         //free(peer_t1);
+	if(i == 0)
+		break;
     }
 
 }
