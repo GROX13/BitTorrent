@@ -308,8 +308,27 @@ int poll_peers(bt_args_t *bt_args)
 **/
 int send_to_peer(peer_t *peer, bt_msg_t *msg)
 {
-    int sockfd;
+//    int sockfd;
     ssize_t ret_val = -1;
+//    struct sockaddr_in addr;
+//    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+//    if (sockfd == -1)
+//        perror("Couldn't create the socket");
+//
+//    addr.sin_family = AF_INET;
+//    addr.sin_port = htons(peer->sockaddr.sin_port);
+//    addr.sin_addr = peer->sockaddr.sin_addr;
+//
+//    // (peer->sockaddr)
+//
+//
+//    if (connect(sockfd, (struct sockaddr *) &addr, sizeof(struct sockaddr_in)) == -1)
+//    {
+//        perror("Connection Problem");
+//        return (int) ret_val;
+//    }
+
+    int sockfd;
     struct sockaddr_in addr;
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1)
@@ -318,15 +337,13 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
     addr.sin_family = AF_INET;
     addr.sin_port = htons(peer->sockaddr.sin_port);
     addr.sin_addr = peer->sockaddr.sin_addr;
-
-    // (peer->sockaddr)
-
-
-    if (connect(sockfd, (struct sockaddr *) &addr, sizeof(struct sockaddr_in)) == -1)
+    //peer->sockaddr
+    if (connect (sockfd, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) == -1)
     {
         perror("Connection Problem");
-        return (int) ret_val;
+        return 1;
     }
+
 
     uint32_t msg_size = htonl(msg->length);
     uint8_t msg_type;
@@ -348,6 +365,7 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
     case BT_REQUEST_T:
 
         msg_size = sizeof(uint32_t) + sizeof(uint8_t);
+            buff = malloc(msg_size);
         memcpy((char *) buff, &a, sizeof(uint32_t));
         memcpy((char *) buff + sizeof(uint32_t), &b, sizeof(uint8_t));
 //        memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
