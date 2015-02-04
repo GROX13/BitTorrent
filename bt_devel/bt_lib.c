@@ -452,80 +452,110 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
 
     uint32_t msg_size = htonl(msg->length);
     uint8_t msg_type;
+    // May need in future
+    uint32_t tmp_1;
+    uint32_t tmp_2;
+    uint32_t tmp_3;
     // Allocate needed space
-    void *buff = malloc(msg_size + sizeof(uint32_t));
+    void *buff = malloc(msg->length + sizeof(uint32_t));
 
-    switch (msg->type)
-    {
+    switch (msg->type) {
 
-    case BT_BITFIELD_T:
-        msg_type = BT_BITFILED;
-        memcpy((char *) buff, &msg_size, sizeof(uint32_t));
-        memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-        memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t), msg->payload.bitfiled.bitfield, msg->payload.bitfiled.size);
-        ret_val = (int) write(sockfd, buff, msg_size);
-        break;
+        case BT_BITFIELD_T:
+            msg_type = BT_BITFILED;
+            memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+            memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+            memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t), msg->payload.bitfiled.bitfield, msg->payload.bitfiled.size);
+            ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+            break;
 
-    case BT_REQUEST_T:
-        memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
-               &msg->payload.request.index, sizeof(uint32_t));
-        memcpy((char *) buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
-               &msg->payload.request.begin, sizeof(uint32_t));
-        memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
-               &msg->payload.request.length, sizeof(uint32_t));
-        print_bytes(buff);
+        case BT_REQUEST_T:
+            msg_type = BT_REQUEST;
+            tmp_1 = htonl(msg->payload.request.index);
+            tmp_2 = htonl(msg->payload.request.begin);
+            tmp_3 = htonl(msg->payload.request.length);
+            memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+            memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+            memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
+                    &tmp_1, sizeof(uint32_t));
+            memcpy((char *) buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
+                    &tmp_2, sizeof(uint32_t));
+            memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
+                    &tmp_3, sizeof(uint32_t));
+            ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+            break;
 
-        ret_val = (int) write(sockfd, buff, msg_size);
-        printf("%d\n", (int) ret_val);
-        break;
+        case BT_CANCEL_T:
+            msg_type = BT_CANCEL;
+            tmp_1 = htonl(msg->payload.request.index);
+            tmp_2 = htonl(msg->payload.request.begin);
+            tmp_3 = htonl(msg->payload.request.length);
+            memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+            memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+            memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
+                    &tmp_1, sizeof(uint32_t));
+            memcpy((char *) buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
+                    &tmp_2, sizeof(uint32_t));
+            memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
+                    &tmp_3, sizeof(uint32_t));
+            ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+            break;
 
-    case BT_CANCEL_T:
-        msg_type = BT_CANCEL;
-        memcpy((char *) buff, &msg_size, sizeof(uint32_t));
-        memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-        memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
-               &msg->payload.request.index, sizeof(uint32_t));
-        memcpy((char *) buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
-               &msg->payload.request.begin, sizeof(uint32_t));
-        memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
-               &msg->payload.request.length, sizeof(uint32_t));
-        ret_val = (int) write(sockfd, buff, msg_size);
-        break;
+        case BT_PIECE_T:
+            msg_type = BT_PIECE;
+            tmp_1 = htonl(msg->payload.piece.index);
+            tmp_2 = htonl(msg->payload.piece.begin);
+            memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+            memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+            memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
+                    &tmp_1, sizeof(uint32_t));
+            memcpy((char *) buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
+                    &tmp_2, sizeof(uint32_t));
+            memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
+                    &msg->payload.piece.piece, msg->length - (2 * sizeof(uint32_t) + sizeof(uint8_t)));
+            ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+            break;
 
-    case BT_PIECE_T:
-        msg_type = BT_PIECE;
-        memcpy((char *) buff, &msg_size, sizeof(uint32_t));
-        memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-        memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
-               &msg->payload.piece.index, sizeof(uint32_t));
-        memcpy((char *) buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
-               &msg->payload.piece.begin, sizeof(uint32_t));
-        memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
-               &msg->payload.piece.piece, msg_size - (3 * sizeof(uint32_t) + sizeof(uint8_t)));
-        ret_val = (int) write(sockfd, buff, msg_size);
-        break;
+            // Mainly correct: not tested but correct :)
+        case BT_INTERESTED_T:
+            msg_type = BT_INTERSTED;
+            memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+            memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+            ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+            break;
 
-    case BT_INTERESTED_T:
-        msg_type = BT_INTERSTED;
-        memcpy((char *) buff, &msg_size, sizeof(uint32_t));
-        memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-        ret_val = (int) write(sockfd, buff, msg_size);
-        break;
+        case BT_CHOKE_T:
+            msg_type = BT_CHOKE;
+            memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+            memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+            ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+            break;
 
-    case  BT_CHOKE_T:
-        break;
+        case BT_UNCHOKE_T:
+            msg_type = BT_UNCHOKE;
+            memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+            memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+            ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+            break;
 
-    case BT_UNCHOKE_T:
-        break;
+        case BT_NOT_INTERESTED_T:
+            msg_type = BT_NOT_INTERESTED;
+            memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+            memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+            ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+            break;
 
-    case BT_NOT_INTERESTED_T:
-        break;
+        case BT_HAVE_T:
+            msg_type = BT_HAVE;
+            tmp_1 = htonl(msg->payload.have);
+            memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+            memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+            memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t), &tmp_1, sizeof(uint32_t));
+            ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+            break;
 
-    case BT_HAVE_T:
-        break;
-
-    default:
-        break;
+        default:
+            break;
     }
 
     free(buff);
