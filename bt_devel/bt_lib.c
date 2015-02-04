@@ -30,6 +30,13 @@ struct my_string
     size_t size;
 };
 
+typedef struct thdata
+{
+    int th_num;
+    bt_args_t *bt_args;
+    peer_t *bt_peer_t;
+} thdata;
+
 static size_t _my_string_append(void *contents, size_t size, size_t nmemb, void *userp)
 {
     size_t realsize = size * nmemb;
@@ -138,6 +145,27 @@ int _fill_peer_info(bt_peer *peer, be_node *node, ssize_t indent, char *key)
     return 1;
 }
 
+
+void _connect_function(void *ptr)
+{
+    thdata *data;
+    data = ptr;
+
+    int my_socket = create_socket(data->bt_peer_t->sockaddr);
+    if (my_socket < 0)
+    {
+        drop_peer(data->bt_peer_t, data->bt_args);
+//        free(data->bt_peer_t);
+    }
+    else
+    {
+        data->bt_peer_t->socket_fd = my_socket;
+
+        if (data->bt_args->verbose)
+            print_peer(data->bt_peer_t);
+    }
+}
+
 int contact_tracker(bt_args_t *bt_args)
 {
     printf("Please wait ...\nConnecting with tracker.\n");
@@ -220,6 +248,7 @@ int contact_tracker(bt_args_t *bt_args)
             return 1;
         }
         int count = 0;
+        pthread_t *thread = malloc(num_peers * sizeof(pthread_t));
         printf("Connecting with peers.\n");
         for (i = 0; i < num_peers; i++)
         {
@@ -242,27 +271,28 @@ int contact_tracker(bt_args_t *bt_args)
             calc_id(inet_ntoa(ip_addr), port, id);
 
             init_peer(my_peer_t, id, inet_ntoa(ip_addr), htons(port));
+            add_peer(my_peer_t, bt_args, inet_ntoa(ip_addr), port);
 
-            int my_socket = create_socket(my_peer_t->sockaddr);
-            if (my_socket < 0)
-            {
-                free(my_peer_t);
-            }
-            else
-            {
-                my_peer_t->socket_fd = my_socket;
-                add_peer(my_peer_t, bt_args, inet_ntoa(ip_addr), port);
-                if (bt_args->verbose)
-                    print_peer(my_peer_t);
-            }
 
+            thdata data;
+
+            data.th_num = i;
+            data.bt_args = bt_args;
+            data.bt_peer_t = my_peer_t;
+
+            pthread_create (&thread[i], NULL, (void *) &_connect_function, (void *) &data);
+            break;
         }
+
+        for (i = 0; i < num_peers; i++)
+            pthread_join(thread[i], NULL);
     }
     else
     {
         printf("Something went wrong!\n");
         return 1;
     }
+
     return 0;
 }
 
@@ -311,12 +341,13 @@ int drop_peer(peer_t *peer, bt_args_t *bt_args)
 {
     int i = 0;
     for (; i < MAX_CONNECTIONS; ++i)
-        if (strcmp((char const *) bt_args->peers[i]->id, (char const *) peer->id) == 0
-                && bt_args->peers[i]->port == peer->port)
-        {
-            bt_args->peers[i] = NULL;
-            return 0;
-        }
+        if (bt_args->peers[i])
+            if (strcmp((char const *) bt_args->peers[i]->id, (char const *) peer->id) == 0
+                    && bt_args->peers[i]->port == peer->port)
+            {
+                bt_args->peers[i] = NULL;
+                return 0;
+            }
     return 1;
 }
 

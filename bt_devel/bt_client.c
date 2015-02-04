@@ -72,6 +72,9 @@ int main(int argc, char *argv[])
             memcpy(handshake_t.peer_id , bt_args.bt_peer_id, 20);
 
             handshake(bt_args.peers[i], handshake_t);
+            bt_msg_t msg;
+            msg.type = BT_INTERESTED_T;
+            send_to_peer(bt_args.peers[i], &msg);
         }
 
 //    peer_t *peer = bt_args.peers[0];
