@@ -218,9 +218,9 @@ int contact_tracker(bt_args_t *bt_args)
         {
             uint32_t ip;
             ip = *(uint32_t *) (peer->peer_hashes + count);
-            count = count + 4;
+            count = (int) (count + sizeof(uint32_t));
             port = *(uint16_t *) (peer->peer_hashes + count);
-            count = count + 2;
+            count = (int) (count + sizeof(uint16_t));
             //IP stringad
             struct in_addr ip_addr;
             ip_addr.s_addr = ip;

@@ -73,11 +73,6 @@ FILE *create_file(bt_args_t *bt_args, char *filename, char* file_type);
 /**
 * ERRORS: Will exit on various errors
 */
-int create_socket(char *ip_addr, unsigned short port);
-
-/**
-* ERRORS: Will exit on various errors
-*/
 char *generate_peer_id();
 
 /**
