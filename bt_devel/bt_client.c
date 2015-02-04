@@ -51,10 +51,9 @@ int main(int argc, char *argv[])
         be_dump(node);
     }
 
-    bt_info_t *info_t = malloc(sizeof(bt_info_t));
-
-    parse_bt_info(info_t, node);
-    bt_args.bt_info = info_t;
+    bt_info_t info_t;
+    parse_bt_info(&info_t, node);
+    bt_args.bt_info = &info_t;
 
     contact_tracker(&bt_args);
 
@@ -74,23 +73,23 @@ int main(int argc, char *argv[])
 
             handshake(bt_args.peers[i], handshake_t);
             if (i == 0)
-            break;
+                break;
         }
     }
 
     peer_t *peer = bt_args.peers[0];
-    bt_msg_t msg; 
+    bt_msg_t msg;
     msg.length = 13;
     msg.type = BT_REQUEST_T;
     msg.payload.request.index = 1;
     msg.payload.request.begin = 0;
     msg.payload.request.length = (8 * 2048);
     send_to_peer(peer, &msg);
-	
-	FILE *save_file = create_file(&bt_args,"save.txt","ab+");
-	char str[] = "Bla";
 
-	fwrite(str , 1, sizeof(str) , save_file);
+    FILE *save_file = create_file(&bt_args, "save.txt", "ab+");
+    char str[] = "Bla";
+
+    fwrite(str , 1, sizeof(str) , save_file);
     //main client loop
     printf("Starting Main Loop\n");
     while (1)

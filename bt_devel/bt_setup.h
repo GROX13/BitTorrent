@@ -68,7 +68,6 @@ void parse_args(bt_args_t *bt_args, int argc, char **argv);
 * ERRORS: Will exit on various errors
 *
 **/
-char *read_file(char *file, long long *len);
 
 FILE *create_file(bt_args_t *bt_args, char *filename, char* file_type);
 
@@ -80,10 +79,10 @@ char *url_encode(char *str);
 
 char *url_decode(char *str);
 
-void decode_tracker_info(bt_args_t *bt_args, char *info);
-
 int handshake(peer_t *peer, bt_handshake_t msg);
 
 int print_bytes(void * buff);
+
+char *byte_to_binary(int x);
 
 #endif

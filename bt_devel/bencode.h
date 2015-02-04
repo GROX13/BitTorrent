@@ -54,6 +54,7 @@ typedef struct be_node {
     } val; //this union is stored in val
 } be_node;
 
+char *read_file(char *file, long long *len);
 
 long long be_str_len(be_node *node);
 

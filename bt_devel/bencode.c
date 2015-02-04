@@ -304,7 +304,7 @@ void be_dump(be_node *node)
 }
 
 
-char *_read_file(char *file, long long *len)
+char *read_file(char *file, long long *len)
 {
     struct stat st;
     char *ret = NULL;
@@ -343,7 +343,7 @@ be_node *load_be_node(char *torf)
     char *torf_d; //stores the raw data of the torrent file
     long long torf_s;
     be_node *node; //store the top node in the bencoding of the torrent file
-    torf_d = _read_file(torf, &torf_s);
+    torf_d = read_file(torf, &torf_s);
     node = be_decoden(torf_d, torf_s);
     free(torf_d); //free the raw torrent file, not needed anymore
 

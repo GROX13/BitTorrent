@@ -342,105 +342,8 @@ char *url_decode(char *str)
     return buf;
 }
 
-int _fill_peer_info(bt_peer *peer, be_node *node, ssize_t indent, char *key)
+int handshake(peer_t *peer, bt_handshake_t msg)
 {
-    size_t i;
-
-    indent = abs((int) indent);
-
-    switch (node->type)
-    {
-    case BE_STR:
-        if (!strcmp(key, "tracker id"))
-            strcpy(peer->tracker_id, node->val.s);
-
-        if (!strcmp(key, "peers"))
-            strcpy(peer->peer_hashes, node->val.s);
-
-        break;
-
-    case BE_INT:
-        if (!strcmp(key, "complete"))
-            peer->complete = (int) node->val.i;
-        if (!strcmp(key, "incomplete"))
-            peer->incomplete = (int) node->val.i;
-        if (!strcmp(key, "interval"))
-            peer->interval = (int) node->val.i;
-
-        break;
-
-    case BE_LIST:
-        for (i = 0; node->val.l[i]; ++i)
-            _fill_peer_info(peer, node->val.l[i], indent + 1, "");
-
-        break;
-
-    case BE_DICT:
-        for (i = 0; node->val.d[i].val; ++i)
-            _fill_peer_info(peer, node->val.d[i].val, -(indent + 1), node->val.d[i].key);
-
-        break;
-    }
-    return 1;
-}
-
-/**
-* Returns 1 in case sucess
-*/
-int parse_info(bt_peer *peer, be_node *node)
-{
-    return _fill_peer_info(peer, node, 0, "");
-}
-
-
-void decode_tracker_info(bt_args_t *bt_args, char *info)
-{
-    be_node *node = be_decoden(info, (long long int) be_len);
-//    node = load_node(info);
-    printf("%lld\n", be_len(info));
-    be_dump(node);
-
-    bt_peer *peer = malloc(sizeof(bt_peer));
-
-    parse_info(peer, node);
-    printf("complete: %i\n", peer->complete);
-    printf("incomplete: %i\n", peer->incomplete);
-    printf("interval: %i\n", peer->interval);
-    printf("peers: %s\n", peer->peer_hashes);
-    int num_peers = (int) (strlen(peer->peer_hashes) / 6);
-    printf("peers amount: %i\n", num_peers);
-
-    int i;
-    int count = 0;
-
-    for (i = 0; i < num_peers; i++)
-    {
-        uint32_t ip;
-        uint16_t port;
-        ip = *(uint32_t *) (peer->peer_hashes + count);
-        count = count + 4;
-        port = *(uint16_t *) (peer->peer_hashes + count);
-        count = count + 2;
-        //IP stringad
-        struct in_addr ip_addr;
-        ip_addr.s_addr = ip;
-
-        char *id = malloc(21);
-        memset(id, 0, 21);
-        calc_id(inet_ntoa(ip_addr), port, id);
-        peer_t *peer_t1 = malloc(sizeof(peer_t));
-        init_peer(peer_t1, id, inet_ntoa(ip_addr), port);
-        // char *hostname;
-        add_peer(peer_t1, bt_args, NULL, port);
-        print_peer(peer_t1);
-        //free(peer_t1);
-	if(i == 0)
-		break;
-    }
-
-}
-
-int handshake(peer_t *peer, bt_handshake_t msg) {
     int sockfd;
     struct sockaddr_in addr;
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -487,121 +390,108 @@ int handshake(peer_t *peer, bt_handshake_t msg) {
     memset(buff, '\0', 2000);
     size = (int) read(sockfd, buff, 2000);
     printf("received size: %i\nreceived %s\n", size, buff);
-	
-	if(size == 68){
-		memcpy(&peer->id, &buff[48], 20);
-		printf("PEER ID IS: %s\n", peer->id);
-	}
-	bt_msg_t *msg1 = malloc(sizeof(bt_msg_t));	
-	//read_from_peer(peer, msg1);
-	int msg_len = 0;
-	size = (int) read(sockfd, &msg_len, sizeof(int));
-	msg_len = ntohl(msg_len);
-	printf("Message length is: %i\n", msg_len);
-	
 
-	uint8_t msg_id;
-	size = (int) read(sockfd, &msg_id, sizeof(char));
-	printf("Message id is:  %" SCNd8 "\n", msg_id);
-   
-	switch (msg_id)
+    if (size == 68)
+    {
+        memcpy(&peer->id, &buff[48], 20);
+        printf("PEER ID IS: %s\n", peer->id);
+    }
+    bt_msg_t *msg1 = malloc(sizeof(bt_msg_t));
+    //read_from_peer(peer, msg1);
+    int msg_len = 0;
+    size = (int) read(sockfd, &msg_len, sizeof(int));
+    msg_len = ntohl(msg_len);
+    printf("Message length is: %i\n", msg_len);
+
+
+    uint8_t msg_id;
+    size = (int) read(sockfd, &msg_id, sizeof(char));
+    printf("Message id is:  %" SCNd8 "\n", msg_id);
+
+    switch (msg_id)
     {
 
     case BT_CHOKE:
-		peer->choked = 0;
+        peer->choked = 0;
         break;
 
     case BT_UNCHOKE:
-		peer->choked = 1;
+        peer->choked = 1;
         break;
 
     case BT_INTERSTED:
-		peer->interested = 0;	
+        peer->interested = 0;
         break;
     case BT_NOT_INTERESTED:
-		peer->interested = 1;	
+        peer->interested = 1;
         break;
 
-	case BT_HAVE:
+    case BT_HAVE:
 
         break;
 
     case BT_BITFILED:;
-		bt_bitfield_t *bt_bitfield = malloc(sizeof(bt_bitfield_t));
-		bt_bitfield->size = (size_t)(msg_len - 1);
-		printf("bitfield size is : %zu\n", bt_bitfield->size);
-		bt_bitfield->bitfield = malloc(bt_bitfield->size);
-		size = (int) read(sockfd, bt_bitfield->bitfield, bt_bitfield->size);
+        bt_bitfield_t *bt_bitfield = malloc(sizeof(bt_bitfield_t));
+        bt_bitfield->size = (size_t)(msg_len - 1);
+        printf("bitfield size is : %zu\n", bt_bitfield->size);
+        bt_bitfield->bitfield = malloc(bt_bitfield->size);
+        size = (int) read(sockfd, bt_bitfield->bitfield, bt_bitfield->size);
         printf("bitfield size is : %zu\n", size);
         //size = (int) read(sockfd, bt_bitfield->bitfield, bt_bitfield->size);
         break;
 
     case BT_REQUEST:;
-		bt_request_t *bt_request = malloc(sizeof(bt_request_t));
-		size = (int) read(sockfd, &bt_request->index, sizeof(int));
+        bt_request_t *bt_request = malloc(sizeof(bt_request_t));
+        size = (int) read(sockfd, &bt_request->index, sizeof(int));
         size = (int) read(sockfd, &bt_request->begin, sizeof(int));
-		size = (int) read(sockfd, &bt_request->length, sizeof(int));
+        size = (int) read(sockfd, &bt_request->length, sizeof(int));
         break;
 
     case BT_PIECE:;
-		bt_piece_t * bt_piece = malloc(sizeof(bt_piece_t));
-		int block_len = msg_len - 9;
-		size = (int) read(sockfd, &bt_piece->index, sizeof(int));
+        bt_piece_t *bt_piece = malloc(sizeof(bt_piece_t));
+        int block_len = msg_len - 9;
+        size = (int) read(sockfd, &bt_piece->index, sizeof(int));
         size = (int) read(sockfd, &bt_piece->begin, sizeof(int));
-		size = (int) read(sockfd, &bt_piece->piece, block_len);
+        size = (int) read(sockfd, &bt_piece->piece, block_len);
         break;
 
-	case BT_CANCEL:
+    case BT_CANCEL:
 
         break;
 
     default:
         break;
     }
-	
+
     return 0;
 }
 
-/**
-*
-**/
-char *read_file(char *file, long long *len)
+int print_bytes(void *buff)
 {
-    struct stat st;
-    char *ret = NULL;
-    FILE *fp;
-
-    if (stat(file, &st))
-    {
-        return ret;
-    }
-    *len = st.st_size;
-
-    fp = fopen(file, "r");
-    if (!fp)
-        return ret;
-
-    ret = malloc((size_t) * len);
-    if (!ret)
-        return NULL;
-
-    fread(ret, 1, (size_t) *len, fp);
-
-    fclose(fp);
-
-    return ret;
-}
-
-int print_bytes(void *buff) {
     size_t i;
-    printf("(");
+    printf("[");
     for (i = 0; i < 17; ++i)
-        printf("%02X", ((unsigned char*)buff)[i]);
-    printf(")\n");
+        printf("%02X", ((unsigned char *)buff)[i]);
+    printf("]\n");
     return 0;
 }
 
-FILE *create_file(bt_args_t *bt_args, char *filename, char* file_type){
+char *byte_to_binary(int x)
+{
+    static char b[9];
+    b[0] = '\0';
+
+    int z;
+    for (z = 128; z > 0; z >>= 1)
+    {
+        strcat(b, ((x & z) == z) ? "1" : "0");
+    }
+
+    return b;
+}
+
+FILE *create_file(bt_args_t *bt_args, char *filename, char *file_type)
+{
     FILE *fp = fopen(filename, file_type);
     memcpy(&bt_args->save_file, filename, strlen(filename));
     bt_args->f_save = fp;

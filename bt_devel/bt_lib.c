@@ -23,27 +23,13 @@
 
 #define ECHOMAX 255
 
-void reverse(char *x, int begin, int end)
-{
-    char c;
-
-    if (begin >= end)
-        return;
-
-    c = *(x + begin);
-    *(x + begin) = *(x + end);
-    *(x + end) = c;
-
-    reverse(x, ++begin, --end);
-}
-
 struct my_string
 {
     char *memory;
     size_t size;
 };
 
-static size_t my_string_append(void *contents, size_t size, size_t nmemb, void *userp)
+static size_t _my_string_append(void *contents, size_t size, size_t nmemb, void *userp)
 {
     size_t realsize = size * nmemb;
     struct my_string *mem = (struct my_string *) userp;
@@ -57,7 +43,7 @@ static size_t my_string_append(void *contents, size_t size, size_t nmemb, void *
     return realsize;
 }
 
-char *send_http_request(char *url)
+char *_send_http_request(char *URL)
 {
     CURL *curl_handle;
     CURLcode res;
@@ -72,9 +58,9 @@ char *send_http_request(char *url)
     // curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, args);
     curl_easy_setopt(curl_handle, CURLOPT_HTTPGET, 1);
     /* specify URL to get */
-    curl_easy_setopt(curl_handle, CURLOPT_URL, url);
+    curl_easy_setopt(curl_handle, CURLOPT_URL, URL);
     /* send all data to this function  */
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, my_string_append);
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, _my_string_append);
     /* we pass our 'chunk' struct to the callback function */
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &body);
     curl_easy_setopt(curl_handle, CURLOPT_HEADERDATA, (void *) &header);
@@ -103,6 +89,48 @@ char *send_http_request(char *url)
     }
 }
 
+int _fill_peer_info(bt_peer *peer, be_node *node, ssize_t indent, char *key)
+{
+    size_t i;
+
+    indent = abs((int) indent);
+
+    switch (node->type)
+    {
+    case BE_STR:
+        if (!strcmp(key, "tracker id"))
+            strcpy(peer->tracker_id, node->val.s);
+
+        if (!strcmp(key, "peers"))
+            strcpy(peer->peer_hashes, node->val.s);
+
+        break;
+
+    case BE_INT:
+        if (!strcmp(key, "complete"))
+            peer->complete = (int) node->val.i;
+        if (!strcmp(key, "incomplete"))
+            peer->incomplete = (int) node->val.i;
+        if (!strcmp(key, "interval"))
+            peer->interval = (int) node->val.i;
+
+        break;
+
+    case BE_LIST:
+        for (i = 0; node->val.l[i]; ++i)
+            _fill_peer_info(peer, node->val.l[i], indent + 1, "");
+
+        break;
+
+    case BE_DICT:
+        for (i = 0; node->val.d[i].val; ++i)
+            _fill_peer_info(peer, node->val.d[i].val, -(indent + 1), node->val.d[i].key);
+
+        break;
+    }
+    return 1;
+}
+
 int contact_tracker(bt_args_t *bt_args)
 {
     char *new_file;
@@ -111,7 +139,7 @@ int contact_tracker(bt_args_t *bt_args)
     new_file = read_file(bt_args->torrent_file, &leng);
 
     char *inf = strstr(strstr(new_file, "info"), "d");
-    // length on ubuntu 14 should be 44478
+    // length on ubuntu 14.04 torrent should be 44478
     long long len = be_len(inf);
 
     memset(bt_args->info_hash, '\0', BT_INFO_HASH_SIZE);
@@ -123,38 +151,75 @@ int contact_tracker(bt_args_t *bt_args)
 
     memset(request_to_send, '\0', FILE_NAME_MAX);
     memcpy(bt_args->bt_peer_id, generate_peer_id(), 20);
-    //aq unda iyos: Port number this peer is listening on.
+
+    //Port number this peer is listening on.
     //Common behavior is for a downloader to try to listen on
     //port 6881 and if that port is taken try 6882, then 6883, etc. and give up after 6889.
-    int port = INIT_PORT;
+    uint16_t port = INIT_PORT;
     bt_args->bt_info->num_pieces = bt_args->bt_info->length / bt_args->bt_info->piece_length;
     sprintf(request_to_send,
-            "%s?info_hash=%s&peer_id=%s&port=%i&uploaded=0"
+            "%s?info_hash=%s&peer_id=%s&port=%hu&uploaded=0"
             "&downloaded=0&left=%d&event=started&compact=1",
             bt_args->bt_info->announce, url_encode(bt_args->info_hash),
             url_encode(bt_args->bt_peer_id), port, bt_args->bt_info->length);
 
-    /*
-     * correct request to send on ubuntu torrent
-     *
-     *  "http://torrent.ubuntu.com:6969/"
-     *      "announce?info_hash=%B4%15%C9%13d%3E%5F%F4%9F%E3%7D0K%BB%5En%11%ADQ%01"
-     *      "announce?info_hash=%b4%15%c9%13d%3e_%f4%9f%e3%7d0K%bb%5en%11%adQ%01"
-     *      "&peer_id=TueFeb32137332015RRR"
-     *      "&port=6681"
-     *      "&event=started"
-     *      "&uploaded=0"
-     *      "&downloaded=0"
-     *      "&left=1162936320"
-     *      "&compact=1";
-     */
+    // correct request to send on ubuntu torrent
 
-    printf("Request URL for tracker: %s\n", request_to_send);
-    char *result = send_http_request(request_to_send);
+    //  http://torrent.ubuntu.com:6969/announce?info_hash=%B4%15%C9%13d%3E%5F%F4%9F%E3%7D0K%BB%5En%11%ADQ%01
+    //      announce?info_hash=%b4%15%c9%13d%3e_%f4%9f%e3%7d0K%bb%5en%11%adQ%01
+    //      &peer_id=TueFeb32137332015RRR&port=6681&event=started&uploaded=0
+    //      &downloaded=0&left=1162936320&compact=1
+
+    if (bt_args->verbose)
+        printf("Request URL for tracker: %s\n", request_to_send);
+
+    char *result = _send_http_request(request_to_send);
     if (result)
     {
-        printf("Trackers responce is: %s\n", result);
-        decode_tracker_info(bt_args, result);
+        be_node *node = be_decoden(result, (long long int) be_len);
+        
+        if (bt_args->verbose)
+            be_dump(node);
+
+        bt_peer *peer = malloc(sizeof(bt_peer));
+
+        // parse_info(peer, node);
+        _fill_peer_info(peer, node, 0, "");
+        int num_peers = (int) (strlen(peer->peer_hashes) / 6);
+
+
+            printf("Peers: %i\n", num_peers);
+            // printf("Peer : %s\n", peer->peer_hashes);
+
+        int i;
+        int count = 0;
+
+        for (i = 0; i < num_peers; i++)
+        {
+            uint32_t ip;
+            ip = *(uint32_t *) (peer->peer_hashes + count);
+            count = count + 4;
+            port = *(uint16_t *) (peer->peer_hashes + count);
+            count = count + 2;
+            //IP stringad
+            struct in_addr ip_addr;
+            ip_addr.s_addr = ip;
+
+            char *id = malloc(21);
+            memset(id, 0, 21);
+            calc_id(inet_ntoa(ip_addr), port, id);
+            peer_t *peer_t1 = malloc(sizeof(peer_t));
+            init_peer(peer_t1, id, inet_ntoa(ip_addr), port);
+            // char *hostname;
+            add_peer(peer_t1, bt_args, NULL, port);
+            print_peer(peer_t1);
+            //free(peer_t1);
+            if (i == 0)
+                break;
+        }
+    } else {
+        printf("Something went wrong!\n");
+        return 1;
     }
     return 0;
 }
@@ -308,25 +373,25 @@ int poll_peers(bt_args_t *bt_args)
 **/
 int send_to_peer(peer_t *peer, bt_msg_t *msg)
 {
-//    int sockfd;
+    //    int sockfd;
     ssize_t ret_val = -1;
-//    struct sockaddr_in addr;
-//    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-//    if (sockfd == -1)
-//        perror("Couldn't create the socket");
-//
-//    addr.sin_family = AF_INET;
-//    addr.sin_port = htons(peer->sockaddr.sin_port);
-//    addr.sin_addr = peer->sockaddr.sin_addr;
-//
-//    // (peer->sockaddr)
-//
-//
-//    if (connect(sockfd, (struct sockaddr *) &addr, sizeof(struct sockaddr_in)) == -1)
-//    {
-//        perror("Connection Problem");
-//        return (int) ret_val;
-//    }
+    //    struct sockaddr_in addr;
+    //    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    //    if (sockfd == -1)
+    //        perror("Couldn't create the socket");
+    //
+    //    addr.sin_family = AF_INET;
+    //    addr.sin_port = htons(peer->sockaddr.sin_port);
+    //    addr.sin_addr = peer->sockaddr.sin_addr;
+    //
+    //    // (peer->sockaddr)
+    //
+    //
+    //    if (connect(sockfd, (struct sockaddr *) &addr, sizeof(struct sockaddr_in)) == -1)
+    //    {
+    //        perror("Connection Problem");
+    //        return (int) ret_val;
+    //    }
 
     int sockfd;
     struct sockaddr_in addr;
@@ -365,19 +430,19 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
     case BT_REQUEST_T:
 
         msg_size = sizeof(uint32_t) + sizeof(uint8_t);
-            buff = malloc(msg_size);
+        buff = malloc(msg_size);
         memcpy((char *) buff, &a, sizeof(uint32_t));
         memcpy((char *) buff + sizeof(uint32_t), &b, sizeof(uint8_t));
-//        memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
-//               &msg->payload.request.index, sizeof(uint32_t));
-//        memcpy((char *) buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
-//               &msg->payload.request.begin, sizeof(uint32_t));
-//        memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
-//               &msg->payload.request.length, sizeof(uint32_t));
+        //        memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
+        //               &msg->payload.request.index, sizeof(uint32_t));
+        //        memcpy((char *) buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
+        //               &msg->payload.request.begin, sizeof(uint32_t));
+        //        memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
+        //               &msg->payload.request.length, sizeof(uint32_t));
         print_bytes(buff);
 
         ret_val = write(sockfd, buff, msg_size);
-            printf("%d\n", (int) ret_val);
+        printf("%d\n", (int) ret_val);
         break;
 
     case BT_CANCEL_T:
@@ -499,7 +564,7 @@ int read_from_peer(peer_t *peer, bt_msg_t *msg)
         bt_bitfield->bitfield = malloc(bt_bitfield->size);
         size = (int) read(sockfd, bt_bitfield->bitfield, bt_bitfield->size);
         memcpy(&msg->payload.bitfiled, bt_bitfield, sizeof(bt_bitfield_t));
-		puts("blaaa");
+        puts("blaaa");
         break;
 
     case BT_REQUEST:;
@@ -658,18 +723,13 @@ int parse_bt_info(bt_info_t *bt_info, be_node *node)
 {
     return _fill_info(bt_info, node, 0, "");
 }
-typedef struct
-{
-    int index; //which piece index
-    int begin; //offset within piece
-    char piece[0]; //pointer to start of the data for a piece
-} bt_piece_t;
 
 /* save a piece of the file */
-int save_piece(bt_args_t *bt_args, bt_piece_t *piece){
-	FILE *file = bt_args->f_save;
-		
-	return 0;
+int save_piece(bt_args_t *bt_args, bt_piece_t *piece)
+{
+    FILE *file = bt_args->f_save;
+
+    return 0;
 }
 
 
