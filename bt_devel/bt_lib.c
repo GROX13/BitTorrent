@@ -20,6 +20,7 @@
 #include "bencode.h"
 #include "bt_lib.h"
 #include "bt_setup.h"
+#include "bt_sock.h"
 
 #define ECHOMAX 255
 
@@ -180,10 +181,9 @@ int contact_tracker(bt_args_t *bt_args)
         printf("Request URL for tracker: %s\n", request_to_send);
 
     char *result = _send_http_request(request_to_send);
-    if (result)
-    {
+    if (result) {
         be_node *node = be_decoden(result, (long long int) be_len);
-        
+
         if (bt_args->verbose)
             be_dump(node);
 
@@ -197,6 +197,7 @@ int contact_tracker(bt_args_t *bt_args)
         char *peer_num = strstr(result, "peers");
         if (peer_num == NULL) {
             printf("Something went wrong in parsing received data!\n");
+            free(result);
             return 1;
         }
         int i = 0;
@@ -209,33 +210,55 @@ int contact_tracker(bt_args_t *bt_args)
         char *endptr;
         num_peers = (int) strtol(buff, &endptr, 10) / 6;
 
-        if (num_peers == 0)
+        if (num_peers == 0) {
+            free(result);
             return 1;
-
+        }
         int count = 0;
 
         for (i = 0; i < num_peers; i++)
         {
-            uint32_t ip;
-            ip = *(uint32_t *) (peer->peer_hashes + count);
+            uint32_t ip = *(uint32_t *) (peer->peer_hashes + count);
             count = (int) (count + sizeof(uint32_t));
             port = *(uint16_t *) (peer->peer_hashes + count);
             count = (int) (count + sizeof(uint16_t));
-            //IP stringad
+
+            peer_t *my_peer_t = malloc(sizeof(peer_t));
+
+            my_peer_t->interested = -1;
+            my_peer_t->choked = -1;
+
+            //IP to string
             struct in_addr ip_addr;
             ip_addr.s_addr = ip;
 
             char *id = malloc(21);
             memset(id, 0, 21);
             calc_id(inet_ntoa(ip_addr), port, id);
-            peer_t *peer_t1 = malloc(sizeof(peer_t));
-            init_peer(peer_t1, id, inet_ntoa(ip_addr), port);
+
+
+            init_peer(my_peer_t, id, inet_ntoa(ip_addr), htons(port));
+            my_peer_t->socket_fd = create_socket(my_peer_t->sockaddr);
+            //_____ success
             // char *hostname;
-            add_peer(peer_t1, bt_args, NULL, port);
-            print_peer(peer_t1);
-            //free(peer_t1);
-            if (i == 0)
-                break;
+
+            bt_handshake_t handshake_t;
+
+            handshake_t.protocol_name_length = 19;
+            memcpy(handshake_t.protocol_name , "BitTorrent protocol", 19);
+            memset(handshake_t.reserved_bytes, 0, 8);
+            memcpy(handshake_t.hash_info, bt_args->info_hash , 20);
+            memcpy(handshake_t.peer_id , bt_args->bt_peer_id, 20);
+
+
+            handshake(my_peer_t, handshake_t);
+            add_peer(my_peer_t, bt_args, NULL, port);
+
+
+
+            if (bt_args->verbose)
+                print_peer(my_peer_t);
+
         }
     } else {
         printf("Something went wrong!\n");

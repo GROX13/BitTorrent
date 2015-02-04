@@ -314,21 +314,21 @@ char *url_decode(char *str)
 
 int handshake(peer_t *peer, bt_handshake_t msg)
 {
-    int sockfd;
-    struct sockaddr_in addr;
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd == -1)
-        perror("Couldn't create the socket");
-
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(peer->sockaddr.sin_port);
-    addr.sin_addr = peer->sockaddr.sin_addr;
-    //peer->sockaddr
-    if (connect (sockfd, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) == -1)
-    {
-        perror("Connection Problem");
-        return 1;
-    }
+    int sockfd = peer->socket_fd;
+//    struct sockaddr_in addr;
+//    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+//    if (sockfd == -1)
+//        perror("Couldn't create the socket");
+//
+//    addr.sin_family = AF_INET;
+//    addr.sin_port = htons(peer->sockaddr.sin_port);
+//    addr.sin_addr = peer->sockaddr.sin_addr;
+//    //peer->sockaddr
+//    if (connect (sockfd, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) == -1)
+//    {
+//        perror("Connection Problem");
+//        return 1;
+//    }
 
     // datashi structuris gadawera
 
