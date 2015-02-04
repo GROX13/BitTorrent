@@ -52,6 +52,24 @@ int save_data_to_file(void *ptr, size_t len, int index, int file_desc, char* fil
 	
 }
 
+int load_data_from_file(void *ptr, size_t len, int index, int file_desc, char* filename) {
+	
+	struct stat st;
+	stat(filename, &st);
+	int size = st.st_size;
 
+	if(index >= size) return 1;
 
+	if(lseek(file_desc,index,SEEK_SET) < 0) return 1;
 
+	ptr = malloc(len);
+	
+	if(read(file_desc, ptr, len) != len)  return 1;
+
+	if(lseek(file_desc,0,SEEK_SET) < 0) return 1;
+		
+	puts(ptr);
+
+	return 0;
+
+}
