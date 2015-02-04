@@ -8,18 +8,21 @@
 #include <glob.h>
 #include <assert.h>
 #include <inttypes.h>
-
+#include <fcntl.h>
+#include <sys/types.h>
+#include <inttypes.h>
+#include <sys/stat.h>
 #include "bt_setup.h"
 #include "bt_lib.h"
 #include "bencode.h"
 #include "bt_io.h"
 
-FILE *create_file(bt_args_t *bt_args, char *filename, char *file_type)
+int create_file_descriptor(char *filename)
 {
-    FILE *fp = fopen(filename, file_type);
-    memcpy(&bt_args->save_file, filename, strlen(filename));
-    bt_args->f_save = fp;
-    return fp;
+    int file = 0;
+	if((file=open(filename,O_RDWR)) < -1)
+        return 1;
+    return file;
 }
 
 int save_data_to_file(void *ptr, size_t len, int index, int file_desc, char* filename) {
@@ -52,6 +55,24 @@ int save_data_to_file(void *ptr, size_t len, int index, int file_desc, char* fil
 	
 }
 
+int load_data_from_file(void *ptr, size_t len, int index, int file_desc, char* filename) {
+	
+	struct stat st;
+	stat(filename, &st);
+	int size = st.st_size;
 
+	if(index >= size) return 1;
 
+	if(lseek(file_desc,index,SEEK_SET) < 0) return 1;
 
+	ptr = malloc(len);
+	
+	if(read(file_desc, ptr, len) != len)  return 1;
+
+	if(lseek(file_desc,0,SEEK_SET) < 0) return 1;
+		
+	puts(ptr);
+
+	return 0;
+
+}
