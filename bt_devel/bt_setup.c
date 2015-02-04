@@ -314,21 +314,7 @@ char *url_decode(char *str)
 
 int handshake(peer_t *peer, bt_handshake_t msg)
 {
-    int sockfd;
-    struct sockaddr_in addr;
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd == -1)
-        perror("Couldn't create the socket");
-
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(peer->sockaddr.sin_port);
-    addr.sin_addr = peer->sockaddr.sin_addr;
-    //peer->sockaddr
-    if (connect (sockfd, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) == -1)
-    {
-        perror("Connection Problem");
-        return 1;
-    }
+    int sockfd = peer->socket_fd;
 
     // datashi structuris gadawera
 
@@ -353,87 +339,85 @@ int handshake(peer_t *peer, bt_handshake_t msg)
     memcpy(&data[offset], msg.peer_id, (size_t) size);
 
     size = (int) write(sockfd, data, sizeof(bt_handshake_t));
-    printf("____________\n");
-    printf("sent size: %i\n", size);
 
-    char buff[2000];
-    memset(buff, '\0', 2000);
-    size = (int) read(sockfd, buff, 2000);
-    printf("received size: %i\nreceived %s\n", size, buff);
+//    char buff[2000];
+//    memset(buff, '\0', 2000);
+//    size = (int) read(sockfd, buff, 2000);
+//    printf("received size: %i\nreceived %s\n", size, buff);
+//
+//    if (size == 68)
+//    {
+//        memcpy(&peer->id, &buff[48], 20);
+//        printf("PEER ID IS: %s\n", peer->id);
+//    }
+//    bt_msg_t *msg1 = malloc(sizeof(bt_msg_t));
+//    //read_from_peer(peer, msg1);
+//    int msg_len = 0;
+//    size = (int) read(sockfd, &msg_len, sizeof(int));
+//    msg_len = ntohl(msg_len);
+//    printf("Message length is: %i\n", msg_len);
+//
+//
+//    uint8_t msg_id;
+//    size = (int) read(sockfd, &msg_id, sizeof(char));
+//    printf("Message id is:  %" SCNd8 "\n", msg_id);
+//
+//    switch (msg_id)
+//    {
+//
+//    case BT_CHOKE:
+//        peer->choked = 0;
+//        break;
+//
+//    case BT_UNCHOKE:
+//        peer->choked = 1;
+//        break;
+//
+//    case BT_INTERSTED:
+//        peer->interested = 0;
+//        break;
+//    case BT_NOT_INTERESTED:
+//        peer->interested = 1;
+//        break;
+//
+//    case BT_HAVE:
+//
+//        break;
+//
+//    case BT_BITFILED:;
+//        bt_bitfield_t *bt_bitfield = malloc(sizeof(bt_bitfield_t));
+//        bt_bitfield->size = (size_t)(msg_len - 1);
+//        printf("bitfield size is : %zu\n", bt_bitfield->size);
+//        bt_bitfield->bitfield = malloc(bt_bitfield->size);
+//        size = (int) read(sockfd, bt_bitfield->bitfield, bt_bitfield->size);
+//        printf("bitfield size is : %zu\n", size);
+//        //size = (int) read(sockfd, bt_bitfield->bitfield, bt_bitfield->size);
+//        break;
+//
+//    case BT_REQUEST:;
+//        bt_request_t *bt_request = malloc(sizeof(bt_request_t));
+//        size = (int) read(sockfd, &bt_request->index, sizeof(int));
+//        size = (int) read(sockfd, &bt_request->begin, sizeof(int));
+//        size = (int) read(sockfd, &bt_request->length, sizeof(int));
+//        break;
+//
+//    case BT_PIECE:;
+//        bt_piece_t *bt_piece = malloc(sizeof(bt_piece_t));
+//        int block_len = msg_len - 9;
+//        size = (int) read(sockfd, &bt_piece->index, sizeof(int));
+//        size = (int) read(sockfd, &bt_piece->begin, sizeof(int));
+//        size = (int) read(sockfd, &bt_piece->piece, block_len);
+//        break;
+//
+//    case BT_CANCEL:
+//
+//        break;
+//
+//    default:
+//        break;
+//    }
 
-    if (size == 68)
-    {
-        memcpy(&peer->id, &buff[48], 20);
-        printf("PEER ID IS: %s\n", peer->id);
-    }
-    bt_msg_t *msg1 = malloc(sizeof(bt_msg_t));
-    //read_from_peer(peer, msg1);
-    int msg_len = 0;
-    size = (int) read(sockfd, &msg_len, sizeof(int));
-    msg_len = ntohl(msg_len);
-    printf("Message length is: %i\n", msg_len);
-
-
-    uint8_t msg_id;
-    size = (int) read(sockfd, &msg_id, sizeof(char));
-    printf("Message id is:  %" SCNd8 "\n", msg_id);
-
-    switch (msg_id)
-    {
-
-    case BT_CHOKE:
-        peer->choked = 0;
-        break;
-
-    case BT_UNCHOKE:
-        peer->choked = 1;
-        break;
-
-    case BT_INTERSTED:
-        peer->interested = 0;
-        break;
-    case BT_NOT_INTERESTED:
-        peer->interested = 1;
-        break;
-
-    case BT_HAVE:
-
-        break;
-
-    case BT_BITFILED:;
-        bt_bitfield_t *bt_bitfield = malloc(sizeof(bt_bitfield_t));
-        bt_bitfield->size = (size_t)(msg_len - 1);
-        printf("bitfield size is : %zu\n", bt_bitfield->size);
-        bt_bitfield->bitfield = malloc(bt_bitfield->size);
-        size = (int) read(sockfd, bt_bitfield->bitfield, bt_bitfield->size);
-        printf("bitfield size is : %zu\n", size);
-        //size = (int) read(sockfd, bt_bitfield->bitfield, bt_bitfield->size);
-        break;
-
-    case BT_REQUEST:;
-        bt_request_t *bt_request = malloc(sizeof(bt_request_t));
-        size = (int) read(sockfd, &bt_request->index, sizeof(int));
-        size = (int) read(sockfd, &bt_request->begin, sizeof(int));
-        size = (int) read(sockfd, &bt_request->length, sizeof(int));
-        break;
-
-    case BT_PIECE:;
-        bt_piece_t *bt_piece = malloc(sizeof(bt_piece_t));
-        int block_len = msg_len - 9;
-        size = (int) read(sockfd, &bt_piece->index, sizeof(int));
-        size = (int) read(sockfd, &bt_piece->begin, sizeof(int));
-        size = (int) read(sockfd, &bt_piece->piece, block_len);
-        break;
-
-    case BT_CANCEL:
-
-        break;
-
-    default:
-        break;
-    }
-
-    return 0;
+    return size;
 }
 
 int print_bytes(void *buff)

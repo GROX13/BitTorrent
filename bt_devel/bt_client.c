@@ -60,7 +60,6 @@ int main(int argc, char *argv[])
 
 
     for (i = 0; i < MAX_CONNECTIONS; ++i)
-    {
 
         if (bt_args.peers[i])
         {
@@ -72,26 +71,26 @@ int main(int argc, char *argv[])
             memcpy(handshake_t.hash_info, bt_args.info_hash , 20);
             memcpy(handshake_t.peer_id , bt_args.bt_peer_id, 20);
 
-
             handshake(bt_args.peers[i], handshake_t);
-            if (i == 0)
-                break;
+            bt_msg_t msg;
+            msg.type = BT_INTERESTED_T;
+            send_to_peer(bt_args.peers[i], &msg);
         }
-    }
 
-    peer_t *peer = bt_args.peers[0];
-    bt_msg_t msg;
-    msg.length = 13;
-    msg.type = BT_REQUEST_T;
-    msg.payload.request.index = 1;
-    msg.payload.request.begin = 0;
-    msg.payload.request.length = (8 * 2048);
-    send_to_peer(peer, &msg);
+//    peer_t *peer = bt_args.peers[0];
+//    bt_msg_t msg;
+//    msg.length = 13;
+//    msg.type = BT_REQUEST_T;
+//    msg.payload.request.index = 1;
+//    msg.payload.request.begin = 0;
+//    msg.payload.request.length = (8 * 2048);
+//    send_to_peer(peer, &msg);
+//
+//    FILE *save_file = create_file(&bt_args, "save.txt", "ab+");
+//    char str[] = "Bla";
+//
+//    fwrite(str , 1, sizeof(str) , save_file);
 
-    FILE *save_file = create_file(&bt_args, "save.txt", "ab+");
-    char str[] = "Bla";
-
-    fwrite(str , 1, sizeof(str) , save_file);
     //main client loop
     printf("Starting Main Loop\n");
     while (1)

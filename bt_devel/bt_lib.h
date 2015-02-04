@@ -58,6 +58,10 @@ typedef enum
     BT_CANCEL_T,
     BT_PIECE_T,
     BT_INTERESTED_T,
+    BT_CHOKE_T,
+    BT_UNCHOKE_T,
+    BT_NOT_INTERESTED_T,
+    BT_HAVE_T,
 } bt_msg_type;
 
 //holds information about a peer
@@ -71,6 +75,13 @@ typedef struct peer
     int interested; //peer interested?
 } peer_t;
 
+typedef struct bt_peer {
+    char tracker_id[FILE_NAME_MAX];
+    int complete;
+    int incomplete;
+    int interval;
+    char peer_hashes[1024];
+} bt_peer;
 
 //holds information about a torrent file
 typedef struct
