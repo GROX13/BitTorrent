@@ -155,7 +155,8 @@ void _connect_function(void *ptr)
     if (my_socket < 0)
     {
         drop_peer(data->bt_peer_t, data->bt_args);
-//        free(data->bt_peer_t);
+        free(data->bt_peer_t);
+        free(ptr);
     }
     else
     {
@@ -163,6 +164,7 @@ void _connect_function(void *ptr)
 
         if (data->bt_args->verbose)
             print_peer(data->bt_peer_t);
+        free(ptr);
     }
 }
 
@@ -269,19 +271,19 @@ int contact_tracker(bt_args_t *bt_args)
             char *id = malloc(21);
             memset(id, 0, 21);
             calc_id(inet_ntoa(ip_addr), port, id);
+            memset(my_peer_t->id, 0, ID_SIZE);
+            strcpy((char *) my_peer_t->id, id);
 
             init_peer(my_peer_t, id, inet_ntoa(ip_addr), htons(port));
             add_peer(my_peer_t, bt_args, inet_ntoa(ip_addr), port);
 
+            thdata *data = malloc(sizeof(thdata));
 
-            thdata data;
+            data->th_num = i;
+            data->bt_args = bt_args;
+            data->bt_peer_t = my_peer_t;
 
-            data.th_num = i;
-            data.bt_args = bt_args;
-            data.bt_peer_t = my_peer_t;
-
-            pthread_create (&thread[i], NULL, (void *) &_connect_function, (void *) &data);
-            break;
+            pthread_create (&thread[i], NULL, (void *) &_connect_function, (void *) data);
         }
 
         for (i = 0; i < num_peers; i++);
