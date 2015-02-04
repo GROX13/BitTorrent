@@ -284,7 +284,7 @@ int contact_tracker(bt_args_t *bt_args)
             break;
         }
 
-        for (i = 0; i < num_peers; i++)
+        for (i = 0; i < num_peers; i++);
             pthread_join(thread[i], NULL);
     }
     else
