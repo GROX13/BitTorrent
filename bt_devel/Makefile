@@ -3,7 +3,7 @@ CPFLAGS = -g -Wall
 LDFLAGS = -lcrypto -lcurl -lpthread
 
 
-SRC = bencode.c bt_client.c bt_lib.c bt_setup.c bt_sock.c bt_io.c
+SRC = bencode.c bt_client.c bt_lib.c bt_setup.c bt_sock.c
 OBJ = $(SRC:.c=.o)
 BIN = bt_client.x86_64
 
