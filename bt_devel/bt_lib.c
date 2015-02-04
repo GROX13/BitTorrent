@@ -558,21 +558,7 @@ void *_connection_handler(void *socket_desc)
 /*read a msg from a peer and store it in msg*/
 int read_from_peer(peer_t *peer, bt_msg_t *msg)
 {
-    int sockfd;
-    struct sockaddr_in addr;
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd == -1)
-        perror("Couldn't create the socket");
-
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(peer->sockaddr.sin_port);
-    addr.sin_addr = peer->sockaddr.sin_addr;
-    //peer->sockaddr
-    if (connect (sockfd, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) == -1)
-    {
-        perror("Connection Problem");
-        return 1;
-    }
+   	int sockfd = peer->socket_fd;
     int msg_len = 0;
     int size = (int) read(sockfd, &msg_len, sizeof(int));
     msg_len = ntohl(msg_len);
@@ -614,7 +600,6 @@ int read_from_peer(peer_t *peer, bt_msg_t *msg)
         bt_bitfield->bitfield = malloc(bt_bitfield->size);
         size = (int) read(sockfd, bt_bitfield->bitfield, bt_bitfield->size);
         memcpy(&msg->payload.bitfiled, bt_bitfield, sizeof(bt_bitfield_t));
-        puts("blaaa");
         break;
 
     case BT_REQUEST:;
@@ -625,7 +610,7 @@ int read_from_peer(peer_t *peer, bt_msg_t *msg)
         size = (int) read(sockfd, &bt_request->length, sizeof(int));
         memcpy(&msg->payload.request, bt_request, sizeof(bt_request_t));
         break;
-    //es ar vici sworia tu ara
+    
     case BT_PIECE:;
         msg->type = BT_PIECE_T;
         bt_piece_t *bt_piece = malloc(sizeof(bt_piece_t));

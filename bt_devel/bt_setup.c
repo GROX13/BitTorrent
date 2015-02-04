@@ -340,18 +340,17 @@ int handshake(peer_t *peer, bt_handshake_t msg)
 
     size = (int) write(sockfd, data, sizeof(bt_handshake_t));
 
-//    char buff[2000];
-//    memset(buff, '\0', 2000);
-//    size = (int) read(sockfd, buff, 2000);
-//    printf("received size: %i\nreceived %s\n", size, buff);
-//
-//    if (size == 68)
-//    {
-//        memcpy(&peer->id, &buff[48], 20);
-//        printf("PEER ID IS: %s\n", peer->id);
-//    }
-//    bt_msg_t *msg1 = malloc(sizeof(bt_msg_t));
-//    //read_from_peer(peer, msg1);
+    char buff[68];
+    memset(buff, '\0', 68);
+    size = (int) read(sockfd, buff, 68);
+    printf("received size: %i\nreceived %s\n", size, buff);
+
+    if (size == 68){
+        memcpy(&peer->id, &buff[48], 20);
+        printf("PEER ID IS: %s\n", peer->id);
+    }
+    bt_msg_t *msg1 = malloc(sizeof(bt_msg_t));
+    read_from_peer(peer, msg1);
 //    int msg_len = 0;
 //    size = (int) read(sockfd, &msg_len, sizeof(int));
 //    msg_len = ntohl(msg_len);
