@@ -60,10 +60,9 @@ void usage(FILE *file);
 void parse_args(bt_args_t *bt_args, int argc, char **argv);
 
 /**
-* read_file(char *file, long long *len) -> char *
+* create_file(bt_args_t *bt_args, char *filename, char* file_type) -> FILE *
 *
-* parse the torrent file and return it's
-* representation as a char array.
+*
 *
 * ERRORS: Will exit on various errors
 *
@@ -71,18 +70,39 @@ void parse_args(bt_args_t *bt_args, int argc, char **argv);
 
 FILE *create_file(bt_args_t *bt_args, char *filename, char* file_type);
 
+/**
+* ERRORS: Will exit on various errors
+*/
 int create_socket(char *ip_addr, unsigned short port);
 
+/**
+* ERRORS: Will exit on various errors
+*/
 char *generate_peer_id();
 
+/**
+* ERRORS: Will exit on various errors
+*/
 char *url_encode(char *str);
 
+/**
+* ERRORS: Will exit on various errors
+*/
 char *url_decode(char *str);
 
+/**
+* ERRORS: Will exit on various errors
+*/
 int handshake(peer_t *peer, bt_handshake_t msg);
 
+/**
+* ERRORS: Will exit on various errors
+*/
 int print_bytes(void * buff);
 
+/**
+* ERRORS: Will exit on various errors
+*/
 char *byte_to_binary(int x);
 
 #endif

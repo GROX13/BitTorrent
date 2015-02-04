@@ -79,11 +79,14 @@ char *_send_http_request(char *URL)
     {
         if (memcmp(body.memory, "d8:", 3) != 0)
         {
-            printf("error\n%s\n", body.memory);
+            printf("Error\n%s\n", body.memory);
+            free(header.memory);
+            free(body.memory);
             return NULL;
         }
         else
         {
+            free(header.memory);
             return body.memory;
         }
     }
@@ -127,6 +130,9 @@ int _fill_peer_info(bt_peer *peer, be_node *node, ssize_t indent, char *key)
             _fill_peer_info(peer, node->val.d[i].val, -(indent + 1), node->val.d[i].key);
 
         break;
+
+    default:
+        return -1;
     }
     return 1;
 }
@@ -185,8 +191,10 @@ int contact_tracker(bt_args_t *bt_args)
 
         // parse_info(peer, node);
         _fill_peer_info(peer, node, 0, "");
-        int num_peers = (int) (strlen(peer->peer_hashes) / 6);
 
+        int num_peers = (int) (be_str_len(node) /*strlen(peer->peer_hashes)*/);
+
+        strstr(peer->peer_hashes,);
 
             printf("Peers: %i\n", num_peers);
             // printf("Peer : %s\n", peer->peer_hashes);

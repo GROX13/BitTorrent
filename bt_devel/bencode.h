@@ -56,10 +56,10 @@ typedef struct be_node {
 
 char *read_file(char *file, long long *len);
 
-long long be_str_len(be_node *node);
-
 //gets length of bencoded string
 long long be_len(const char *bencode);
+
+long long be_str_len(be_node *node);
 
 be_node *be_decode(const char *bencode);
 

@@ -222,9 +222,8 @@ int create_socket(char *ip_addr, unsigned short port)
     //Create socket
     socket_desc = socket(AF_INET, SOCK_STREAM, 0);
     if (socket_desc == -1)
-    {
-        printf("Could not create socket");
-    }
+        puts("Could not create socket");
+
 
     server.sin_addr.s_addr = inet_addr(ip_addr);
     server.sin_family = AF_INET;
@@ -233,10 +232,9 @@ int create_socket(char *ip_addr, unsigned short port)
     //Connect to remote server
     if (connect(socket_desc, (struct sockaddr *) &server, sizeof(server)) < 0)
     {
-        puts("connect error");
+        puts("Connect error.");
         return 1;
     }
-    puts("Connected");
 
     return socket_desc;
 }
@@ -259,14 +257,14 @@ char *generate_peer_id()
     char *c_time_string;
 
     current_time = time(NULL);
-
+    //current time
     if (current_time == ((time_t) - 1))
-        (void) fprintf(stderr, "Failure to compute the current time.");
+        (void) fprintf(stderr, "Failure to compute.");
 
     c_time_string = ctime(&current_time);
 
     if (c_time_string == NULL)
-        (void) fprintf(stderr, "Failure to convert the current time.");
+        (void) fprintf(stderr, "Failure to convert.");
 
     _remove_char(c_time_string, ' ');
     _remove_char(c_time_string, ':');
