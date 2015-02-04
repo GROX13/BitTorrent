@@ -73,7 +73,9 @@ int main(int argc, char *argv[])
 
             handshake(bt_args.peers[i], handshake_t);
             bt_msg_t msg;
+            msg.length = 1;
             msg.type = BT_INTERESTED_T;
+
             send_to_peer(bt_args.peers[i], &msg);
         }
 
