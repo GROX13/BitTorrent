@@ -10,7 +10,7 @@
 * creates socket using structure sockaddr
 * and returns socket file descriptor
 *
-* ERRORS: Will exit on various errors
+* Returns negative number on error
 */
 int create_socket(struct sockaddr_in sockaddr);
 
@@ -20,7 +20,7 @@ int create_socket(struct sockaddr_in sockaddr);
 * closes socket, returns 1 on success.
 * On error, -1 is returned
 *
-* ERRORS: Will exit on various errors
+* Returns 1 on success, -1 on error
 */
 int close_socket(int sock_fd);
 

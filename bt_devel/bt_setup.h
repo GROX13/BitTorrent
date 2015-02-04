@@ -11,23 +11,6 @@
 #include "bt_lib.h"
 #include "bencode.h"
 
-
-typedef struct bt_peer {
-    char tracker_id[FILE_NAME_MAX];
-    int complete;
-    int incomplete;
-    int interval;
-    char peer_hashes[1024];
-} bt_peer;
-
-typedef struct {
-    const char *str;
-    const char *start;
-    void *parent;
-    int val;
-    int len;
-} bencode_t;
-
 typedef struct
 {
     uint8_t protocol_name_length;
@@ -60,6 +43,15 @@ void usage(FILE *file);
 void parse_args(bt_args_t *bt_args, int argc, char **argv);
 
 /**
+* handshake(peer_t *peer, bt_handshake_t msg) -> int
+*
+* sends handshake message to given peer
+*
+* ERRORS: Will exit on various errors
+*/
+int handshake(peer_t *peer, bt_handshake_t msg);
+
+/**
 * create_file(bt_args_t *bt_args, char *filename, char* file_type) -> FILE *
 *
 *
@@ -84,11 +76,6 @@ char *url_encode(char *str);
 * ERRORS: Will exit on various errors
 */
 char *url_decode(char *str);
-
-/**
-* ERRORS: Will exit on various errors
-*/
-int handshake(peer_t *peer, bt_handshake_t msg);
 
 /**
 * ERRORS: Will exit on various errors

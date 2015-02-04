@@ -140,6 +140,8 @@ int _fill_peer_info(bt_peer *peer, be_node *node, ssize_t indent, char *key)
 
 int contact_tracker(bt_args_t *bt_args)
 {
+    printf("Please wait ...\nConnecting with tracker.\n");
+
     char *new_file;
     long long leng;
 
@@ -181,7 +183,8 @@ int contact_tracker(bt_args_t *bt_args)
         printf("Request URL for tracker: %s\n", request_to_send);
 
     char *result = _send_http_request(request_to_send);
-    if (result) {
+    if (result)
+    {
         be_node *node = be_decoden(result, (long long int) be_len);
 
         if (bt_args->verbose)
@@ -195,7 +198,8 @@ int contact_tracker(bt_args_t *bt_args)
         int num_peers = 0;
 
         char *peer_num = strstr(result, "peers");
-        if (peer_num == NULL) {
+        if (peer_num == NULL)
+        {
             printf("Something went wrong in parsing received data!\n");
             free(result);
             return 1;
@@ -210,12 +214,13 @@ int contact_tracker(bt_args_t *bt_args)
         char *endptr;
         num_peers = (int) strtol(buff, &endptr, 10) / 6;
 
-        if (num_peers == 0) {
+        if (num_peers == 0)
+        {
             free(result);
             return 1;
         }
         int count = 0;
-
+        printf("Connecting with peers.\n");
         for (i = 0; i < num_peers; i++)
         {
             uint32_t ip = *(uint32_t *) (peer->peer_hashes + count);
@@ -236,31 +241,25 @@ int contact_tracker(bt_args_t *bt_args)
             memset(id, 0, 21);
             calc_id(inet_ntoa(ip_addr), port, id);
 
-
             init_peer(my_peer_t, id, inet_ntoa(ip_addr), htons(port));
-            my_peer_t->socket_fd = create_socket(my_peer_t->sockaddr);
-            //_____ success
-            // char *hostname;
 
-            bt_handshake_t handshake_t;
-
-            handshake_t.protocol_name_length = 19;
-            memcpy(handshake_t.protocol_name , "BitTorrent protocol", 19);
-            memset(handshake_t.reserved_bytes, 0, 8);
-            memcpy(handshake_t.hash_info, bt_args->info_hash , 20);
-            memcpy(handshake_t.peer_id , bt_args->bt_peer_id, 20);
-
-
-            handshake(my_peer_t, handshake_t);
-            add_peer(my_peer_t, bt_args, NULL, port);
-
-
-
-            if (bt_args->verbose)
-                print_peer(my_peer_t);
+            int my_socket = create_socket(my_peer_t->sockaddr);
+            if (my_socket < 0)
+            {
+                free(my_peer_t);
+            }
+            else
+            {
+                my_peer_t->socket_fd = my_socket;
+                add_peer(my_peer_t, bt_args, inet_ntoa(ip_addr), port);
+                if (bt_args->verbose)
+                    print_peer(my_peer_t);
+            }
 
         }
-    } else {
+    }
+    else
+    {
         printf("Something went wrong!\n");
         return 1;
     }
@@ -416,49 +415,13 @@ int poll_peers(bt_args_t *bt_args)
 **/
 int send_to_peer(peer_t *peer, bt_msg_t *msg)
 {
-    //    int sockfd;
-    ssize_t ret_val = -1;
-    //    struct sockaddr_in addr;
-    //    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    //    if (sockfd == -1)
-    //        perror("Couldn't create the socket");
-    //
-    //    addr.sin_family = AF_INET;
-    //    addr.sin_port = htons(peer->sockaddr.sin_port);
-    //    addr.sin_addr = peer->sockaddr.sin_addr;
-    //
-    //    // (peer->sockaddr)
-    //
-    //
-    //    if (connect(sockfd, (struct sockaddr *) &addr, sizeof(struct sockaddr_in)) == -1)
-    //    {
-    //        perror("Connection Problem");
-    //        return (int) ret_val;
-    //    }
-
-    int sockfd;
-    struct sockaddr_in addr;
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd == -1)
-        perror("Couldn't create the socket");
-
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(peer->sockaddr.sin_port);
-    addr.sin_addr = peer->sockaddr.sin_addr;
-    //peer->sockaddr
-    if (connect (sockfd, (struct sockaddr *)&addr, sizeof(struct sockaddr_in)) == -1)
-    {
-        perror("Connection Problem");
-        return 1;
-    }
-
+    int sockfd = peer->socket_fd, ret_val = -1;
 
     uint32_t msg_size = htonl(msg->length);
     uint8_t msg_type;
     // Allocate needed space
     void *buff = malloc(msg_size + sizeof(uint32_t));
-    uint8_t b = 2;
-    uint32_t a = htonl(1);
+
     switch (msg->type)
     {
 
@@ -467,24 +430,19 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
         memcpy((char *) buff, &msg_size, sizeof(uint32_t));
         memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
         memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t), msg->payload.bitfiled.bitfield, msg->payload.bitfiled.size);
-        ret_val = write(sockfd, buff, msg_size);
+        ret_val = (int) write(sockfd, buff, msg_size);
         break;
 
     case BT_REQUEST_T:
-
-        msg_size = sizeof(uint32_t) + sizeof(uint8_t);
-        buff = malloc(msg_size);
-        memcpy((char *) buff, &a, sizeof(uint32_t));
-        memcpy((char *) buff + sizeof(uint32_t), &b, sizeof(uint8_t));
-        //        memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
-        //               &msg->payload.request.index, sizeof(uint32_t));
-        //        memcpy((char *) buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
-        //               &msg->payload.request.begin, sizeof(uint32_t));
-        //        memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
-        //               &msg->payload.request.length, sizeof(uint32_t));
+        memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
+               &msg->payload.request.index, sizeof(uint32_t));
+        memcpy((char *) buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
+               &msg->payload.request.begin, sizeof(uint32_t));
+        memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
+               &msg->payload.request.length, sizeof(uint32_t));
         print_bytes(buff);
 
-        ret_val = write(sockfd, buff, msg_size);
+        ret_val = (int) write(sockfd, buff, msg_size);
         printf("%d\n", (int) ret_val);
         break;
 
@@ -498,8 +456,9 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
                &msg->payload.request.begin, sizeof(uint32_t));
         memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
                &msg->payload.request.length, sizeof(uint32_t));
-        ret_val = write(sockfd, buff, msg_size);
+        ret_val = (int) write(sockfd, buff, msg_size);
         break;
+
     case BT_PIECE_T:
         msg_type = BT_PIECE;
         memcpy((char *) buff, &msg_size, sizeof(uint32_t));
@@ -510,19 +469,34 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
                &msg->payload.piece.begin, sizeof(uint32_t));
         memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
                &msg->payload.piece.piece, msg_size - (3 * sizeof(uint32_t) + sizeof(uint8_t)));
-        ret_val = write(sockfd, buff, msg_size);
+        ret_val = (int) write(sockfd, buff, msg_size);
         break;
+
     case BT_INTERESTED_T:
+        msg_type = BT_INTERSTED;
         memcpy((char *) buff, &msg_size, sizeof(uint32_t));
         memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-        ret_val = write(sockfd, buff, msg_size);
+        ret_val = (int) write(sockfd, buff, msg_size);
         break;
+
+    case  BT_CHOKE_T:
+        break;
+
+    case BT_UNCHOKE_T:
+        break;
+
+    case BT_NOT_INTERESTED_T:
+        break;
+
+    case BT_HAVE_T:
+        break;
+
     default:
         break;
     }
 
     free(buff);
-    return (int) ret_val;
+    return ret_val;
 }
 
 /*
