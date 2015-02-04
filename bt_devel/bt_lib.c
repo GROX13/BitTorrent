@@ -192,14 +192,26 @@ int contact_tracker(bt_args_t *bt_args)
         // parse_info(peer, node);
         _fill_peer_info(peer, node, 0, "");
 
-        int num_peers = (int) (be_str_len(node) /*strlen(peer->peer_hashes)*/);
+        int num_peers = 0;
 
-        strstr(peer->peer_hashes,);
+        char *peer_num = strstr(result, "peers");
+        if (peer_num == NULL) {
+            printf("Something went wrong in parsing received data!\n");
+            return 1;
+        }
+        int i = 0;
+        peer_num += 5;
+        char buff[20];
+        memset(buff, 0, 20);
+        for (; *peer_num != ':'; peer_num++, i++)
+            buff[i] = *peer_num;
 
-            printf("Peers: %i\n", num_peers);
-            // printf("Peer : %s\n", peer->peer_hashes);
+        char *endptr;
+        num_peers = (int) strtol(buff, &endptr, 10) / 6;
 
-        int i;
+        if (num_peers == 0)
+            return 1;
+
         int count = 0;
 
         for (i = 0; i < num_peers; i++)

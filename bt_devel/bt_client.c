@@ -51,11 +51,13 @@ int main(int argc, char *argv[])
         be_dump(node);
     }
 
-    bt_info_t info_t;
-    parse_bt_info(&info_t, node);
-    bt_args.bt_info = &info_t;
+    bt_info_t *info_t = malloc(sizeof(bt_info_t));
+    parse_bt_info(info_t, node);
+    bt_args.bt_info = info_t;
 
-    contact_tracker(&bt_args);
+    if (contact_tracker(&bt_args))
+        exit(EXIT_FAILURE);
+
 
     for (i = 0; i < MAX_CONNECTIONS; ++i)
     {

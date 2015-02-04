@@ -66,6 +66,7 @@ typedef struct peer
     unsigned char id[ID_SIZE]; //the peer id
     unsigned short port; //the port to connect n
     struct sockaddr_in sockaddr; //sockaddr for peer
+    int socket_fd; //socket connection to this peer
     int choked; //peer choked?
     int interested; //peer interested?
 } peer_t;
