@@ -44,8 +44,8 @@ int save_data_to_file(void *ptr, size_t len, int index, int file_desc, char* fil
 	char* all = malloc(size+index);
 
 	memcpy(all, before_index, index);
-	memcpy(all+index, ptr, len);
-	memcpy(all+index+len, after_index, (size-index));
+	memcpy((char*)all+index, ptr, len);
+	memcpy((char*)all+index+len, after_index, (size-index));
 	
 	if(write(file_desc,all,strlen(all)) != strlen(all))  return 1;
 	
