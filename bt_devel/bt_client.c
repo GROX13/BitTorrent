@@ -60,9 +60,7 @@ int main(int argc, char *argv[])
     if (contact_tracker(&bt_args))
         exit(EXIT_FAILURE);
 
-
     for (i = 0; i < MAX_CONNECTIONS; ++i)
-
         if (bt_args.peers[i])
         {
             bt_handshake_t handshake_t;
@@ -72,7 +70,7 @@ int main(int argc, char *argv[])
             memset(handshake_t.reserved_bytes, 0, 8);
             memcpy(handshake_t.hash_info, bt_args.info_hash , 20);
             memcpy(handshake_t.peer_id , bt_args.bt_peer_id, 20);
-            puts("\n\n");
+            
             handshake(bt_args.peers[i], handshake_t);
             //
 
