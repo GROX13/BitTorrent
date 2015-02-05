@@ -437,8 +437,41 @@ int check_peer(peer_t *peer)
 /*check if peers want to send me something*/
 int poll_peers(bt_args_t *bt_args)
 {
+    int nfds;
+    for (;;)
+    {
+        nfds = epoll_wait(bt_args->epollfd, bt_args->poll_sockets, MAX_CONNECTIONS, -1);
+        if (nfds == -1)
+        {
+            perror("epoll_pwait");
+            break;
+            //            exit(EXIT_FAILURE);
+        }
 
-    return 0;
+        //        for (n = 0; n < nfds; ++n) {
+        //            if (bt_args->poll_sockets[n].data.fd == listen_sock) {
+        //                conn_sock = accept(listen_sock,
+        //                        (struct sockaddr *) &local, &addrlen);
+        //                if (conn_sock == -1) {
+        //                    perror("accept");
+        //                    break;
+        ////                    exit(EXIT_FAILURE);
+        //                }
+        //                setnonblocking(conn_sock);
+        //                ev.events = EPOLLIN | EPOLLET;
+        //                ev.data.fd = conn_sock;
+        //                if (epoll_ctl(epollfd, EPOLL_CTL_ADD, conn_sock,
+        //                        &ev) == -1) {
+        //                    perror("epoll_ctl: conn_sock");
+        //                    break;
+        ////                    exit(EXIT_FAILURE);
+        //                }
+        //            } else {
+        //                do_use_fd(events[n].data.fd);
+        //            }
+        //        }
+    }
+    return -1;
 }
 
 

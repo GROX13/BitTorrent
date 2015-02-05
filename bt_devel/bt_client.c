@@ -10,18 +10,19 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <signal.h>
-
+#include <sys/epoll.h>
 
 #include "bencode.h"
 #include "bt_lib.h"
 #include "bt_setup.h"
+
+bt_args_t bt_args;
 
 void _int_handler(int);
 
 int main(int argc, char *argv[])
 {
 
-    bt_args_t bt_args;
     be_node *node; // top node in the bencoding
     int i;
 
@@ -60,6 +61,14 @@ int main(int argc, char *argv[])
     if (contact_tracker(&bt_args))
         exit(EXIT_FAILURE);
 
+    bt_args.epollfd = epoll_create1(0);
+    if (bt_args.epollfd == -1)
+    {
+        perror("Epoll create 1");
+        exit(EXIT_FAILURE);
+    }
+
+
     for (i = 0; i < MAX_CONNECTIONS; ++i)
         if (bt_args.peers[i])
         {
@@ -70,9 +79,17 @@ int main(int argc, char *argv[])
             memset(handshake_t.reserved_bytes, 0, 8);
             memcpy(handshake_t.hash_info, bt_args.info_hash , 20);
             memcpy(handshake_t.peer_id , bt_args.bt_peer_id, 20);
-            
+
             handshake(bt_args.peers[i], handshake_t);
             //
+            //            struct epoll_event *ev = malloc(sizeof(struct epoll_event));
+            //            ev->events = EPOLLIN;
+            //            ev->data.fd = bt_args.peers[i]->socket_fd;
+            //            if (epoll_ctl(bt_args.epollfd, EPOLL_CTL_ADD,
+            //                    bt_args.peers[i]->socket_fd, ev) == -1) {
+            //                perror("epoll_ctl: listen_sock");
+            //                exit(EXIT_FAILURE);
+            //            }
 
         }
 
@@ -128,10 +145,16 @@ void  _int_handler(int sig)
     char  c;
 
     signal(sig, SIG_IGN);
-    printf("\nOUCH, did you hit Ctrl-C?\n"
-           "Do you really want to quit? [y/n] ");
-    c = getchar();
-    if (c == 'y' || c == 'Y') {
+    printf("\nDo you really want to quit? [y/n] ");
+    c = (char) getchar();
+    if (c == 'y' || c == 'Y')
+    {
+        int i = 0;
+        for (; i < MAX_CONNECTIONS; i++)
+        {
+            if (bt_args.peers[i])
+                close(bt_args.peers[i]->socket_fd);
+        }
         exit(0);
     }
     else

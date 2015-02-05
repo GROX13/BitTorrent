@@ -12,6 +12,7 @@
 //networking stuff
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/epoll.h>
 #include <netinet/in.h>
 #include <netdb.h>
 
@@ -96,34 +97,6 @@ typedef struct
 } bt_info_t;
 
 
-//holds all the agurments and state for a running the bt client
-typedef struct
-{
-    int verbose; //verbose level
-    //the filename to save to
-    char save_file[FILE_NAME_MAX];
-    //the file to save to
-    FILE *f_save;
-    //the log file
-    char log_file[FILE_NAME_MAX];
-    // *.torrent file
-    char torrent_file[FILE_NAME_MAX];
-    //my peer id
-    char bt_peer_id[BT_PEER_SIZE];
-    //info sha1 hash
-    char info_hash[BT_INFO_HASH_SIZE];
-
-    peer_t *peers[MAX_CONNECTIONS]; // array of peer_t pointers
-    unsigned int id; //this bt_clients id
-    int sockets[MAX_CONNECTIONS]; //Array of possible sockets
-    struct pollfd poll_sockets[MAX_CONNECTIONS]; //Arry of pollfd for polling for input
-
-    /*set once torrent is parse*/
-    bt_info_t *bt_info; //the parsed info for this torrent
-
-} bt_args_t;
-
-
 /**
 * Message structures
 **/
@@ -172,6 +145,35 @@ typedef struct bt_msg
     } payload;
 
 } bt_msg_t;
+
+
+//holds all the agurments and state for a running the bt client
+typedef struct
+{
+    int verbose; //verbose level
+    //the filename to save to
+    char save_file[FILE_NAME_MAX];
+    //the file to save to
+    FILE *f_save;
+    //the log file
+    char log_file[FILE_NAME_MAX];
+    // *.torrent file
+    char torrent_file[FILE_NAME_MAX];
+    //my peer id
+    char bt_peer_id[BT_PEER_SIZE];
+    //info sha1 hash
+    char info_hash[BT_INFO_HASH_SIZE];
+
+    peer_t *peers[MAX_CONNECTIONS]; // array of peer_t pointers
+    unsigned int id; //this bt_clients id
+    int sockets[MAX_CONNECTIONS]; //Array of possible sockets
+    int epollfd; //epoll file descriptor
+    struct epoll_event poll_sockets[MAX_CONNECTIONS]; //Arry of pollfd for polling for input
+
+    /*set once torrent is parse*/
+    bt_info_t *bt_info; //the parsed info for this torrent
+    bt_bitfield_t bitfield; //my bitfield which pieces i have
+} bt_args_t;
 
 
 int parse_bt_info(bt_info_t *bt_info, be_node *node);
