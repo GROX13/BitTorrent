@@ -782,7 +782,8 @@ int parse_bt_info(bt_info_t *bt_info, be_node *node)
 
 /*load the bitfield into bitfield*/
 int get_bitfield(bt_args_t *bt_args, bt_bitfield_t *bitfield){
-	
+	bitfield = malloc(sizeof(bt_bitfield_t));
+	memcpy(bitfield, &bt_args->bitfield, sizeof(bt_bitfield_t));
 	return 0;
 }
 
