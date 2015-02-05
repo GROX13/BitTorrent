@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <signal.h>
 #include <sys/epoll.h>
+#include <semaphore.h>
 
 #include "bencode.h"
 #include "bt_lib.h"
