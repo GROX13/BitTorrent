@@ -16,6 +16,8 @@
 #include "bt_lib.h"
 #include "bt_setup.h"
 
+void _int_handler(int);
+
 int main(int argc, char *argv[])
 {
 
@@ -70,28 +72,32 @@ int main(int argc, char *argv[])
             memset(handshake_t.reserved_bytes, 0, 8);
             memcpy(handshake_t.hash_info, bt_args.info_hash , 20);
             memcpy(handshake_t.peer_id , bt_args.bt_peer_id, 20);
-
+            puts("\n\n");
             handshake(bt_args.peers[i], handshake_t);
-            bt_msg_t msg;
-            msg.length = 1;
-            msg.type = BT_INTERESTED_T;
+            //
 
-            send_to_peer(bt_args.peers[i], &msg);
         }
 
-//    peer_t *peer = bt_args.peers[0];
-//    bt_msg_t msg;
-//    msg.length = 13;
-//    msg.type = BT_REQUEST_T;
-//    msg.payload.request.index = 1;
-//    msg.payload.request.begin = 0;
-//    msg.payload.request.length = (8 * 2048);
-//    send_to_peer(peer, &msg);
-//
-//    FILE *save_file = create_file(&bt_args, "save.txt", "ab+");
-//    char str[] = "Bla";
-//
-//    fwrite(str , 1, sizeof(str) , save_file);
+    // bt_msg_t msg;
+    // msg.length = 1;
+    // msg.type = BT_INTERESTED_T;
+
+    // send_to_peer(bt_args.peers[i], &msg);
+    //    peer_t *peer = bt_args.peers[0];
+    //    bt_msg_t msg;
+    //    msg.length = 13;
+    //    msg.type = BT_REQUEST_T;
+    //    msg.payload.request.index = 1;
+    //    msg.payload.request.begin = 0;
+    //    msg.payload.request.length = (8 * 2048);
+    //    send_to_peer(peer, &msg);
+    //
+    //    FILE *save_file = create_file(&bt_args, "save.txt", "ab+");
+    //    char str[] = "Bla";
+    //
+    //    fwrite(str , 1, sizeof(str) , save_file);
+
+    signal(SIGINT, _int_handler);
 
     //main client loop
     printf("Starting Main Loop\n");
@@ -113,8 +119,23 @@ int main(int argc, char *argv[])
         //with new potentially useful peers
 
         //update peers,
-        break;
+
     }
 
     return 0;
+}
+
+void  _int_handler(int sig)
+{
+    char  c;
+
+    signal(sig, SIG_IGN);
+    printf("\nOUCH, did you hit Ctrl-C?\n"
+           "Do you really want to quit? [y/n] ");
+    c = getchar();
+    if (c == 'y' || c == 'Y') {
+        exit(0);
+    }
+    else
+        signal(SIGINT, _int_handler);
 }
