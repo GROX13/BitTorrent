@@ -70,7 +70,7 @@ int load_data_from_file(void *ptr, size_t len, int index, int file_desc, char *f
 
     if (lseek(file_desc, 0, SEEK_SET) < 0) return 1;
 
-    puts(ptr);
+    //puts(ptr);
 
     return 0;
 

@@ -18,7 +18,7 @@
 
 #include "bt_lib.h"
 #include "bencode.h"
-
+#include "bt_io.h"
 
 /*Maximum file name size, to make things easy*/
 #define FILE_NAME_MAX 1024
@@ -212,10 +212,10 @@ int read_from_peer(peer_t *peer, bt_msg_t *msg);
 
 
 /* save a piece of the file */
-int save_piece(bt_args_t *bt_args, bt_piece_t *piece);
+int save_piece(bt_args_t *bt_args, bt_piece_t *piece_t);
 
 /*load a piece of the file into piece */
-int load_piece(bt_args_t *bt_args, bt_piece_t *piece);
+int load_piece(bt_args_t *bt_args, bt_piece_t *piece_t);
 
 /*load the bitfield into bitfield*/
 int get_bitfield(bt_args_t *bt_args, bt_bitfield_t *bitfield);
