@@ -16,9 +16,13 @@
 #include "bt_lib.h"
 #include "bt_setup.h"
 
+sem_t sem;
+char *file_info;
 bt_args_t bt_args;
 
+
 void _int_handler(int);
+void _download(void *);
 
 int main(int argc, char *argv[])
 {
@@ -68,7 +72,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-
+    file_info = malloc(1);
     for (i = 0; i < MAX_CONNECTIONS; ++i)
         if (bt_args.peers[i])
         {
@@ -91,9 +95,6 @@ int main(int argc, char *argv[])
             //                exit(EXIT_FAILURE);
             //            }
 
-            bt_msg_t msg;
-            read_from_peer(bt_args.peers[i], &msg);
-            printf("___");
         }
 
     // bt_msg_t msg;
