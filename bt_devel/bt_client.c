@@ -123,7 +123,11 @@ int main(int argc, char *argv[]) {
     //    fwrite(str , 1, sizeof(str) , save_file);
 
     signal(SIGINT, _int_handler);
-
+	
+	pthread_t send_thread;
+    if (pthread_create(&send_thread, NULL, _send, NULL))
+    	perror("Error on thread creation");
+	
     //main client loop
     printf("Starting Main Loop\n");
     while (1) {
@@ -150,7 +154,16 @@ int main(int argc, char *argv[]) {
 }
 
 void *_send(void *data) {
+	int i;
+	for (i = 0; i < MAX_CONNECTIONS; ++i){
+        if (bt_args.peers[i]) {
+			if(bt_args.peers[i]->interested == 1 && bt_args.peers[i]->choked == -1){
+				
+			}
+		}
 
+	}
+	
     return (void *) -1;
 }
 
