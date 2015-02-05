@@ -338,83 +338,9 @@ int handshake(peer_t *peer, bt_handshake_t msg)
     size = sizeof(msg.peer_id);
     memcpy(&data[offset], msg.peer_id, (size_t) size);
 
-    size = (int) write(sockfd, data, sizeof(bt_handshake_t));
+    // size = (int) write(sockfd, data, sizeof(bt_handshake_t));
 
-//    char buff[68];
-//    memset(buff, '\0', 68);
-//    size = (int) read(sockfd, buff, 68);
-//    printf("received size: %i\nreceived %s\n", size, buff);
-//
-//    if (size == 68){
-//        memcpy(&peer->id, &buff[48], 20);
-//        printf("PEER ID IS: %s\n", peer->id);
-//    }
-//    bt_msg_t *msg1 = malloc(sizeof(bt_msg_t));
-//    read_from_peer(peer, msg1);
-//    int msg_len = 0;
-//    size = (int) read(sockfd, &msg_len, sizeof(int));
-//    msg_len = ntohl(msg_len);
-//    printf("Message length is: %i\n", msg_len);
-//
-//
-//    uint8_t msg_id;
-//    size = (int) read(sockfd, &msg_id, sizeof(char));
-//    printf("Message id is:  %" SCNd8 "\n", msg_id);
-//
-//    switch (msg_id)
-//    {
-//
-//    case BT_CHOKE:
-//        peer->choked = 0;
-//        break;
-//
-//    case BT_UNCHOKE:
-//        peer->choked = 1;
-//        break;
-//
-//    case BT_INTERSTED:
-//        peer->interested = 0;
-//        break;
-//    case BT_NOT_INTERESTED:
-//        peer->interested = 1;
-//        break;
-//
-//    case BT_HAVE:
-//
-//        break;
-//
-//    case BT_BITFILED:;
-//        bt_bitfield_t *bt_bitfield = malloc(sizeof(bt_bitfield_t));
-//        bt_bitfield->size = (size_t)(msg_len - 1);
-//        printf("bitfield size is : %zu\n", bt_bitfield->size);
-//        bt_bitfield->bitfield = malloc(bt_bitfield->size);
-//        size = (int) read(sockfd, bt_bitfield->bitfield, bt_bitfield->size);
-//        printf("bitfield size is : %zu\n", size);
-//        //size = (int) read(sockfd, bt_bitfield->bitfield, bt_bitfield->size);
-//        break;
-//
-//    case BT_REQUEST:;
-//        bt_request_t *bt_request = malloc(sizeof(bt_request_t));
-//        size = (int) read(sockfd, &bt_request->index, sizeof(int));
-//        size = (int) read(sockfd, &bt_request->begin, sizeof(int));
-//        size = (int) read(sockfd, &bt_request->length, sizeof(int));
-//        break;
-//
-//    case BT_PIECE:;
-//        bt_piece_t *bt_piece = malloc(sizeof(bt_piece_t));
-//        int block_len = msg_len - 9;
-//        size = (int) read(sockfd, &bt_piece->index, sizeof(int));
-//        size = (int) read(sockfd, &bt_piece->begin, sizeof(int));
-//        size = (int) read(sockfd, &bt_piece->piece, block_len);
-//        break;
-//
-//    case BT_CANCEL:
-//
-//        break;
-//
-//    default:
-//        break;
-//    }
+    size = send(sockfd , data , sizeof(bt_handshake_t), 0);
 
     return size;
 }
@@ -451,35 +377,38 @@ FILE *create_file(bt_args_t *bt_args, char *filename, char *file_type)
     return fp;
 }
 
-uint8_t power_of_num(int base, int exp){
-    uint8_t value=1;
-    while (exp!=0){
-        value*=base;  
+uint8_t power_of_num(int base, int exp)
+{
+    uint8_t value = 1;
+    while (exp != 0)
+    {
+        value *= base;
         --exp;
     }
     return value;
 }
 
-int piece_is_in_bitfield(int piece_index, bt_bitfield_t* bitfield_t){
-    char* bits = malloc(sizeof(bitfield_t->bitfield));
+int piece_is_in_bitfield(int piece_index, bt_bitfield_t *bitfield_t)
+{
+    char *bits = malloc(sizeof(bitfield_t->bitfield));
     size_t size = sizeof(bitfield_t->bitfield);
     memcpy(bits, bitfield_t->bitfield, size);
     long num_of_pieces = sizeof(bitfield_t->bitfield) * 8;
 
-    if(piece_index >= num_of_pieces) return 1;
-    
-    int byte_index = piece_index/8;
-    
-    int bit_index = piece_index%8;
+    if (piece_index >= num_of_pieces) return 1;
+
+    int byte_index = piece_index / 8;
+
+    int bit_index = piece_index % 8;
 
     uint8_t num = power_of_num(2, bit_index);
 
     uint8_t get_byte = 0;
-    
-    memcpy(&get_byte, (char*)bits + byte_index, sizeof(char));
 
-    if((get_byte&num) != num) return 1;
-   
+    memcpy(&get_byte, (char *)bits + byte_index, sizeof(char));
+
+    if ((get_byte & num) != num) return 1;
+
     return 0;
 }
 
