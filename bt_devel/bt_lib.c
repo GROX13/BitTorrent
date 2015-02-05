@@ -21,7 +21,7 @@
 #include "bt_lib.h"
 #include "bt_setup.h"
 #include "bt_sock.h"
-
+#include "bt_io.h"
 #define ECHOMAX 255
 
 struct my_string
@@ -780,17 +780,31 @@ int parse_bt_info(bt_info_t *bt_info, be_node *node)
     return _fill_info(bt_info, node, 0, "");
 }
 
-/* save a piece of the file */
-int save_piece(bt_args_t *bt_args, bt_piece_t *piece)
-{
-    // FILE *file = bt_args->f_save;
-
-    return 0;
+/*load the bitfield into bitfield*/
+int get_bitfield(bt_args_t *bt_args, bt_bitfield_t *bitfield){
+	
+	return 0;
 }
 
+/* save a piece of the file */
+int save_piece(bt_args_t *bt_args, bt_piece_t *piece_t){
+	int fd = create_file_descriptor(bt_args->save_file);
+	size_t len = bt_args->bt_info->piece_length;
+	void* ptr = malloc(len);
+	memcpy(ptr, piece_t->piece, len);
+	int save = save_data_to_file(ptr, len, piece_t->index*len+ piece_t->begin, fd, bt_args->save_file);
+	return save;
+}
 
-
-
+/*load a piece of the file into piece */
+int load_piece(bt_args_t *bt_args, bt_piece_t *piece_t){
+	int fd = create_file_descriptor(bt_args->save_file);
+	size_t len = bt_args->bt_info->piece_length;
+	void * ptr = malloc(len);
+	int load = load_data_from_file(ptr, len, piece_t->index*len+ piece_t->begin, fd, bt_args->save_file);
+	memcpy(piece_t->piece, ptr, len);
+	return load;
+}
 
 
 
