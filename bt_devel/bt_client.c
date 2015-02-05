@@ -91,6 +91,9 @@ int main(int argc, char *argv[])
             //                exit(EXIT_FAILURE);
             //            }
 
+            bt_msg_t msg;
+            read_from_peer(bt_args.peers[i], &msg);
+            printf("___");
         }
 
     // bt_msg_t msg;
