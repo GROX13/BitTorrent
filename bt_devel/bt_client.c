@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 
 void *_send(void *data)
 {
-    int i;
+    int i, indx = 0, begin = 0;
     while (1)
     {
         for (i = 0; i < MAX_CONNECTIONS; ++i)
@@ -171,7 +171,16 @@ void *_send(void *data)
             {
                 if (bt_args.peers[i]->interested == 1 && bt_args.peers[i]->choked == -1)
                 {
-                    
+                    bt_msg_t msg;
+                    msg.length = 13;
+                    msg.type = BT_REQUEST_T;
+                    msg.payload.request.index = indx;
+                    msg.payload.request.begin = 0;
+                    msg.payload.request.length = FILE_LENGTH_MAX;
+                    send_to_peer(bt_args.peers[i], &msg);
+                    begin = (begin + FILE_LENGTH_MAX) % bt_args.bt_info->piece_length;
+                    if (begin == 0)
+                        indx++;
                 }
             }
 

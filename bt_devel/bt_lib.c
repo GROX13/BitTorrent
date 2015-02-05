@@ -161,7 +161,8 @@ void _connect_function(void *ptr)
     else
     {
         data->bt_peer_t->socket_fd = my_socket;
-
+        data->bt_peer_t->interested = 1;
+        data->bt_peer_t->choked = -1;
         if (data->bt_args->verbose)
             print_peer(data->bt_peer_t);
         free(ptr);
