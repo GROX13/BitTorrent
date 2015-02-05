@@ -472,7 +472,7 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
         memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
         memcpy((char *) buff + sizeof(uint32_t) +
                sizeof(uint8_t), msg->payload.bitfiled.bitfield, msg->payload.bitfiled.size);
-        ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+        ret_val = (int) send(sockfd, buff, msg->length + sizeof(uint32_t), 0);
         break;
 
     case BT_REQUEST_T:
@@ -488,7 +488,7 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
                &tmp_2, sizeof(uint32_t));
         memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
                &tmp_3, sizeof(uint32_t));
-        ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+        ret_val = (int) send(sockfd, buff, msg->length + sizeof(uint32_t), 0);
         break;
 
     case BT_CANCEL_T:
@@ -504,7 +504,7 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
                &tmp_2, sizeof(uint32_t));
         memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
                &tmp_3, sizeof(uint32_t));
-        ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+        ret_val = (int) send(sockfd, buff, msg->length + sizeof(uint32_t), 0);
         break;
 
     case BT_PIECE_T:
@@ -519,7 +519,7 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
                &tmp_2, sizeof(uint32_t));
         memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
                &msg->payload.piece.piece, msg->length - (2 * sizeof(uint32_t) + sizeof(uint8_t)));
-        ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+        ret_val = (int) send(sockfd, buff, msg->length + sizeof(uint32_t), 0);
         break;
 
     // not tested but correct :)
@@ -527,28 +527,28 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
         msg_type = BT_INTERSTED;
         memcpy((char *) buff, &msg_size, sizeof(uint32_t));
         memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-        ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+        ret_val = (int) send(sockfd, buff, msg->length + sizeof(uint32_t), 0);
         break;
 
     case BT_CHOKE_T:
         msg_type = BT_CHOKE;
         memcpy((char *) buff, &msg_size, sizeof(uint32_t));
         memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-        ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+        ret_val = (int) send(sockfd, buff, msg->length + sizeof(uint32_t), 0);
         break;
 
     case BT_UNCHOKE_T:
         msg_type = BT_UNCHOKE;
         memcpy((char *) buff, &msg_size, sizeof(uint32_t));
         memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-        ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+        ret_val = (int) send(sockfd, buff, msg->length + sizeof(uint32_t), 0);
         break;
 
     case BT_NOT_INTERESTED_T:
         msg_type = BT_NOT_INTERESTED;
         memcpy((char *) buff, &msg_size, sizeof(uint32_t));
         memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-        ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+        ret_val = (int) send(sockfd, buff, msg->length + sizeof(uint32_t), 0);
         break;
 
     case BT_HAVE_T:
@@ -557,12 +557,12 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
         memcpy((char *) buff, &msg_size, sizeof(uint32_t));
         memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
         memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t), &tmp_1, sizeof(uint32_t));
-        ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+        ret_val = (int) send(sockfd, buff, msg->length + sizeof(uint32_t), 0);
         break;
 
     case BT_KEEP_ALIVE_T:
         memcpy((char *) buff, &msg_size, sizeof(uint32_t));
-        ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+        ret_val = (int) send(sockfd, buff, msg->length + sizeof(uint32_t), 0);
         break;
 
     default:
