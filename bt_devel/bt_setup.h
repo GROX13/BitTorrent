@@ -89,4 +89,6 @@ char *byte_to_binary(int x);
 
 int piece_is_in_bitfield(int piece_index, bt_bitfield_t* bitfield_t);
 
+int put_piece_in_bitfield(int piece_index, bt_bitfield_t* bitfield_t);
+
 #endif

@@ -483,6 +483,27 @@ int piece_is_in_bitfield(int piece_index, bt_bitfield_t* bitfield_t){
     return 0;
 }
 
+int put_piece_is_in_bitfield(int piece_index, bt_bitfield_t* bitfield_t){
+    
+    if(piece_is_in_bitfield(piece_index, bitfield_t) == 0) return 1;
+    
+    int byte_index = piece_index/8;
+    
+    int bit_index = piece_index%8;
+
+    uint8_t get_byte = 0;
+    
+    memcpy(&get_byte, (char*)bitfield_t->bitfield + byte_index, sizeof(char));
+        
+    uint8_t num = power_of_num(2, bit_index);
+   
+    get_byte = get_byte|num;
+
+    memcpy((char*)bitfield_t->bitfield + byte_index, &get_byte, sizeof(char));
+                
+    return 0;
+}
+
 
 
 
