@@ -27,7 +27,8 @@ void *_send(void *);
 
 void *_download(void *);
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 
     be_node *node; // top node in the bencoding
     int i;
@@ -35,14 +36,16 @@ int main(int argc, char *argv[]) {
     parse_args(&bt_args, argc, argv);
 
 
-    if (bt_args.verbose) {
+    if (bt_args.verbose)
+    {
         printf("Args:\n");
         printf("verbose: %d\n", bt_args.verbose);
         printf("save_file: %s\n", bt_args.save_file);
         printf("log_file: %s\n", bt_args.log_file);
         printf("torrent_file: %s\n", bt_args.torrent_file);
 
-        for (i = 0; i < MAX_CONNECTIONS; i++) {
+        for (i = 0; i < MAX_CONNECTIONS; i++)
+        {
             if (bt_args.peers[i] != NULL)
                 print_peer(bt_args.peers[i]);
         }
@@ -53,7 +56,8 @@ int main(int argc, char *argv[]) {
     //read and parse the torent file
     node = load_be_node(bt_args.torrent_file);
 
-    if (bt_args.verbose) {
+    if (bt_args.verbose)
+    {
         be_dump(node);
     }
 
@@ -65,13 +69,15 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
 
     bt_args.epollfd = epoll_create1(0);
-    if (bt_args.epollfd == -1) {
+    if (bt_args.epollfd == -1)
+    {
         perror("Epoll create 1");
         exit(EXIT_FAILURE);
     }
 
     for (i = 0; i < MAX_CONNECTIONS; ++i)
-        if (bt_args.peers[i]) {
+        if (bt_args.peers[i])
+        {
             bt_handshake_t handshake_t;
 
             handshake_t.protocol_name_length = 19;
@@ -123,14 +129,15 @@ int main(int argc, char *argv[]) {
     //    fwrite(str , 1, sizeof(str) , save_file);
 
     signal(SIGINT, _int_handler);
-	
-	pthread_t send_thread;
+
+    pthread_t send_thread;
     if (pthread_create(&send_thread, NULL, _send, NULL))
-    	perror("Error on thread creation");
-	
+        perror("Error on thread creation");
+
     //main client loop
     printf("Starting Main Loop\n");
-    while (1) {
+    while (1)
+    {
 
         //try to accept incoming connection from new peer
 
@@ -153,80 +160,92 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-void *_send(void *data) {
-	int i;
-	for (i = 0; i < MAX_CONNECTIONS; ++i){
-        if (bt_args.peers[i]) {
-			if(bt_args.peers[i]->interested == 1 && bt_args.peers[i]->choked == -1){
-				
-			}
-		}
+void *_send(void *data)
+{
+    int i;
+    while (1)
+    {
+        for (i = 0; i < MAX_CONNECTIONS; ++i)
+        {
+            if (bt_args.peers[i])
+            {
+                if (bt_args.peers[i]->interested == 1 && bt_args.peers[i]->choked == -1)
+                {
+                    
+                }
+            }
 
-	}
-	
-    return (void *) -1;
+        }
+    }
+    return (void *) - 1;
 }
 
-void *_download(void *data) {
+void *_download(void *data)
+{
     peer_t *peer;
     peer = data;
-    while (1) {
+    while (1)
+    {
         bt_msg_t msg, msg_1;
         read_from_peer(peer, &msg);
-        switch (msg.type) {
+        switch (msg.type)
+        {
 
-            case BT_BITFIELD_T:
-                break;
+        case BT_BITFIELD_T:
+            break;
 
-            case BT_REQUEST_T:
-                msg_1.length = (uint32_t) (sizeof(uint8_t) +
-                        2 * sizeof(uint32_t) + msg.payload.request.length);
-                msg_1.type = BT_REQUEST_T;
-                msg_1.payload.piece.index = msg.payload.request.index;
-                msg_1.payload.piece.begin = msg.payload.request.begin;
-                msg_1.payload.piece.size = msg.payload.request.length;
-                load_piece(&bt_args, &msg_1.payload.piece);
-                send_to_peer(peer, &msg_1);
-                break;
+        case BT_REQUEST_T:
+            msg_1.length = (uint32_t) (sizeof(uint8_t) +
+                                       2 * sizeof(uint32_t) + msg.payload.request.length);
+            msg_1.type = BT_REQUEST_T;
+            msg_1.payload.piece.index = msg.payload.request.index;
+            msg_1.payload.piece.begin = msg.payload.request.begin;
+            msg_1.payload.piece.size = msg.payload.request.length;
+            load_piece(&bt_args, &msg_1.payload.piece);
+            send_to_peer(peer, &msg_1);
+            break;
 
-            case BT_PIECE_T:
-                save_piece(&bt_args, &msg.payload.piece);
-                break;
+        case BT_PIECE_T:
+            save_piece(&bt_args, &msg.payload.piece);
+            break;
 
-            case BT_INTERESTED_T:
-                peer->interested = 1;
-                break;
+        case BT_INTERESTED_T:
+            peer->interested = 1;
+            break;
 
-            case BT_CHOKE_T:
-                peer->choked = 1;
-                break;
+        case BT_CHOKE_T:
+            peer->choked = 1;
+            break;
 
-            case BT_UNCHOKE_T:
-                peer->choked = -1;
-                break;
+        case BT_UNCHOKE_T:
+            peer->choked = -1;
+            break;
 
-            case BT_NOT_INTERESTED_T:
-                peer->interested = -1;
-                break;
+        case BT_NOT_INTERESTED_T:
+            peer->interested = -1;
+            break;
 
-            case BT_HAVE_T:
-                break;
+        case BT_HAVE_T:
+            break;
 
-            default:
-                break;
+        default:
+            break;
         }
     }
 }
 
-void _int_handler(int sig) {
+void _int_handler(int sig)
+{
     char c;
 
     signal(sig, SIG_IGN);
     printf("\nDo you really want to quit? [y/n] ");
     c = (char) getchar();
-    if (c == 'y' || c == 'Y') {
+    if (c == 'y' || c == 'Y')
+    {
         int i = 0;
-        for (; i < MAX_CONNECTIONS; i++) {
+        for (; i < MAX_CONNECTIONS; i++)
+        {
             if (bt_args.peers[i])
                 close(bt_args.peers[i]->socket_fd);
         }
