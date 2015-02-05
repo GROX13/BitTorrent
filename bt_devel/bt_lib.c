@@ -793,7 +793,7 @@ int save_piece(bt_args_t *bt_args, bt_piece_t *piece_t){
 	size_t len = bt_args->bt_info->piece_length;
 	void* ptr = malloc(len);
 	memcpy(ptr, piece_t->piece, len);
-	int save = save_data_to_file(ptr, len, piece_t->index*len+ piece_t->begin, fd, bt_args->save_file);
+	int save = save_data_to_file(ptr, len - piece_t->begin, piece_t->index*len+ piece_t->begin, fd, bt_args->save_file);
 	return save;
 }
 
@@ -802,7 +802,7 @@ int load_piece(bt_args_t *bt_args, bt_piece_t *piece_t){
 	int fd = create_file_descriptor(bt_args->save_file);
 	size_t len = bt_args->bt_info->piece_length;
 	void * ptr = malloc(len);
-	int load = load_data_from_file(ptr, len, piece_t->index*len+ piece_t->begin, fd, bt_args->save_file);
+	int load = load_data_from_file(ptr, len - piece_t->begin, piece_t->index*len+ piece_t->begin, fd, bt_args->save_file);
 	memcpy(piece_t->piece, ptr, len);
 	return load;
 }
