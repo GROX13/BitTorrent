@@ -144,9 +144,10 @@ typedef struct
 
 typedef struct
 {
-    int index; //which piece index
-    int begin; //offset within piece
-    char piece[0]; //pointer to start of the data for a piece
+    uint32_t index; //which piece index
+    uint32_t begin; //offset within piece
+    char *piece; //pointer to start of the data for a piece
+    size_t size;//size of the piece
 } bt_piece_t;
 
 
@@ -163,7 +164,7 @@ typedef struct bt_msg
     {
         bt_bitfield_t bitfiled;
         //send a bitfield
-        int have; //what piece you have
+        uint32_t have; //what piece you have
         bt_piece_t piece; //a peice message
         bt_request_t request; //request messge
         bt_request_t cancel; //cancel message, same type as request

@@ -522,7 +522,7 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
         ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
         break;
 
-    // Mainly correct: not tested but correct :)
+    // not tested but correct :)
     case BT_INTERESTED_T:
         msg_type = BT_INTERSTED;
         memcpy((char *) buff, &msg_size, sizeof(uint32_t));
@@ -578,8 +578,8 @@ int read_from_peer(peer_t *peer, bt_msg_t *msg)
 {
     int sockfd = peer->socket_fd;
 
-    uint32_t msg_len = -1;
-    uint8_t msg_id = -1;
+    uint32_t msg_len = 0, tmp_1 = 0, tmp_2 = 0, tmp_3 = 0;
+    uint8_t msg_id = (uint8_t) - 1;
 
     if (read(sockfd, &msg_len, sizeof(uint32_t)) < 0) return -1;
     msg_len = ntohl(msg_len);
@@ -593,54 +593,80 @@ int read_from_peer(peer_t *peer, bt_msg_t *msg)
     case BT_CHOKE:
         msg->length = msg_len;
         msg->type = BT_CHOKE_T;
-
         break;
 
     case BT_UNCHOKE:
         msg->length = msg_len;
         msg->type = BT_UNCHOKE_T;
-
         break;
 
     case BT_INTERSTED:
         msg->length = msg_len;
         msg->type = BT_INTERESTED_T;
-
         break;
+
     case BT_NOT_INTERESTED:
         msg->length = msg_len;
         msg->type = BT_NOT_INTERESTED_T;
-
         break;
 
     case BT_HAVE:
         msg->length = msg_len;
         msg->type = BT_HAVE_T;
-
+        if (read(sockfd, &tmp_1, sizeof(uint32_t)) < 0) return -1;
+        msg->payload.have = ntohl(tmp_1);
         break;
 
     case BT_BITFILED:
         msg->length = msg_len;
         msg->type = BT_BITFIELD_T;
-
+        msg->payload.bitfiled.size = msg_len - sizeof(uint8_t);
+        msg->payload.bitfiled.bitfield = malloc(msg->payload.bitfiled.size);
+        if (read(sockfd, &msg->payload.bitfiled.bitfield,
+                 msg->payload.bitfiled.size) < 0) return -1;
         break;
 
     case BT_REQUEST:
         msg->length = msg_len;
         msg->type = BT_REQUEST_T;
-
+        if (read(sockfd, &tmp_1,
+                 sizeof(uint32_t)) < 0) return -1;
+        if (read(sockfd, &tmp_2,
+                 sizeof(uint32_t)) < 0) return -1;
+        if (read(sockfd, &tmp_3,
+                 sizeof(uint32_t)) < 0) return -1;
+        msg->payload.request.index = ntohl(tmp_1);
+        msg->payload.request.begin = ntohl(tmp_2);
+        msg->payload.request.length = ntohl(tmp_3);
         break;
 
     case BT_PIECE:
         msg->length = msg_len;
         msg->type = BT_PIECE_T;
+        if (read(sockfd, &tmp_1,
+                 sizeof(uint32_t)) < 0) return -1;
+        if (read(sockfd, &tmp_2,
+                 sizeof(uint32_t)) < 0) return -1;
+        msg->payload.piece.size = msg_len - (2 *  sizeof(uint32_t) + sizeof(uint8_t) );
 
+        msg->payload.piece.index = tmp_1;
+        msg->payload.piece.begin = tmp_2;
+        msg->payload.piece.piece = malloc(msg->payload.piece.size);
+        if (read(sockfd, &msg->payload.piece.piece, msg->payload.piece.size)) return -1;
         break;
 
     case BT_CANCEL:
         msg->length = msg_len;
         msg->type = BT_CANCEL_T;
-
+        if (read(sockfd, &tmp_1,
+                 sizeof(uint32_t)) < 0) return -1;
+        if (read(sockfd, &tmp_2,
+                 sizeof(uint32_t)) < 0) return -1;
+        if (read(sockfd, &tmp_3,
+                 sizeof(uint32_t)) < 0) return -1;
+        msg->payload.request.index = ntohl(tmp_1);
+        msg->payload.request.begin = ntohl(tmp_2);
+        msg->payload.request.length = ntohl(tmp_3);
         break;
 
     default:
