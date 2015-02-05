@@ -412,7 +412,7 @@ int piece_is_in_bitfield(int piece_index, bt_bitfield_t *bitfield_t)
     return 0;
 }
 
-int put_piece_is_in_bitfield(int piece_index, bt_bitfield_t* bitfield_t){
+int put_piece_in_bitfield(int piece_index, bt_bitfield_t* bitfield_t){
     
     if(piece_is_in_bitfield(piece_index, bitfield_t) == 0) return 1;
     
