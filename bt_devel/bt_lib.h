@@ -48,11 +48,12 @@
 /*size (in bytes) of some info fields*/
 #define BT_PEER_SIZE 64
 #define BT_INFO_HASH_SIZE 64
-#define FILE_LENGTH_MAX 8192
+#define FILE_LENGTH_MAX 16384
 
 
 typedef enum
 {
+    BT_KEEP_ALIVE_T,
     BT_BITFIELD_T,
     BT_REQUEST_T,
     BT_CANCEL_T,

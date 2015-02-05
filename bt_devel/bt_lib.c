@@ -177,6 +177,9 @@ int contact_tracker(bt_args_t *bt_args)
 
     new_file = read_file(bt_args->torrent_file, &leng);
 
+    if (!new_file)
+        return 1;
+
     char *inf = strstr(strstr(new_file, "info"), "d");
     // length on ubuntu 14.04 torrent should be 44478
     long long len = be_len(inf);
@@ -204,7 +207,8 @@ int contact_tracker(bt_args_t *bt_args)
 
     // correct request to send on ubuntu torrent
 
-    //  http://torrent.ubuntu.com:6969/announce?info_hash=%B4%15%C9%13d%3E%5F%F4%9F%E3%7D0K%BB%5En%11%ADQ%01
+    //  http://torrent.ubuntu.com:6969/announce?
+    //      info_hash=%B4%15%C9%13d%3E%5F%F4%9F%E3%7D0K%BB%5En%11%ADQ%01
     //      announce?info_hash=%b4%15%c9%13d%3e_%f4%9f%e3%7d0K%bb%5en%11%adQ%01
     //      &peer_id=TueFeb32137332015RRR&port=6681&event=started&uploaded=0
     //      &downloaded=0&left=1162936320&compact=1
@@ -287,7 +291,7 @@ int contact_tracker(bt_args_t *bt_args)
         }
 
         for (i = 0; i < num_peers; i++);
-            pthread_join(thread[i], NULL);
+        pthread_join(thread[i], NULL);
     }
     else
     {
@@ -459,266 +463,194 @@ int send_to_peer(peer_t *peer, bt_msg_t *msg)
     // Allocate needed space
     void *buff = malloc(msg->length + sizeof(uint32_t));
 
-    switch (msg->type) {
-
-        case BT_BITFIELD_T:
-            msg_type = BT_BITFILED;
-            memcpy((char *) buff, &msg_size, sizeof(uint32_t));
-            memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-            memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t), msg->payload.bitfiled.bitfield, msg->payload.bitfiled.size);
-            ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
-            break;
-
-        case BT_REQUEST_T:
-            msg_type = BT_REQUEST;
-            tmp_1 = htonl(msg->payload.request.index);
-            tmp_2 = htonl(msg->payload.request.begin);
-            tmp_3 = htonl(msg->payload.request.length);
-            memcpy((char *) buff, &msg_size, sizeof(uint32_t));
-            memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-            memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
-                    &tmp_1, sizeof(uint32_t));
-            memcpy((char *) buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
-                    &tmp_2, sizeof(uint32_t));
-            memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
-                    &tmp_3, sizeof(uint32_t));
-            ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
-            break;
-
-        case BT_CANCEL_T:
-            msg_type = BT_CANCEL;
-            tmp_1 = htonl(msg->payload.request.index);
-            tmp_2 = htonl(msg->payload.request.begin);
-            tmp_3 = htonl(msg->payload.request.length);
-            memcpy((char *) buff, &msg_size, sizeof(uint32_t));
-            memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-            memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
-                    &tmp_1, sizeof(uint32_t));
-            memcpy((char *) buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
-                    &tmp_2, sizeof(uint32_t));
-            memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
-                    &tmp_3, sizeof(uint32_t));
-            ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
-            break;
-
-        case BT_PIECE_T:
-            msg_type = BT_PIECE;
-            tmp_1 = htonl(msg->payload.piece.index);
-            tmp_2 = htonl(msg->payload.piece.begin);
-            memcpy((char *) buff, &msg_size, sizeof(uint32_t));
-            memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-            memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
-                    &tmp_1, sizeof(uint32_t));
-            memcpy((char *) buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
-                    &tmp_2, sizeof(uint32_t));
-            memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
-                    &msg->payload.piece.piece, msg->length - (2 * sizeof(uint32_t) + sizeof(uint8_t)));
-            ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
-            break;
-
-            // Mainly correct: not tested but correct :)
-        case BT_INTERESTED_T:
-            msg_type = BT_INTERSTED;
-            memcpy((char *) buff, &msg_size, sizeof(uint32_t));
-            memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-            ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
-            break;
-
-        case BT_CHOKE_T:
-            msg_type = BT_CHOKE;
-            memcpy((char *) buff, &msg_size, sizeof(uint32_t));
-            memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-            ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
-            break;
-
-        case BT_UNCHOKE_T:
-            msg_type = BT_UNCHOKE;
-            memcpy((char *) buff, &msg_size, sizeof(uint32_t));
-            memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-            ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
-            break;
-
-        case BT_NOT_INTERESTED_T:
-            msg_type = BT_NOT_INTERESTED;
-            memcpy((char *) buff, &msg_size, sizeof(uint32_t));
-            memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-            ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
-            break;
-
-        case BT_HAVE_T:
-            msg_type = BT_HAVE;
-            tmp_1 = htonl(msg->payload.have);
-            memcpy((char *) buff, &msg_size, sizeof(uint32_t));
-            memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
-            memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t), &tmp_1, sizeof(uint32_t));
-            ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
-            break;
-
-        default:
-            break;
-    }
-
-    free(buff);
-    return ret_val;
-}
-
-/*
- * This will handle connection for each client
- * */
-void *_connection_handler(void *socket_desc)
-{
-    //Get the socket descriptor
-    int sock = *(int *) socket_desc;
-
-    char *message;
-
-    //Send some messages to the client
-    message = "Greetings! I am your connection handler\n";
-    write(sock, message, strlen(message));
-
-    message = "Its my duty to communicate with you";
-    write(sock, message, strlen(message));
-
-    //Free the socket pointer
-    free(socket_desc);
-
-    return 0;
-}
-
-/*read a msg from a peer and store it in msg*/
-int read_from_peer(peer_t *peer, bt_msg_t *msg)
-{
-   	int sockfd = peer->socket_fd;
-    int msg_len = 0;
-    int size = (int) read(sockfd, &msg_len, sizeof(int));
-    msg_len = ntohl(msg_len);
-    msg->length = msg_len;
-    printf("Message length is: %i\n", msg_len);
-    printf("%d\n", size);
-
-    uint8_t msg_id;
-    size = (int) read(sockfd, &msg_id, sizeof(char));
-
-    switch (msg_id)
+    switch (msg->type)
     {
 
-    case BT_CHOKE:
-        peer->choked = 0;
+    case BT_BITFIELD_T:
+        msg_type = BT_BITFILED;
+        memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+        memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+        memcpy((char *) buff + sizeof(uint32_t) +
+               sizeof(uint8_t), msg->payload.bitfiled.bitfield, msg->payload.bitfiled.size);
+        ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
         break;
 
-    case BT_UNCHOKE:
-        peer->choked = 1;
+    case BT_REQUEST_T:
+        msg_type = BT_REQUEST;
+        tmp_1 = htonl(msg->payload.request.index);
+        tmp_2 = htonl(msg->payload.request.begin);
+        tmp_3 = htonl(msg->payload.request.length);
+        memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+        memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+        memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
+               &tmp_1, sizeof(uint32_t));
+        memcpy((char *) buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
+               &tmp_2, sizeof(uint32_t));
+        memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
+               &tmp_3, sizeof(uint32_t));
+        ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
         break;
 
-    case BT_INTERSTED:
-        peer->interested = 0;
-        msg->type = BT_INTERESTED_T;
-        break;
-    case BT_NOT_INTERESTED:
-        peer->interested = 1;
-        break;
-
-    case BT_HAVE:
-
-        break;
-
-    case BT_BITFILED:;
-        msg->type =  BT_BITFIELD_T;
-        bt_bitfield_t *bt_bitfield = malloc(sizeof(bt_bitfield_t));
-        bt_bitfield->size = (size_t)(msg_len - 1);
-        printf("bitfield size is : %zu\n", bt_bitfield->size);
-        bt_bitfield->bitfield = malloc(bt_bitfield->size);
-        size = (int) read(sockfd, bt_bitfield->bitfield, bt_bitfield->size);
-        memcpy(&msg->payload.bitfiled, bt_bitfield, sizeof(bt_bitfield_t));
+    case BT_CANCEL_T:
+        msg_type = BT_CANCEL;
+        tmp_1 = htonl(msg->payload.request.index);
+        tmp_2 = htonl(msg->payload.request.begin);
+        tmp_3 = htonl(msg->payload.request.length);
+        memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+        memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+        memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
+               &tmp_1, sizeof(uint32_t));
+        memcpy((char *) buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
+               &tmp_2, sizeof(uint32_t));
+        memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
+               &tmp_3, sizeof(uint32_t));
+        ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
         break;
 
-    case BT_REQUEST:;
-        msg->type = BT_REQUEST_T;
-        bt_request_t *bt_request = malloc(sizeof(bt_request_t));
-        size = (int) read(sockfd, &bt_request->index, sizeof(int));
-        size = (int) read(sockfd, &bt_request->begin, sizeof(int));
-        size = (int) read(sockfd, &bt_request->length, sizeof(int));
-        memcpy(&msg->payload.request, bt_request, sizeof(bt_request_t));
-        break;
-    
-    case BT_PIECE:;
-        msg->type = BT_PIECE_T;
-        bt_piece_t *bt_piece = malloc(sizeof(bt_piece_t));
-        int block_len = msg_len - 9;
-        size = (int) read(sockfd, &bt_piece->index, sizeof(int));
-        size = (int) read(sockfd, &bt_piece->begin, sizeof(int));
-        size = (int) read(sockfd, &bt_piece->piece, block_len);
-        memcpy(&msg->payload.piece, bt_piece, sizeof(bt_piece_t));
+    case BT_PIECE_T:
+        msg_type = BT_PIECE;
+        tmp_1 = htonl(msg->payload.piece.index);
+        tmp_2 = htonl(msg->payload.piece.begin);
+        memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+        memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+        memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t),
+               &tmp_1, sizeof(uint32_t));
+        memcpy((char *) buff + 2 * sizeof(uint32_t) + sizeof(uint8_t),
+               &tmp_2, sizeof(uint32_t));
+        memcpy((char *) buff + 3 * sizeof(uint32_t) + sizeof(uint8_t),
+               &msg->payload.piece.piece, msg->length - (2 * sizeof(uint32_t) + sizeof(uint8_t)));
+        ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
         break;
 
-    case BT_CANCEL:
-        msg->type = BT_CANCEL_T;
+    // Mainly correct: not tested but correct :)
+    case BT_INTERESTED_T:
+        msg_type = BT_INTERSTED;
+        memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+        memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+        ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+        break;
+
+    case BT_CHOKE_T:
+        msg_type = BT_CHOKE;
+        memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+        memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+        ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+        break;
+
+    case BT_UNCHOKE_T:
+        msg_type = BT_UNCHOKE;
+        memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+        memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+        ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+        break;
+
+    case BT_NOT_INTERESTED_T:
+        msg_type = BT_NOT_INTERESTED;
+        memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+        memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+        ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+        break;
+
+    case BT_HAVE_T:
+        msg_type = BT_HAVE;
+        tmp_1 = htonl(msg->payload.have);
+        memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+        memcpy((char *) buff + sizeof(uint32_t), &msg_type, sizeof(uint8_t));
+        memcpy((char *) buff + sizeof(uint32_t) + sizeof(uint8_t), &tmp_1, sizeof(uint32_t));
+        ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
+        break;
+
+    case BT_KEEP_ALIVE_T:
+        memcpy((char *) buff, &msg_size, sizeof(uint32_t));
+        ret_val = (int) write(sockfd, buff, msg->length + sizeof(uint32_t));
         break;
 
     default:
         break;
     }
 
-    return 0;
-    /* int socket_desc, new_socket, c, *new_sock;
-     struct sockaddr_in server, client;
-     char *message;
+    free(buff);
+    return ret_val;
+}
 
-     //Create socket
-     socket_desc = socket(AF_INET, SOCK_STREAM, 0);
-     if (socket_desc == -1)
-     {
-         printf("Could not create socket");
-     }
+/*read a msg from a peer and store it in msg*/
+int read_from_peer(peer_t *peer, bt_msg_t *msg)
+{
+    int sockfd = peer->socket_fd;
 
-     //Prepare the sockaddr_in structure
-     server.sin_family = AF_INET;
-     server.sin_addr.s_addr = INADDR_ANY;
-     server.sin_port = htons(8888);
+    uint32_t msg_len = -1;
+    uint8_t msg_id = -1;
 
-     //Bind
-     if (bind(socket_desc, (struct sockaddr *) &server, sizeof(server)) < 0)
-     {
-         puts("bind failed");
-         return 1;
-     }
-     puts("bind done");
+    if (read(sockfd, &msg_len, sizeof(uint32_t)) < 0) return -1;
+    msg_len = ntohl(msg_len);
+    msg->length = msg_len;
 
-     //Listen
-     listen(socket_desc, 3);
+    if (read(sockfd, &msg_id, sizeof(uint8_t)) < 0) return -1;
 
-     //Accept and incoming connection
-     puts("Waiting for incoming connections...");
-     c = sizeof(struct sockaddr_in);
-     while ((new_socket = accept(socket_desc, (struct sockaddr *) &client, (socklen_t *) &c)))
-     {
-         puts("Connection accepted");
+    switch (msg_id)
+    {
 
-         //Reply to the client
-         message = "Hello Client , I have received your connection. And now I will assign a handler for you\n";
-         write(new_socket, message, strlen(message));
+    case BT_CHOKE:
+        msg->length = msg_len;
+        msg->type = BT_CHOKE_T;
 
-         pthread_t sniffer_thread;
-         new_sock = malloc(1);
-         *new_sock = new_socket;
+        break;
 
-         if (pthread_create(&sniffer_thread, NULL, _connection_handler, (void *) new_sock) < 0)
-         {
-             perror("could not create thread");
-             return 1;
-         }
+    case BT_UNCHOKE:
+        msg->length = msg_len;
+        msg->type = BT_UNCHOKE_T;
 
-         //Now join the thread , so that we dont terminate before the thread
-         //pthread_join( sniffer_thread , NULL);
-         puts("Handler assigned");
-     }
+        break;
 
-     if (new_socket < 0)
-     {
-         perror("accept failed");
-         return 1;
-     }
-    */
+    case BT_INTERSTED:
+        msg->length = msg_len;
+        msg->type = BT_INTERESTED_T;
+
+        break;
+    case BT_NOT_INTERESTED:
+        msg->length = msg_len;
+        msg->type = BT_NOT_INTERESTED_T;
+
+        break;
+
+    case BT_HAVE:
+        msg->length = msg_len;
+        msg->type = BT_HAVE_T;
+
+        break;
+
+    case BT_BITFILED:
+        msg->length = msg_len;
+        msg->type = BT_BITFIELD_T;
+
+        break;
+
+    case BT_REQUEST:
+        msg->length = msg_len;
+        msg->type = BT_REQUEST_T;
+
+        break;
+
+    case BT_PIECE:
+        msg->length = msg_len;
+        msg->type = BT_PIECE_T;
+
+        break;
+
+    case BT_CANCEL:
+        msg->length = msg_len;
+        msg->type = BT_CANCEL_T;
+
+        break;
+
+    default:
+        if (msg_len == 0)
+        {
+            msg->length = msg_len;
+            msg->type = BT_KEEP_ALIVE_T;
+        }
+        break;
+    }
     return 0;
 }
 
@@ -792,7 +724,7 @@ int parse_bt_info(bt_info_t *bt_info, be_node *node)
 /* save a piece of the file */
 int save_piece(bt_args_t *bt_args, bt_piece_t *piece)
 {
-    FILE *file = bt_args->f_save;
+    // FILE *file = bt_args->f_save;
 
     return 0;
 }
