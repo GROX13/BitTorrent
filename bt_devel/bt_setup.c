@@ -462,7 +462,8 @@ uint8_t power_of_num(int base, int exp){
 
 int piece_is_in_bitfield(int piece_index, bt_bitfield_t* bitfield_t){
     char* bits = malloc(sizeof(bitfield_t->bitfield));
-    memcpy(bits, bitfield_t->bitfield, sizeof(bitfield_t->bitfield));
+    size_t size = sizeof(bitfield_t->bitfield);
+    memcpy(bits, bitfield_t->bitfield, size);
     long num_of_pieces = sizeof(bitfield_t->bitfield) * 8;
 
     if(piece_index >= num_of_pieces) return 1;
@@ -477,7 +478,7 @@ int piece_is_in_bitfield(int piece_index, bt_bitfield_t* bitfield_t){
     
     memcpy(&get_byte, (char*)bits + byte_index, sizeof(char));
 
-    if(get_byte&num != num) return 1;
+    if((get_byte&num) != num) return 1;
    
     return 0;
 }
