@@ -91,4 +91,6 @@ int piece_is_in_bitfield(int piece_index, bt_bitfield_t* bitfield_t);
 
 int put_piece_in_bitfield(int piece_index, bt_bitfield_t* bitfield_t);
 
+int find_log_file(bt_args_t *bt_args);
+
 #endif

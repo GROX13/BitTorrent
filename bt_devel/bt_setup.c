@@ -8,7 +8,11 @@
 #include <glob.h>
 #include <assert.h>
 #include <inttypes.h>
-
+#include <unistd.h>
+#include <stdio.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <stdlib.h>
 #include "bt_setup.h"
 #include "bt_lib.h"
 #include "bencode.h"
@@ -432,9 +436,34 @@ int put_piece_in_bitfield(int piece_index, bt_bitfield_t* bitfield_t){
                 
     return 0;
 }
+/*
+const char *get_filename_ext(const char *filename) {
+    const char *dot = strrchr(filename, '.');
+    if(!dot || dot == filename) return "";
+    return dot + 1;
+}
 
+int read_files_in_directory(char* path){
+    DIR *d;
+    struct dirent *dir;
+    d = opendir(path);
+    if (d){
+        while ((dir = readdir(d)) != NULL){
+            if(strcmp(get_filename_ext(dir->d_name),"log") == 0){
+                
+            }
+            
+    }
+    closedir(d);
+  }
 
+  return(0);
+}
 
+int find_log_file(bt_args_t *bt_args){
+    return 0;
+}
+*/
 
 
 
