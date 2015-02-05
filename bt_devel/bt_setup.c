@@ -338,7 +338,9 @@ int handshake(peer_t *peer, bt_handshake_t msg)
     size = sizeof(msg.peer_id);
     memcpy(&data[offset], msg.peer_id, (size_t) size);
 
-    size = (int) write(sockfd, data, sizeof(bt_handshake_t));
+    // size = (int) write(sockfd, data, sizeof(bt_handshake_t));
+
+    size = send(sockfd , data , sizeof(bt_handshake_t), 0);
 
     return size;
 }
@@ -375,35 +377,38 @@ FILE *create_file(bt_args_t *bt_args, char *filename, char *file_type)
     return fp;
 }
 
-uint8_t power_of_num(int base, int exp){
-    uint8_t value=1;
-    while (exp!=0){
-        value*=base;  
+uint8_t power_of_num(int base, int exp)
+{
+    uint8_t value = 1;
+    while (exp != 0)
+    {
+        value *= base;
         --exp;
     }
     return value;
 }
 
-int piece_is_in_bitfield(int piece_index, bt_bitfield_t* bitfield_t){
-    char* bits = malloc(sizeof(bitfield_t->bitfield));
+int piece_is_in_bitfield(int piece_index, bt_bitfield_t *bitfield_t)
+{
+    char *bits = malloc(sizeof(bitfield_t->bitfield));
     size_t size = sizeof(bitfield_t->bitfield);
     memcpy(bits, bitfield_t->bitfield, size);
     long num_of_pieces = sizeof(bitfield_t->bitfield) * 8;
 
-    if(piece_index >= num_of_pieces) return 1;
-    
-    int byte_index = piece_index/8;
-    
-    int bit_index = piece_index%8;
+    if (piece_index >= num_of_pieces) return 1;
+
+    int byte_index = piece_index / 8;
+
+    int bit_index = piece_index % 8;
 
     uint8_t num = power_of_num(2, bit_index);
 
     uint8_t get_byte = 0;
-    
-    memcpy(&get_byte, (char*)bits + byte_index, sizeof(char));
 
-    if((get_byte&num) != num) return 1;
-   
+    memcpy(&get_byte, (char *)bits + byte_index, sizeof(char));
+
+    if ((get_byte & num) != num) return 1;
+
     return 0;
 }
 
