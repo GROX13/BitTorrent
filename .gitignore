@@ -34,7 +34,6 @@
 
 # Clion project files
 .idea/
-CMakeLists.txt
 
 # Executable file
 # bt_client
